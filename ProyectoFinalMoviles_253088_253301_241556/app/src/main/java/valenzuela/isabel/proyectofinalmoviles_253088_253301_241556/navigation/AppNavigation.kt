@@ -1,12 +1,19 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.HomeScreen
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.LoginScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.MainScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 
@@ -14,16 +21,26 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Aut
 fun AppNavigation(
     authViewModel: AuthViewModel
 ) {
-    val navController = rememberNavController();
+    val navController = rememberNavController()
 
-    val isFirstTime by authViewModel.isFirstTime.collectAsState();
-    val isLoggedIn by authViewModel.isLoggedIn.collectAsState();
-    val username by authViewModel.username.collectAsState();
+    val isFirstTime by authViewModel.isFirstTime.collectAsState(null)
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState(null)
+    val username by authViewModel.username.collectAsState()
 
     val startDestination = when {
-        isFirstTime -> Screen.MainScreen.route
-        isLoggedIn -> Screen.Home.route
+        isFirstTime == true -> Screen.MainScreen.route
+        isLoggedIn == true -> Screen.Home.route
         else -> Screen.Login.route
+    }
+
+    if (isFirstTime == null || isLoggedIn == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
     }
 
     NavHost(
@@ -49,20 +66,21 @@ fun AppNavigation(
         }
 
         // Login
+        composable(Screen.Login.route) {
+            LoginScreen()
+        }
 
         // Registrarse
 
         // Home
+        composable(Screen.Home.route) {
+            HomeScreen()
+        }
     }
 
     LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn) {
+        if (isLoggedIn == true) {
             navController.navigate(Screen.Home.route) {
-                popUpTo(0) // limpia toda la pila
-                launchSingleTop = true // para que no duplique pantallas
-            }
-        } else {
-            navController.navigate(Screen.Login.route) {
                 popUpTo(0)
                 launchSingleTop = true
             }
