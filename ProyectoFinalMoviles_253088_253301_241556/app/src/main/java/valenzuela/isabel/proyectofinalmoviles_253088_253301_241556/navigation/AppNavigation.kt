@@ -67,7 +67,7 @@ fun AppNavigation(
 
         // Login
         composable(Screen.Login.route) {
-            LoginScreen()
+            LoginScreen({}, {})
         }
 
         // Registrarse
