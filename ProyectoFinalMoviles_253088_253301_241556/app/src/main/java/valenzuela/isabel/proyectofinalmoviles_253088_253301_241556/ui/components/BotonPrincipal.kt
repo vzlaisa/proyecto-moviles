@@ -22,7 +22,7 @@ fun BotonPrincipal(
     modifier: Modifier = Modifier
 ) {
     Button(
-        onClick = onClick,
+            onClick = onClick,
         modifier = modifier
             .height(56.dp),
         shape = RoundedCornerShape(24.dp),

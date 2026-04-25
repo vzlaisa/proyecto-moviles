@@ -72,7 +72,7 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = pass,
                     onValueChange = { pass = it },
-                    label = { Text("Ingrese su contraseña") },
+                    label = { Text("Ingresa tu contraseña") },
                     modifier = Modifier
                         .fillMaxWidth()
                 )
@@ -95,7 +95,7 @@ fun LoginScreen(
                 // Botón para ingresar
                 BotonPrincipal(
                     text = "Ingresar",
-                    onClick = onLogin,
+                    onClick = { onLogin() },
                     modifier = Modifier.fillMaxWidth()
                 )
 

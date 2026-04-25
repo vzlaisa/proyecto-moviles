@@ -15,51 +15,50 @@ import androidx.navigation.compose.rememberNavController
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.HomeScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.LoginScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.MainScreen
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.RegistroPaso1
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.RegistroPaso2
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.RegistroPaso3
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.RegistroPaso4
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 
 @Composable
 fun AppNavigation(
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    registroViewModel: RegistroViewModel
 ) {
     val navController = rememberNavController()
 
-    val isFirstTime by authViewModel.isFirstTime.collectAsState(null)
-    val isLoggedIn by authViewModel.isLoggedIn.collectAsState(null)
+    val isFirstTime by authViewModel.isFirstTime.collectAsState()
+    val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val username by authViewModel.username.collectAsState()
-
-    val startDestination = when {
-        isFirstTime == true -> Screen.MainScreen.route
-        isLoggedIn == true -> Screen.Home.route
-        else -> Screen.Login.route
-    }
-
-    if (isFirstTime == null || isLoggedIn == null) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-        return
-    }
 
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = "splash"
     ) {
-        // Main screen
+
+        composable("splash") {
+            SplashRouter(
+                isFirstTime = isFirstTime,
+                isLoggedIn = isLoggedIn,
+                navController = navController
+            )
+        }
+
+        // Onboarding
         composable(Screen.MainScreen.route) {
             MainScreen(
                 onLoginClick = {
                     authViewModel.setFirstTime(false)
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.MainScreen.route) { inclusive = true }
+                        popUpTo(0)
                     }
                 },
                 onSignUpClick = {
                     authViewModel.setFirstTime(false)
                     navController.navigate(Screen.SignUp.route) {
-                        popUpTo(Screen.MainScreen.route) { inclusive = true }
+                        popUpTo(0)
                     }
                 }
             )
@@ -67,23 +66,48 @@ fun AppNavigation(
 
         // Login
         composable(Screen.Login.route) {
-            LoginScreen({}, {})
+            LoginScreen(
+                onCambiarContra = {},
+                onLogin = {},
+                onRegistrarse = {
+                    navController.navigate(Screen.SignUp.route)
+                }
+            )
         }
 
-        // Registrarse
+        // Wizard de registrarse
+        composable(Screen.SignUp.route) {
+            RegistroPaso1(
+                onNext = { navController.navigate("signup_step2") },
+                registroViewModel
+            )
+        }
+
+        composable("signup_step2") {
+            RegistroPaso2(
+                onNext = { navController.navigate("signup_step3") },
+                onBack = { navController.popBackStack() },
+                registroViewModel
+            )
+        }
+
+        composable("signup_step3") {
+            RegistroPaso3(
+                onNext = { navController.navigate("signup_step3") },
+                onBack = { navController.popBackStack() },
+                registroViewModel
+            )
+        }
+
+        composable("signup_step4") {
+            RegistroPaso4(
+                onFinish = { }
+            )
+        }
 
         // Home
         composable(Screen.Home.route) {
             HomeScreen()
-        }
-    }
-
-    LaunchedEffect(isLoggedIn) {
-        if (isLoggedIn == true) {
-            navController.navigate(Screen.Home.route) {
-                popUpTo(0)
-                launchSingleTop = true
-            }
         }
     }
 

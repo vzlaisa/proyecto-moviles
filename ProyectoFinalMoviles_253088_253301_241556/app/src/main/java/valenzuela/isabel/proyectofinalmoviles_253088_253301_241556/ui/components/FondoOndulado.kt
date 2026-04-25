@@ -31,7 +31,7 @@ fun FondoOndulado(
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.TopCenter),  // 👈
+                .align(Alignment.TopCenter),
             contentScale = ContentScale.FillWidth
         )
 

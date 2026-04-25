@@ -14,3 +14,6 @@ val BeigeAlt = Color(0xFFFFF2CB)
 val White = Color(0xFFFFFFFF)
 val Black = Color(0xFF000000)
 val BlueLink = Color(0xFF0088FF)
+
+val GrayEnabled = Color(0xFF7D8286)
+val Green = Color(0xFF4CAF50)
