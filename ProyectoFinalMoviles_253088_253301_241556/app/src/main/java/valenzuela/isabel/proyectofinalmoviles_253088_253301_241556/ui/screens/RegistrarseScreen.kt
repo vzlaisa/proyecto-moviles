@@ -1,9 +1,16 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,12 +20,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -26,9 +38,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,12 +54,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.R
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.AppDatabase
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Interes
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.UsuarioRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BotonPrincipal
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardFondo
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.FondoOndulado
@@ -53,6 +74,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.StepIndicator
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Black
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.BlueAlt
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.GrayAlt
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.GrayEnabled
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Green
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.OrangePrimary
@@ -60,9 +82,10 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Pink
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.ProyectoFinalMoviles_253088_253301_241556Theme
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PurpleAlt
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
+import java.io.File
 import java.time.Instant
 import java.time.ZoneId
-
+import coil.compose.AsyncImage
 
 @Composable
 private fun RegistroLayout(
@@ -184,6 +207,8 @@ fun RegistroPaso1(
 
             Spacer(modifier = Modifier.weight(1f))
 
+            Spacer(Modifier.height(20.dp))
+
             NavegacionPasos(
                 onNext = { if (viewModel.onSiguienteClickPaso1()) onNext() }
                 // onBack = null porque es el primer paso
@@ -231,7 +256,7 @@ fun RegistroPaso2(
             // Apellido materno
             Text("Apellido materno")
             OutlinedTextField(
-                value = viewModel.apellidoMaterno,
+                value = viewModel.apellidoMaterno ?: "",
                 onValueChange = { viewModel.onApellidoMaternoChange(it) },
                 label = { Text("Ingresa tu apellido materno") },
                 modifier = Modifier.fillMaxWidth()
@@ -259,7 +284,7 @@ fun RegistroPaso2(
                 onExpandedChange = { generoExpanded = it }
             ) {
                 OutlinedTextField(
-                    value = viewModel.genero,
+                    value = viewModel.genero?.label?: "",
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Selecciona tu género") },
@@ -275,7 +300,7 @@ fun RegistroPaso2(
                 ) {
                     viewModel.generosOpciones.forEach { opcion ->
                         DropdownMenuItem(
-                            text = { Text(opcion) },
+                            text = { Text(opcion.label) },
                             onClick = {
                                 viewModel.onGeneroChange(opcion)
                                 generoExpanded = false
@@ -337,6 +362,8 @@ fun RegistroPaso2(
 
             Spacer(modifier = Modifier.weight(1f))
 
+            Spacer(Modifier.height(20.dp))
+
             NavegacionPasos(
                 onBack = onBack,
                 onNext = { if (viewModel.onSiguienteClickPaso2()) onNext() }
@@ -362,8 +389,8 @@ fun RegistroPaso3(
             // Usuario
             RequiredLabel("Usuario")
             OutlinedTextField(
-                value = viewModel.correo,
-                onValueChange = { viewModel.onCorreoChange(it) },
+                value = viewModel.nickname,
+                onValueChange = { viewModel.onNicknameChange(it) },
                 label = { Text("Ingresa un nombre de usuario") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -373,21 +400,25 @@ fun RegistroPaso3(
 
             // Foto de perfil
             Text("Foto de perfil")
-            // Falta agregar cómo seleccionarla
+            FotoPerfilPicker(
+                fotoUri = viewModel.fotoUri,
+                onFotoSeleccionada = { viewModel.onFotoChange(it) },
+                onFotoTomada = { viewModel.onFotoChange(it) }
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
             NavegacionPasos(
-                onNext = { if (viewModel.onSiguienteClickPaso1()) onNext() },
+                onNext = { if (viewModel.onSiguienteClickPaso3()) onNext() },
                 onBack = onBack
             )
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RegistroPaso4(
-    onFinish: () -> Unit,
     onBack: () -> Unit,
     viewModel: RegistroViewModel
 ) {
@@ -402,6 +433,24 @@ fun RegistroPaso4(
             Spacer(Modifier.height(20.dp))
 
             // Cargar los chips
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Interes.entries.forEach { interes ->
+                    val seleccionado = interes in viewModel.interesesSeleccionados
+
+                    FilterChip(
+                        selected = seleccionado,
+                        onClick = { viewModel.onInteresToggle(interes) },
+                        label = { Text(interes.label) },
+                        leadingIcon = if (seleccionado) {
+                            { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        } else null
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -411,7 +460,7 @@ fun RegistroPaso4(
                 }
                 BotonPrincipal(
                     text = "Crear cuenta",
-                    onClick = { onFinish() }
+                    onClick = { if (viewModel.onFinishClickPaso4()) viewModel.registrarUsuario() }
                 )
             }
         }
@@ -459,7 +508,7 @@ private fun NavegacionPasos(
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
                 )
                 Spacer(Modifier.width(4.dp))
@@ -487,7 +536,7 @@ private fun NavegacionPasos(
                 )
                 Spacer(Modifier.width(4.dp))
                 Icon(
-                    imageVector = Icons.Default.ArrowForward,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null
                 )
             }
@@ -495,11 +544,90 @@ private fun NavegacionPasos(
     }
 }
 
+@Composable
+fun FotoPerfilPicker(
+    fotoUri: Uri?,
+    onFotoSeleccionada: (Uri) -> Unit,
+    onFotoTomada: (Uri) -> Unit
+) {
+    val context = LocalContext.current
+
+    // Launcher para galería
+    val galeriaLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? -> uri?.let { onFotoSeleccionada(it) } }
+
+    // Uri temporal para la cámara
+    var cameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Launcher para cámara
+    val camaraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success -> if (success) cameraUri?.let { onFotoTomada(it) } }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        // Círculo con foto o ícono
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .background(GrayAlt)
+        ) {
+            if (fotoUri != null) {
+                AsyncImage(
+                    model = fotoUri,
+                    contentDescription = "Foto de perfil",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    tint = GrayEnabled,
+                    modifier = Modifier.size(60.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Botones
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { galeriaLauncher.launch("image/*") }) {
+                Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Galería")
+            }
+
+            OutlinedButton(onClick = {
+                val uri = context.createTempImageUri()
+                cameraUri = uri
+                camaraLauncher.launch(uri)
+            }) {
+                Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Cámara")
+            }
+        }
+    }
+}
+
+// Extension para crear URI temporal para la cámara
+fun Context.createTempImageUri(): Uri {
+    val file = File(cacheDir, "foto_perfil_${System.currentTimeMillis()}.jpg")
+    return FileProvider.getUriForFile(this, "${packageName}.provider", file)
+}
+
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true)
 @Composable
 fun RegistroPaso3Preview() {
     ProyectoFinalMoviles_253088_253301_241556Theme {
-        RegistroPaso4({}, {}, RegistroViewModel())
+        RegistroPaso4({}, RegistroViewModel(UsuarioRepository(AppDatabase.getDatabase(LocalContext.current).usuarioDao())))
     }
 }

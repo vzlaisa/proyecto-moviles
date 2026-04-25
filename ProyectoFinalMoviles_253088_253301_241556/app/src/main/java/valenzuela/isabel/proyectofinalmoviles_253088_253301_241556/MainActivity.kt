@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.AppDatabase
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStoreManager
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.UsuarioRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.navigation.AppNavigation
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.ProyectoFinalMoviles_253088_253301_241556Theme
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
@@ -25,7 +27,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val authViewModel = AuthViewModel(DataStoreManager(this))
-        val registroViewModel = RegistroViewModel()
+        val registroViewModel = RegistroViewModel(UsuarioRepository(AppDatabase.getDatabase(this).usuarioDao()))
         setContent {
             ProyectoFinalMoviles_253088_253301_241556Theme {
                 AppNavigation(authViewModel, registroViewModel)

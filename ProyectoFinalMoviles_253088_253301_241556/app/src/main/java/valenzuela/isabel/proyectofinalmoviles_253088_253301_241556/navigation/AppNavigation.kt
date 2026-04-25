@@ -93,7 +93,7 @@ fun AppNavigation(
 
         composable("signup_step3") {
             RegistroPaso3(
-                onNext = { navController.navigate("signup_step3") },
+                onNext = { navController.navigate("signup_step4") },
                 onBack = { navController.popBackStack() },
                 registroViewModel
             )
@@ -101,7 +101,8 @@ fun AppNavigation(
 
         composable("signup_step4") {
             RegistroPaso4(
-                onFinish = { }
+                onBack = { navController.popBackStack() },
+                registroViewModel
             )
         }
 
