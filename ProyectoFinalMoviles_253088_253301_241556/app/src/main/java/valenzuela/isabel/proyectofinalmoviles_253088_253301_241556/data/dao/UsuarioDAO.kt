@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InteresEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioConIntereses
@@ -18,15 +19,11 @@ interface UsuarioDAO {
     @Query("SELECT * FROM usuarios")
     fun getAll(): Flow<List<UsuarioConIntereses>>
 
-    @Transaction
-    @Query("SELECT * FROM usuarios WHERE correo = :correo AND contrasenia = :contrasenia LIMIT 1")
-    suspend fun login(correo: String, contrasenia: String): UsuarioConIntereses?
-
     @Query("SELECT * FROM usuarios WHERE correo = :correo LIMIT 1")
-    suspend fun getByCorreo(correo: String): UsuarioEntity?
+    suspend fun getByCorreo(correo: String): UsuarioConIntereses?
 
     @Query("SELECT * FROM usuarios WHERE nickname = :nickname LIMIT 1")
-    suspend fun  getByNickname(nickname: String): UsuarioEntity?
+    suspend fun  getByNickname(nickname: String): UsuarioConIntereses?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertUsuario(usuario: UsuarioEntity): Long
@@ -37,5 +34,6 @@ interface UsuarioDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCrossRefs(crossRefs: List<UsuarioInteresCrossRef>)
 
-
+    @Query("UPDATE usuarios SET contrasenia = :contrasenia WHERE correo = :correo")
+    suspend fun updateContrasenia(correo: String, contrasenia: String)
 }

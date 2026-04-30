@@ -7,6 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -33,11 +36,32 @@ fun AppNavigation(
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val username by authViewModel.username.collectAsState()
 
+    // Esta bandera evita que el efecto global choque con el Splash al arrancar
+    var yaPasoElSplash by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isLoggedIn) {
+        // Si está arrancando no hace nada y deja que el splash decida
+        if (!yaPasoElSplash) {
+            if (isLoggedIn != null) yaPasoElSplash = true
+            return@LaunchedEffect
+        }
+
+        // Esto solo corre si el usuario hace login o logout manualmente
+        if (isLoggedIn == true) {
+            navController.navigate(Screen.Home.route) {
+                popUpTo(0) { inclusive = true }
+            }
+        } else if (isLoggedIn == false) {
+            navController.navigate(Screen.Login.route) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = "splash"
     ) {
-
         composable("splash") {
             SplashRouter(
                 isFirstTime = isFirstTime,
@@ -66,10 +90,10 @@ fun AppNavigation(
         composable(Screen.Login.route) {
             LoginScreen(
                 onCambiarContra = {},
-                onLogin = {},
                 onRegistrarse = {
                     navController.navigate(Screen.SignUp.route)
-                }
+                },
+                authViewModel
             )
         }
 

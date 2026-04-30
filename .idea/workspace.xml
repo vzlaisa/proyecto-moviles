@@ -4,7 +4,16 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="50e93d1f-8b5d-4688-b39e-a9f8a8336d5c" name="Changes" comment="" />
+    <list default="true" id="50e93d1f-8b5d-4688-b39e-a9f8a8336d5c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/data/dao/UsuarioDAO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/data/dao/UsuarioDAO.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/data/repository/UsuarioRepository.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/data/repository/UsuarioRepository.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/navigation/AppNavigation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/navigation/AppNavigation.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/ui/screens/LoginScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/ui/screens/LoginScreen.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/viewModel/AuthViewModel.kt" beforeDir="false" afterPath="$PROJECT_DIR$/ProyectoFinalMoviles_253088_253301_241556/app/src/main/java/valenzuela/isabel/proyectofinalmoviles_253088_253301_241556/viewModel/AuthViewModel.kt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -16,38 +25,38 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "vzlaisa"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;vzlaisa&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/vzlaisa/proyecto-moviles.git",
-    "accountId": "2175022d-e5b8-4d50-bb09-dac4233357e6"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/vzlaisa/proyecto-moviles.git&quot;,
+    &quot;accountId&quot;: &quot;2175022d-e5b8-4d50-bb09-dac4233357e6&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
   <component name="ProjectId" id="3D0hl1BiSgOOVIwOfKA3Mzat6hG" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/rocha/Documents/github/proyecto-moviles"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/rocha/Documents/github/proyecto-moviles&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="50e93d1f-8b5d-4688-b39e-a9f8a8336d5c" name="Changes" comment="" />

@@ -10,6 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val authViewModel = AuthViewModel(DataStoreManager(this))
+        val authViewModel = AuthViewModel(DataStoreManager(this), UsuarioRepository(AppDatabase.getDatabase(this).usuarioDao()))
         val registroViewModel = RegistroViewModel(UsuarioRepository(AppDatabase.getDatabase(this).usuarioDao()))
         setContent {
             ProyectoFinalMoviles_253088_253301_241556Theme {

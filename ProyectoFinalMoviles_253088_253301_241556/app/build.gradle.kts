@@ -63,6 +63,8 @@ dependencies {
     implementation(libs.androidx.compose.foundation.layout)
     ksp("androidx.room:room-compiler:2.8.4")
 
+    implementation("org.mindrot:jbcrypt:0.4")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
