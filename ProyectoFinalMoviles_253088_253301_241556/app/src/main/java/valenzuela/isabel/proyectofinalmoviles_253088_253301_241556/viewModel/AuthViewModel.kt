@@ -13,13 +13,13 @@ class AuthViewModel(private val dataStore : DataStoreManager): ViewModel() {
     val isFirstTime = dataStore.isFirstTimeFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        true
+        null
     )
 
     val isLoggedIn = dataStore.isLoggedInFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        false
+        null
     )
 
     val username = dataStore.usernameFlow.stateIn(

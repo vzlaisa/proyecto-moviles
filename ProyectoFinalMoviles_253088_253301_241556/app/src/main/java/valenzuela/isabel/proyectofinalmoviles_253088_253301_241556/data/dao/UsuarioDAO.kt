@@ -22,6 +22,12 @@ interface UsuarioDAO {
     @Query("SELECT * FROM usuarios WHERE correo = :correo AND contrasenia = :contrasenia LIMIT 1")
     suspend fun login(correo: String, contrasenia: String): UsuarioConIntereses?
 
+    @Query("SELECT * FROM usuarios WHERE correo = :correo LIMIT 1")
+    suspend fun getByCorreo(correo: String): UsuarioEntity?
+
+    @Query("SELECT * FROM usuarios WHERE nickname = :nickname LIMIT 1")
+    suspend fun  getByNickname(nickname: String): UsuarioEntity?
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertUsuario(usuario: UsuarioEntity): Long
 

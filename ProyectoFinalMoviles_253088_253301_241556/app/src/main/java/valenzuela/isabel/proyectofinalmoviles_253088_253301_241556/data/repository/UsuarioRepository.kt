@@ -18,6 +18,18 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
     suspend fun login(correo: String, contrasenia: String): UsuarioConIntereses? =
         usuarioDAO.login(correo, contrasenia)
 
+    suspend fun correoYaExiste(correo: String): Boolean {
+        val usuario = usuarioDAO.getByCorreo(correo)
+
+        return usuario != null
+    }
+
+    suspend fun nicknameYaExiste(nickname: String): Boolean {
+        val usuario = usuarioDAO.getByNickname(nickname)
+
+        return usuario != null
+    }
+
     suspend fun registrar(usuario: UsuarioEntity, intereses: List<Interes>) {
         if (usuario.correo.isBlank()) {
             throw ValidationException("Correo obligatorio")
@@ -46,7 +58,7 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
 
             usuarioDAO.insertCrossRefs(crossRefs)
         } catch (e: SQLiteConstraintException) {
-            Log.e("REPO_ERROR", "Error al registrar: ${e.message}")
+            Log.e("REPOSITORY_ERROR", "Error al registrar usuario: ${e.message}")
             // Correo único duplicado
             throw UsuarioYaExisteException()
         } catch (e: Exception) {

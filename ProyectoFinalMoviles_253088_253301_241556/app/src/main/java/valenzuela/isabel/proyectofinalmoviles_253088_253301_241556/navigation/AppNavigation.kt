@@ -50,13 +50,11 @@ fun AppNavigation(
         composable(Screen.MainScreen.route) {
             MainScreen(
                 onLoginClick = {
-                    authViewModel.setFirstTime(false)
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0)
                     }
                 },
                 onSignUpClick = {
-                    authViewModel.setFirstTime(false)
                     navController.navigate(Screen.SignUp.route) {
                         popUpTo(0)
                     }
@@ -102,12 +100,19 @@ fun AppNavigation(
         composable("signup_step4") {
             RegistroPaso4(
                 onBack = { navController.popBackStack() },
+                onRegistrarseSuccess = {
+                    authViewModel.setFirstTime(false)
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.SignUp.route) { inclusive = true }
+                    }
+                },
                 registroViewModel
             )
         }
 
         // Home
         composable(Screen.Home.route) {
+            authViewModel.setFirstTime(false)
             HomeScreen()
         }
     }

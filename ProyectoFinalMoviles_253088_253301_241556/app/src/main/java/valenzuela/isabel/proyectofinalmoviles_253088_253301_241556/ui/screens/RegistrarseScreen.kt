@@ -3,6 +3,7 @@ package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -44,10 +45,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,7 +61,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -86,6 +91,7 @@ import java.io.File
 import java.time.Instant
 import java.time.ZoneId
 import coil.compose.AsyncImage
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.RequiredTextField
 
 @Composable
 private fun RegistroLayout(
@@ -151,52 +157,34 @@ fun RegistroPaso1(
         ) {
             // Correo
             RequiredLabel("Correo electrónico")
-            OutlinedTextField(
+            RequiredTextField(
                 value = viewModel.correo,
                 onValueChange = { viewModel.onCorreoChange(it) },
-                label = { Text("Ej. correo@gmail.com") },
-                modifier = Modifier
-                    .fillMaxWidth()
+                placeholder = "Ej, correo@gmail.com",
+                error = viewModel.correoError
             )
 
             Spacer(Modifier.height(20.dp))
 
             // Contraseña
             RequiredLabel("Contraseña")
-            OutlinedTextField(
+            RequiredTextField(
                 value = viewModel.pass,
                 onValueChange = { viewModel.onPassChange(it) },
-                label = { Text("Ingresa tu contraseña") },
-                modifier = Modifier
-                    .fillMaxWidth()
+                placeholder = "Ingresa tu contraseña",
+                error = viewModel.passError
             )
 
             Spacer(Modifier.height(20.dp))
 
             // Confirmar contraseña
             RequiredLabel("Confirmar contraseña")
-            OutlinedTextField(
+            RequiredTextField(
                 value = viewModel.confirmarPass,
                 onValueChange = { viewModel.onConfirmarPassChange(it) },
-                label = { Text("Confirma tu contraseña") },
-                isError = viewModel.mostrarErrorPass,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged { focusState ->
-                        if (!focusState.isFocused) viewModel.onConfirmarPassFocusLost()
-                    }
+                placeholder = "Confirma tu contraseña",
+                error = viewModel.confirmarPassError
             )
-
-            Spacer(Modifier.height(10.dp))
-
-            // Para error si las contraseñas no coinciden
-            if (viewModel.mostrarErrorPass) {
-                Text(
-                    text = "Las contraseñas no coinciden",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
 
             Spacer(Modifier.height(20.dp))
 
@@ -233,44 +221,43 @@ fun RegistroPaso2(
         ) {
             // Nombre
             RequiredLabel("Nombre")
-            OutlinedTextField(
+            RequiredTextField(
                 value = viewModel.nombre,
                 onValueChange = { viewModel.onNombreChange(it) },
-                label = { Text("Ingresa tu nombre") },
-                modifier = Modifier.fillMaxWidth()
+                placeholder = "Ingresa tu nombre",
+                error = viewModel.nombreError
             )
 
             Spacer(Modifier.height(20.dp))
 
             // Apellido paterno
             RequiredLabel("Apellido paterno")
-            OutlinedTextField(
+            RequiredTextField(
                 value = viewModel.apellidoPaterno,
                 onValueChange = { viewModel.onApellidoPaternoChange(it) },
-                label = { Text("Ingresa tu apellido paterno") },
-                modifier = Modifier.fillMaxWidth()
+                placeholder = "Ingresa tu apellido paterno",
+                error = viewModel.apellidoPaternoError
             )
 
             Spacer(Modifier.height(20.dp))
 
             // Apellido materno
             Text("Apellido materno")
-            OutlinedTextField(
+            RequiredTextField(
                 value = viewModel.apellidoMaterno ?: "",
                 onValueChange = { viewModel.onApellidoMaternoChange(it) },
-                label = { Text("Ingresa tu apellido materno") },
-                modifier = Modifier.fillMaxWidth()
+                placeholder = "Ingresa tu apellido materno"
             )
 
             Spacer(Modifier.height(20.dp))
 
             // Ocupación
             RequiredLabel("Ocupación")
-            OutlinedTextField(
+            RequiredTextField(
                 value = viewModel.ocupacion,
                 onValueChange = { viewModel.onOcupacionChange(it) },
-                label = { Text("Ingresa tu ocupación") },
-                modifier = Modifier.fillMaxWidth()
+                placeholder = "Ingresa tu ocupación",
+                error = viewModel.ocupacionError
             )
 
             Spacer(Modifier.height(20.dp))
@@ -310,6 +297,14 @@ fun RegistroPaso2(
                 }
             }
 
+            viewModel.generoError?.let { mensaje ->
+                Text(
+                    text = mensaje,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
             Spacer(Modifier.height(20.dp))
 
             // Fecha de nacimiento
@@ -333,7 +328,14 @@ fun RegistroPaso2(
             )
 
             if (mostrarDatePicker) {
-                val datePickerState = rememberDatePickerState()
+                val datePickerState = rememberDatePickerState(
+                    selectableDates = object : SelectableDates {
+                        // Para restringir solo fechas hasta hoy
+                        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                            return utcTimeMillis <= System.currentTimeMillis()
+                        }
+                    }
+                )
 
                 DatePickerDialog(
                     onDismissRequest = { mostrarDatePicker = false },
@@ -358,6 +360,14 @@ fun RegistroPaso2(
                 ) {
                     DatePicker(state = datePickerState)
                 }
+            }
+
+            viewModel.fechaNacimientoError?.let { mensaje ->
+                Text(
+                    text = mensaje,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -388,12 +398,12 @@ fun RegistroPaso3(
         ) {
             // Usuario
             RequiredLabel("Usuario")
-            OutlinedTextField(
+            RequiredTextField(
                 value = viewModel.nickname,
                 onValueChange = { viewModel.onNicknameChange(it) },
-                label = { Text("Ingresa un nombre de usuario") },
-                modifier = Modifier
-                    .fillMaxWidth()
+                placeholder = "Ingresa tu nombre de usuario",
+                error = viewModel.nicknameError,
+                helperText = "Este será tu nombre público en la app"
             )
 
             Spacer(Modifier.height(20.dp))
@@ -420,48 +430,94 @@ fun RegistroPaso3(
 @Composable
 fun RegistroPaso4(
     onBack: () -> Unit,
+    onRegistrarseSuccess: () -> Unit,
     viewModel: RegistroViewModel
 ) {
-    RegistroLayout(4, "Tus intereses", R.drawable.figura_ondas_lila) {
+    val context = LocalContext.current
 
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-        ) {
-            Text(text = "¿Qué te gusta hacer en tu tiempo libre? Elige tus intereses principales:")
+    val snackbarHostState = remember { SnackbarHostState() }
 
-            Spacer(Modifier.height(20.dp))
+    // Éxito
+    LaunchedEffect(viewModel.registroExitoso) {
+        if (viewModel.registroExitoso) {
+            Toast.makeText(context, "¡Cuenta creada con éxito!", Toast.LENGTH_SHORT).show()
+            onRegistrarseSuccess()
+        }
+    }
 
-            // Cargar los chips
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
+    // Error
+    LaunchedEffect(viewModel.registroError) {
+        viewModel.registroError?.let { mensaje ->
+            snackbarHostState.showSnackbar(mensaje)
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
+
+        RegistroLayout(4, "Tus intereses", R.drawable.figura_ondas_lila) {
+
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
-                Interes.entries.forEach { interes ->
-                    val seleccionado = interes in viewModel.interesesSeleccionados
 
-                    FilterChip(
-                        selected = seleccionado,
-                        onClick = { viewModel.onInteresToggle(interes) },
-                        label = { Text(interes.label) },
-                        leadingIcon = if (seleccionado) {
-                            { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                        } else null
+                Text(text = "¿Qué te gusta hacer en tu tiempo libre? Elige tus intereses principales:")
+
+                Spacer(Modifier.height(20.dp))
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Interes.entries.forEach { interes ->
+                        val seleccionado = interes in viewModel.interesesSeleccionados
+
+                        FilterChip(
+                            selected = seleccionado,
+                            onClick = { viewModel.onInteresToggle(interes) },
+                            label = { Text(interes.label) },
+                            leadingIcon = if (seleccionado) {
+                                {
+                                    Icon(
+                                        Icons.Default.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            } else null
+                        )
+                    }
+                }
+
+                // Error de intereses
+                viewModel.interesesError?.let { mensaje ->
+                    Text(
+                        text = mensaje,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(1f))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.weight(1f)) {
-                    NavegacionPasos(onBack = onBack)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        NavegacionPasos(onBack = onBack)
+                    }
+                    BotonPrincipal(
+                        text = "Crear cuenta",
+                        onClick = {
+                            if (viewModel.onFinishClickPaso4()) {
+                                viewModel.registrarUsuario()
+                            }
+                        }
+                    )
                 }
-                BotonPrincipal(
-                    text = "Crear cuenta",
-                    onClick = { if (viewModel.onFinishClickPaso4()) viewModel.registrarUsuario() }
-                )
             }
         }
     }
@@ -628,6 +684,6 @@ fun Context.createTempImageUri(): Uri {
 @Composable
 fun RegistroPaso3Preview() {
     ProyectoFinalMoviles_253088_253301_241556Theme {
-        RegistroPaso4({}, RegistroViewModel(UsuarioRepository(AppDatabase.getDatabase(LocalContext.current).usuarioDao())))
+        RegistroPaso3({}, {},RegistroViewModel(UsuarioRepository(AppDatabase.getDatabase(LocalContext.current).usuarioDao())))
     }
 }
