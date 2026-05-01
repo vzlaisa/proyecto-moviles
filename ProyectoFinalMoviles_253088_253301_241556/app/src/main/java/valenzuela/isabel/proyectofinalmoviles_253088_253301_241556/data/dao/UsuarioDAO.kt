@@ -19,11 +19,8 @@ interface UsuarioDAO {
     @Query("SELECT * FROM usuarios")
     fun getAll(): Flow<List<UsuarioConIntereses>>
 
-    @Query("SELECT * FROM usuarios WHERE correo = :correo LIMIT 1")
-    suspend fun getByCorreo(correo: String): UsuarioConIntereses?
-
-    @Query("SELECT * FROM usuarios WHERE nickname = :nickname LIMIT 1")
-    suspend fun  getByNickname(nickname: String): UsuarioConIntereses?
+    @Query("SELECT * FROM usuarios WHERE correo = :identificador OR nickname = :identificador LIMIT 1")
+    suspend fun getByIdentificador(identificador: String): UsuarioConIntereses?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertUsuario(usuario: UsuarioEntity): Long
@@ -33,6 +30,9 @@ interface UsuarioDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCrossRefs(crossRefs: List<UsuarioInteresCrossRef>)
+
+    @Query("SELECT foto_perfil FROM usuarios WHERE nickname = :nickname LIMIT 1")
+    fun getImagenByNickname(nickname: String): Flow<String?>
 
     @Query("UPDATE usuarios SET contrasenia = :contrasenia WHERE correo = :correo")
     suspend fun updateContrasenia(correo: String, contrasenia: String)

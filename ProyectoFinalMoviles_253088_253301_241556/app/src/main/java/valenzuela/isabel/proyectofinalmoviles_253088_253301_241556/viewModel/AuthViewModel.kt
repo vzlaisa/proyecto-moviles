@@ -7,6 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStoreManager
@@ -26,11 +28,27 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
         null
     )
 
-    val username = dataStore.usernameFlow.stateIn(
+    val nickname = dataStore.nicknameInFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         ""
     )
+
+    val fotoPerfil = dataStore.nicknameInFlow.flatMapLatest { nickname ->
+        repository.getFotoPerfil(nickname)
+
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        null
+    )
+
+    val hasAccount = dataStore.nicknameInFlow.map { it.isNotBlank() }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            false
+        )
 
     var loginError by mutableStateOf<String?>(null)
         private set
@@ -44,7 +62,10 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
     fun login(correo: String, pass: String) {
         loginError = null
 
-        correoError = if (correo.isBlank()) "El correo es requerido" else null
+        correoError = if (!hasAccount.value && correo.isBlank()) {
+            "El correo es requerido"
+        } else null
+
         passError = if (pass.isBlank()) "La contraseña es requerida" else null
 
         if (correoError != null || passError != null) {
@@ -53,10 +74,15 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
 
         viewModelScope.launch {
             try {
-                val usuario = repository.login(correo, pass)
+                val identificador = if (hasAccount.value) nickname.value else correo
+
+                val usuario = repository.login(identificador, pass)
 
                 if (usuario != null) {
-                    dataStore.saveSession(usuario.usuario.nickname)
+                    dataStore.saveSession(
+                        usuario.usuario.nickname,
+                        usuario.usuario.huellaActiva
+                    )
                 } else {
                     loginError = "Correo o contraseña incorrectos"
                 }
@@ -76,6 +102,12 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
     fun setFirstTime(value: Boolean) {
         viewModelScope.launch {
             dataStore.setFirstTime(value)
+        }
+    }
+
+    fun clearSession() {
+        viewModelScope.launch {
+            dataStore.clearSession()
         }
     }
 }

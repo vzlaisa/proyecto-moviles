@@ -239,7 +239,14 @@ class RegistroViewModel(private val repository: UsuarioRepository): ViewModel() 
     }
 
     private fun validarPaso3() {
-        nicknameError = if (nickname.isBlank()) "El usuario es requerido" else null
+        val regex = Regex("^[a-zA-Z0-9_]*$")
+
+        nicknameError = when {
+            nickname.isBlank() -> "El usuario es requerido"
+            !regex.matches(nickname) -> "Solo se permiten letras, números y guiones bajos"
+            nickname.length < 3 -> "El apodo debe tener al menos 3 caracteres"
+            else -> null
+        }
     }
 
     private fun validarPaso4() {

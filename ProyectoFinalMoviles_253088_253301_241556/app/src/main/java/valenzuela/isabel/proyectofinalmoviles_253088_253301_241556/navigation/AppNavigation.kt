@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CambiarContraScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.HomeScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.LoginScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.MainScreen
@@ -34,7 +35,6 @@ fun AppNavigation(
 
     val isFirstTime by authViewModel.isFirstTime.collectAsState()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
-    val username by authViewModel.username.collectAsState()
 
     // Esta bandera evita que el efecto global choque con el Splash al arrancar
     var yaPasoElSplash by remember { mutableStateOf(false) }
@@ -89,7 +89,15 @@ fun AppNavigation(
         // Login
         composable(Screen.Login.route) {
             LoginScreen(
-                onCambiarContra = {},
+                onCambiarCuenta = {
+                    authViewModel.clearSession()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0)
+                    }
+                },
+                onCambiarContra = {
+                    navController.navigate(Screen.CambiarContra.route)
+                },
                 onRegistrarse = {
                     navController.navigate(Screen.SignUp.route)
                 },
@@ -134,6 +142,11 @@ fun AppNavigation(
             )
         }
 
+        // Cambiar contraseña
+        composable(Screen.CambiarContra.route) {
+            CambiarContraScreen()
+        }
+
         // Home
         composable(Screen.Home.route) {
             authViewModel.setFirstTime(false)
@@ -148,4 +161,5 @@ sealed class Screen(val route: String) {
     object Login: Screen("login")
     object SignUp: Screen("sign_up")
     object Home: Screen("home")
+    object CambiarContra: Screen("cambiar_contrasenia")
 }

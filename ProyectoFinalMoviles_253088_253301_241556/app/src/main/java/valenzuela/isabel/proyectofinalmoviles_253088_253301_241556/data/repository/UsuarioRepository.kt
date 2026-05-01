@@ -2,6 +2,7 @@ package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.reposit
 
 import android.database.sqlite.SQLiteConstraintException
 import android.util.Log
+import kotlinx.coroutines.flow.Flow
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.UsuarioDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InteresEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioConIntereses
@@ -17,8 +18,8 @@ import kotlin.collections.map
 
 class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
 
-    suspend fun login(correo: String, contrasenia: String): UsuarioConIntereses? {
-        val usuarioObtenido = usuarioDAO.getByCorreo(correo)?: return null
+    suspend fun login(identificador: String, contrasenia: String): UsuarioConIntereses? {
+        val usuarioObtenido = usuarioDAO.getByIdentificador(identificador)?: return null
 
         // Comparar contraseñas
         val contraseniaCorrecta = SecurityUtils.checkPassword(
@@ -29,14 +30,18 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
         return if (contraseniaCorrecta) usuarioObtenido else null
     }
 
+    suspend fun getFotoPerfil(nickname: String): Flow<String?> {
+        return usuarioDAO.getImagenByNickname(nickname)
+    }
+
     suspend fun correoYaExiste(correo: String): Boolean {
-        val usuario = usuarioDAO.getByCorreo(correo)
+        val usuario = usuarioDAO.getByIdentificador(correo)
 
         return usuario != null
     }
 
     suspend fun nicknameYaExiste(nickname: String): Boolean {
-        val usuario = usuarioDAO.getByNickname(nickname)
+        val usuario = usuarioDAO.getByIdentificador(nickname)
 
         return usuario != null
     }
@@ -101,7 +106,7 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
         }
 
         try {
-            val usuario = usuarioDAO.getByCorreo(correo) ?: throw ValidationException("No existe un usuario con ese correo")
+            val usuario = usuarioDAO.getByIdentificador(correo) ?: throw ValidationException("No existe un usuario con ese correo")
 
             val nuevaContraHasheada = SecurityUtils.hashPassword(contrasenia)
 

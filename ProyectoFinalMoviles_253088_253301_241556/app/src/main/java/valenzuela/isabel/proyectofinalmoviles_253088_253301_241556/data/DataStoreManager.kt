@@ -14,7 +14,8 @@ class DataStoreManager(private val context: Context) {
     companion object {
         val IS_FIRST_TIME = booleanPreferencesKey("is_first_time")
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
-        val USERNAME = stringPreferencesKey("username")
+        val NICKNAME = stringPreferencesKey("nickname")
+        val FINGERPRINT_ALLOWED = booleanPreferencesKey("fingerprint_allowed")
     }
 
     val isFirstTimeFlow: Flow<Boolean> = context.dataStore.data
@@ -23,32 +24,43 @@ class DataStoreManager(private val context: Context) {
     val isLoggedInFlow: Flow<Boolean> = context.dataStore.data
         .map { it[IS_LOGGED_IN] ?: false }
 
-    val usernameFlow: Flow<String> = context.dataStore.data
-        .map { it[USERNAME] ?: "" }
+    val nicknameInFlow: Flow<String> = context.dataStore.data
+        .map { it[NICKNAME] ?: "" }
+
+    val fingerprintAllowedInFlow: Flow<Boolean> = context.dataStore.data
+        .map { it[FINGERPRINT_ALLOWED] ?: false}
 
     suspend fun logout() {
         context.dataStore.edit {
-            it.clear()
+            it[IS_LOGGED_IN] = false
         }
     }
 
-    suspend fun saveLogin(isLoggedIn: Boolean) {
+    suspend fun clearSession() {
         context.dataStore.edit {
-            it[IS_LOGGED_IN] = isLoggedIn
+            it[NICKNAME] = ""
+            it[FINGERPRINT_ALLOWED] = false
         }
     }
 
-    suspend fun saveSession(username: String) {
+    suspend fun saveSession(nickname: String, fingerprint: Boolean) {
         context.dataStore.edit {
-            it[USERNAME] = username
+            it[NICKNAME] = nickname
             it[IS_LOGGED_IN] = true
             it[IS_FIRST_TIME] = false
+            it[FINGERPRINT_ALLOWED] = fingerprint
         }
     }
 
     suspend fun setFirstTime(value: Boolean) {
         context.dataStore.edit {
             it[IS_FIRST_TIME] = value
+        }
+    }
+
+    suspend fun setFingerprintAllowed(value: Boolean) {
+        context.dataStore.edit {
+            it[FINGERPRINT_ALLOWED] = value
         }
     }
 }
