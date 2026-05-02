@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.R
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioConIntereses
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Interes
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardFondo
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.BlueAlt
@@ -67,6 +68,7 @@ import java.time.Instant
 
 @Composable
 fun HomeScreen(
+    usuario: UsuarioConIntereses,
     viewModel: HomeViewModel,
     onClick: () -> Unit // por mientras para poder probar el login
 ) {
@@ -82,6 +84,7 @@ fun HomeScreen(
         )
         
         HeaderSection(
+            nickname = usuario.usuario.nickname,
             textoBusqueda = filtros.textoBusqueda,
             onBusquedaChange = { viewModel.setBusqueda(it) }
         )
@@ -115,6 +118,7 @@ fun HomeScreen(
 // Sección para el header inicial
 @Composable
 fun HeaderSection(
+    nickname: String,
     textoBusqueda: String,
     onBusquedaChange: (String) -> Unit
 ) {
@@ -128,7 +132,7 @@ fun HeaderSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "¡Hola, JuanPe_22!",
+                text = "¡Hola, ${nickname}!",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)

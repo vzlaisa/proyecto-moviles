@@ -21,7 +21,7 @@ interface ActividadDAO {
     @Transaction
     @Query("""
         SELECT * FROM actividades
-        WHERE (:idInteres IS NULL OR :idInteres = :idInteres)
+        WHERE (:idInteres IS NULL OR id_interes = :idInteres)
         AND (:texto = '' OR nombre LIKE '%' || :texto || '%')
         AND (:fecha IS NULL OR date(fecha_hora) = date(:fecha))
         ORDER BY fecha_hora ASC

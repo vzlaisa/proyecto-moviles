@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.ActividadDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.FiltrosActividades
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.ActividadRepository
 import java.time.LocalDate
@@ -20,11 +19,11 @@ class HomeViewModel(
     private val _filtros = MutableStateFlow(FiltrosActividades())
     val filtros = _filtros.asStateFlow()
 
-    /*val actividades = _filtros
+    val actividades = _filtros
         .flatMapLatest { filtros ->
-            actividadDAO.getActividadesFiltradas(
+            repository.getActividadesFiltradas(
                 idInteres = filtros.idInteres,
-                texto = filtros.textoBusqueda,
+                busqueda = filtros.textoBusqueda,
                 fecha = filtros.fecha
             )
         }
@@ -32,7 +31,7 @@ class HomeViewModel(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
             emptyList()
-        )*/
+        )
 
     // Actualizadores de filtro
     fun setInteres(id: Int?) {
