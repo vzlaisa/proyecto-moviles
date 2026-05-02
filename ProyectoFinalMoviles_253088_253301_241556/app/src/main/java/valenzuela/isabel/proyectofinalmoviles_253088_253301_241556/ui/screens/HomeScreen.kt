@@ -12,12 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.LocationOn
@@ -33,13 +31,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,14 +58,16 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Gray
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.OrangePrimary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PinkSecondary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PurpleAlt
-import java.time.LocalDate
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import kotlin.time.ExperimentalTime
 import java.time.Instant
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    viewModel: HomeViewModel
+) {
+    val filtros by viewModel.filtros.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -78,21 +78,26 @@ fun HomeScreen() {
             modifier = Modifier.fillMaxSize()
         )
         
-        HeaderSection()
+        HeaderSection(
+            textoBusqueda = filtros.textoBusqueda,
+            onBusquedaChange = { viewModel.setBusqueda(it) }
+        )
 
         CardFondo {
             Column(modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                // .verticalScroll(rememberScrollState())
                 .padding(16.dp)
             ) {
+
                 Spacer(modifier = Modifier.height(8.dp))
-                CategoriasSection()
+                CategoriasSection(viewModel = viewModel)
 
                 Spacer(modifier = Modifier.height(18.dp))
-                FiltrosSection()
+                FiltrosSection(viewModel = viewModel)
 
                 Spacer(modifier = Modifier.height(16.dp))
+                ActividadesSection(viewModel = viewModel)
 
             }
         }
@@ -101,7 +106,10 @@ fun HomeScreen() {
 
 // Sección para el header inicial
 @Composable
-fun HeaderSection() {
+fun HeaderSection(
+    textoBusqueda: String,
+    onBusquedaChange: (String) -> Unit
+) {
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 16.dp, vertical = 24.dp)
@@ -126,11 +134,12 @@ fun HeaderSection() {
         )
 
         Spacer(modifier = Modifier.height(8.dp))
+
         // Buscador de actividades
         OutlinedTextField(modifier = Modifier
             .fillMaxWidth(),
-            value = "",
-            onValueChange = {},
+            value = textoBusqueda,
+            onValueChange = onBusquedaChange,
             placeholder = { Text(text = "Buscar actividades") },
             shape = RoundedCornerShape(50),
             trailingIcon = {
@@ -148,7 +157,11 @@ fun HeaderSection() {
 
 // Sección para las categorías
 @Composable
-fun CategoriasSection() {
+fun CategoriasSection(
+    viewModel: HomeViewModel
+) {
+    val filtros by viewModel.filtros.collectAsState()
+    val seleccionado = filtros.idInteres
     val intereses = Interes.values().toList()
 
     Column {
@@ -163,9 +176,20 @@ fun CategoriasSection() {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            item {
+                Chip(
+                    text = "Todos",
+                    selected = seleccionado == null,
+                    onClick = { viewModel.setInteres(null) },
+                    color = GrayAlt
+                )
+            }
+
             items(intereses) { interes ->
                 Chip(
                     text = interes.label,
+                    selected = seleccionado == interes.ordinal,
+                    onClick = { viewModel.setInteres(interes.ordinal) },
                     color = getColorByInteres(interes)
                 )
             }
@@ -178,14 +202,22 @@ fun CategoriasSection() {
 @Composable
 fun Chip(
     text: String,
-    color: Color
+    color: Color,
+    selected: Boolean,
+    onClick: () -> Unit
 ) {
     Box(modifier = Modifier
-        .background(color, shape = RoundedCornerShape(50))
-        .clickable {}
+        .background(
+            if (selected) color else color.copy(alpha = 0.4f),
+            shape = RoundedCornerShape(50)
+        )
+        .clickable { onClick() }
         .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Text(text)
+        Text(
+            text,
+            color = if (selected) Color.White else Color.Black
+        )
     }
 }
 
@@ -199,11 +231,14 @@ private fun getColorByInteres(interes: Interes): Color {
 }
 
 // Sección para filtros
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FiltrosSection() {
+fun FiltrosSection(
+    viewModel: HomeViewModel
+) {
 
-    var distancia by remember { mutableStateOf(50f) }
-    var fecha by remember { mutableStateOf("") }
+    val filtros by viewModel.filtros.collectAsState()
+    var mostrarDatePicker by remember { mutableStateOf(false) }
 
     Column {
 
@@ -234,7 +269,7 @@ fun FiltrosSection() {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Distancia: ${distancia.toInt()} km",
+                        text = "Distancia: ${(filtros.distanciaMax ?: 50f).toInt()} km",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -243,8 +278,8 @@ fun FiltrosSection() {
 
                 // Slider para definir la distancia
                 Slider(
-                    value = distancia,
-                    onValueChange = { distancia = it },
+                    value = filtros.distanciaMax ?: 50f,
+                    onValueChange = { viewModel.setDistancia(it) },
                     valueRange = 1f..100f,
                     colors = SliderDefaults.colors(
                         thumbColor = OrangePrimary,
@@ -263,86 +298,94 @@ fun FiltrosSection() {
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                FiltroFecha()
+
+                // Titulo para filtro de fecha
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = null,
+                        tint = OrangePrimary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Fecha",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                // Filtro para fecha
+                OutlinedTextField(modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { mostrarDatePicker = true },
+                    value = filtros.fecha?.format(
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                    ) ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    placeholder = { Text("dd/mm/aaaa") },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { mostrarDatePicker = true }
+                        ) {
+                            Icon(Icons.Default.DateRange, contentDescription = null)
+                        }
+                    }
+                )
+
+                // Mostrar DatePicker
+                if (mostrarDatePicker) {
+                    val datePickerState = rememberDatePickerState()
+
+                    DatePickerDialog(
+                        onDismissRequest = { mostrarDatePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    val fecha = Instant.ofEpochMilli(millis)
+                                        .atZone(ZoneId.systemDefault())
+                                        .toLocalDate()
+                                    viewModel.setFecha(fecha)
+                                }
+                                mostrarDatePicker = false
+                            }) {
+                                Text("Aceptar")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = {
+                                mostrarDatePicker = false
+                            }) {
+                                Text("Cancelar")
+                            }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
+                    }
+                }
+
             }
         }
 
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
-fun FiltroFecha() {
-    var fecha by remember { mutableStateOf<LocalDate?>(null) }
-    var mostrarDatePicker by remember { mutableStateOf(false) }
+fun ActividadesSection(
+    viewModel: HomeViewModel
+) {
+    val actividades by viewModel.actividades.collectAsState()
 
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Default.DateRange,
-                contentDescription = null,
-                tint = OrangePrimary
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Fecha",
-                style = MaterialTheme.typography.bodyMedium
-            )
+    LazyColumn {
+        items(actividades) { item ->
 
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(modifier = Modifier
-                .fillMaxWidth()
-                .clickable { mostrarDatePicker = true },
-                value = fecha?.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) ?: "",
-                onValueChange = {},
-                readOnly = true,
-                placeholder = { Text("dd/mm/aaaa") },
-                shape = RoundedCornerShape(12.dp),
-                trailingIcon = {
-                    IconButton(onClick = { mostrarDatePicker = true }) {
-                        Icon(Icons.Default.DateRange, contentDescription = null)
-                    }
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Gray,
-                    unfocusedBorderColor = Color.LightGray,
-                    focusedContainerColor = Color(0xFFF7F7F7),
-                    unfocusedContainerColor = Color(0xFFF7F7F7)
-                )
-            )
-        }
-        // Mostrar Date Picker
-        if (mostrarDatePicker) {
-            val datePickerState = rememberDatePickerState(
-                selectableDates = object : SelectableDates {
-                    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                        return utcTimeMillis >= System.currentTimeMillis()
-                    }
-                }
-            )
-
-            DatePickerDialog(
-                onDismissRequest = { mostrarDatePicker = false },
-                confirmButton = {
-                    TextButton(onClick = {
-                        datePickerState.selectedDateMillis?.let { millis ->
-                            fecha = Instant.ofEpochMilli(millis)
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate()
-                        }
-                        mostrarDatePicker = false
-                    }) {
-                        Text(text = "Aceptar")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { mostrarDatePicker = false }) {
-                        Text(text = "Cancelar")
-                    }
-                }
+            Column(modifier = Modifier
+                .padding(8.dp)
             ) {
-                DatePicker(state = datePickerState)
+                Text(item.actividad.nombre, fontWeight = FontWeight.Bold)
+                Text(item.interes.nombre.label)
+                Text("Por: ${item.creador.nombre}")
             }
+
         }
     }
 }
@@ -350,5 +393,5 @@ fun FiltroFecha() {
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+
 }
