@@ -17,3 +17,5 @@ val BlueLink = Color(0xFF0088FF)
 
 val GrayEnabled = Color(0xFF7D8286)
 val Green = Color(0xFF4CAF50)
+
+val LightBlue = Color(0xFFF5F9FE)

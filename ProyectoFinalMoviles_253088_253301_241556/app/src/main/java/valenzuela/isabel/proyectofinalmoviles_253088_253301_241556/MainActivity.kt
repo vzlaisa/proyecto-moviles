@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.AppDatabase
@@ -22,7 +23,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Proy
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

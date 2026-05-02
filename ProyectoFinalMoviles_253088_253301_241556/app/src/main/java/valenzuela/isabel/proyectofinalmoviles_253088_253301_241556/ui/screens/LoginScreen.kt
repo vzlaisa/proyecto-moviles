@@ -1,14 +1,18 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import coil.compose.AsyncImage
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.R
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.AppDatabase
@@ -37,6 +42,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStor
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.UsuarioRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BotonPrincipal
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardFondo
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardHuella
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.FondoOndulado
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.RequiredLabel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.BlueLink
@@ -50,81 +56,111 @@ fun LoginScreen(
     onRegistrarse: () -> Unit,
     viewModel: AuthViewModel
 ) {
-    FondoOndulado(
-        rutaImagen = R.drawable.figura_ondas_lila
-    ) {
-        var correo by remember { mutableStateOf("") }
-        var pass by remember { mutableStateOf("") }
-        val fotoPerfil by viewModel.fotoPerfil.collectAsState()
-        val nickname by viewModel.nickname.collectAsState()
+    var correo by remember { mutableStateOf("") }
+    var pass by remember { mutableStateOf("") }
+    val fotoPerfil by viewModel.fotoPerfil.collectAsState()
+    val nickname by viewModel.nickname.collectAsState()
 
-        val hasAccountState by viewModel.hasAccount.collectAsState()
-        val initialHasAccount = remember { hasAccountState } // Es para que no se actualice la pantalla en automático
+    val activity = LocalActivity.current as? FragmentActivity
+    val fingerprintAllowed by viewModel.isFingerprintAllowed.collectAsState()
 
-        CardFondo {
-            Column(
-                modifier = Modifier
-                    .padding(40.dp)
-            ) {
-                if (initialHasAccount) {
-                    Column(
-                        modifier = Modifier.padding(top = 20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
-                        AsyncImage(
-                            model = fotoPerfil,
-                            contentDescription = "Foto de perfil",
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
+    val isChecking by viewModel.isCheckingAccount.collectAsState()
+    val hasAccount by viewModel.hasAccount.collectAsState()
+    
+    if (isChecking) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = BlueLink)
+        }
+    } else {
+        FondoOndulado(
+            rutaImagen = R.drawable.figura_ondas_lila
+        ) {
+            CardFondo {
+                Column(
+                    modifier = Modifier
+                        .padding(40.dp)
+                ) {
+                    if (hasAccount) {
+                        Column(
+                            modifier = Modifier.padding(top = 20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            AsyncImage(
+                                model = fotoPerfil,
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
 
-                        Spacer(Modifier.height(15.dp))
+                            Spacer(Modifier.height(15.dp))
 
+                            Text(
+                                text = "¡Hola de nuevo, $nickname!",
+                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                buildAnnotatedString {
+                                    append("¿No eres $nickname? ")
+
+                                    withStyle(
+                                        SpanStyle(
+                                            color = BlueLink,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    ) {
+                                        append("Cambiar de cuenta")
+                                    }
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.CenterHorizontally)
+                                    .clickable { onCambiarCuenta() }
+                            )
+
+                            Spacer(Modifier.height(40.dp))
+                        }
+                    } else {
                         Text(
-                            text = "¡Hola de nuevo, $nickname!",
-                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold),
-                            textAlign = TextAlign.Center
+                            text = "Iniciar sesión",
+                            style = MaterialTheme.typography.headlineMedium
                         )
-                        Text(
-                            buildAnnotatedString {
-                                append("¿No eres $nickname? ")
 
-                                withStyle(
-                                    SpanStyle(
-                                        color = BlueLink,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                ) {
-                                    append("Cambiar de cuenta")
-                                }
-                            },
+                        Spacer(Modifier.height(30.dp))
+
+                        // Correo
+                        RequiredLabel("Correo electrónico")
+                        OutlinedTextField(
+                            value = correo,
+                            onValueChange = { correo = it },
+                            label = { Text("Ej. correo@gmail.com") },
                             modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .clickable { onCambiarCuenta() }
+                                .fillMaxWidth()
                         )
 
-                        Spacer(Modifier.height(40.dp))
+                        viewModel.correoError?.let { mensaje ->
+                            Text(
+                                text = mensaje,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        Spacer(Modifier.height(20.dp))
                     }
-                } else {
-                    Text(
-                        text = "Iniciar sesión",
-                        style = MaterialTheme.typography.headlineMedium
-                    )
 
-                    Spacer(Modifier.height(30.dp))
-
-                    // Correo
-                    RequiredLabel("Correo electrónico")
+                    // Contraseña
+                    RequiredLabel("Contraseña")
                     OutlinedTextField(
-                        value = correo,
-                        onValueChange = { correo = it },
-                        label = { Text("Ej. correo@gmail.com") },
+                        value = pass,
+                        onValueChange = { pass = it },
+                        label = { Text("Ingresa tu contraseña") },
                         modifier = Modifier
                             .fillMaxWidth()
                     )
 
-                    viewModel.correoError?.let { mensaje ->
+                    viewModel.passError?.let { mensaje ->
                         Text(
                             text = mensaje,
                             color = MaterialTheme.colorScheme.error,
@@ -132,84 +168,75 @@ fun LoginScreen(
                         )
                     }
 
+                    Spacer(Modifier.height(10.dp))
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            text = "¿Olvidaste tu contraseña?",
+                            color = BlueLink,
+                            modifier = Modifier.clickable { onCambiarContra() }
+                        )
+                    }
+
                     Spacer(Modifier.height(20.dp))
-                }
 
-                // Contraseña
-                RequiredLabel("Contraseña")
-                OutlinedTextField(
-                    value = pass,
-                    onValueChange = { pass = it },
-                    label = { Text("Ingresa tu contraseña") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
+                    viewModel.loginError?.let { mensaje ->
+                        Text(
+                            text = mensaje,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
 
-                viewModel.passError?.let { mensaje ->
-                    Text(
-                        text = mensaje,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                    Spacer(Modifier.height(40.dp))
+
+                    // Botón para ingresar
+                    BotonPrincipal(
+                        text = "Ingresar",
+                        onClick = { viewModel.login(correo, pass) },
+                        modifier = Modifier.fillMaxWidth()
                     )
-                }
 
-                Spacer(Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = "¿Olvidaste tu contraseña?",
-                        color = BlueLink,
-                        modifier = Modifier.clickable { onCambiarContra() }
-                    )
-                }
+                    if (hasAccount && fingerprintAllowed == true && activity != null) {
+                        CardHuella(
+                            text = "Iniciar sesión usando huella digital",
+                            activity = activity,
+                            onSuccess = { viewModel.loginConHuella() }
+                        )
+                    }
 
-                Spacer(Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.weight(1f))
 
-                viewModel.loginError?.let { mensaje ->
-                    Text(
-                        text = mensaje,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
+                    if (!hasAccount) {
+                        // Link para registrarse
+                        Text(
+                            buildAnnotatedString {
+                                append("¿No tienes una cuenta? ")
 
-                Spacer(Modifier.height(40.dp))
-
-                // Botón para ingresar
-                BotonPrincipal(
-                    text = "Ingresar",
-                    onClick = { viewModel.login(correo, pass)},
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                if (!initialHasAccount) {
-                    // Link para registrarse
-                    Text(
-                        buildAnnotatedString {
-                            append("¿No tienes una cuenta? ")
-
-                            withStyle(
-                                SpanStyle(
-                                    color = BlueLink,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            ) {
-                                append("Registrarse")
-                            }
-                        },
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .clickable { onRegistrarse() }
-                    )
+                                withStyle(
+                                    SpanStyle(
+                                        color = BlueLink,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                ) {
+                                    append("Registrarse")
+                                }
+                            },
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .clickable { onRegistrarse() }
+                        )
+                    }
                 }
             }
         }
     }
+
 }
 
 @SuppressLint("ViewModelConstructorInComposable")

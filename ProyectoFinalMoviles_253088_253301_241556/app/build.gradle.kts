@@ -53,7 +53,6 @@ dependencies {
 
     implementation("androidx.compose.material:material-icons-extended")
 
-
     implementation("androidx.datastore:datastore-preferences:1.2.1")
     implementation("io.coil-kt:coil-compose:2.6.0")
 
@@ -64,6 +63,8 @@ dependencies {
     ksp("androidx.room:room-compiler:2.8.4")
 
     implementation("org.mindrot:jbcrypt:0.4")
+
+    implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

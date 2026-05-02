@@ -36,7 +36,7 @@ fun AppNavigation(
     val isFirstTime by authViewModel.isFirstTime.collectAsState()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
-    // Esta bandera evita que el efecto global choque con el Splash al arrancar
+    // Esta bandera evita que el efecto global choque con el splash al arrancar
     var yaPasoElSplash by remember { mutableStateOf(false) }
 
     LaunchedEffect(isLoggedIn) {

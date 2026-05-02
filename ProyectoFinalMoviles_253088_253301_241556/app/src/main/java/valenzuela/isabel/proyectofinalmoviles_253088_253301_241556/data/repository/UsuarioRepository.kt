@@ -30,6 +30,10 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
         return if (contraseniaCorrecta) usuarioObtenido else null
     }
 
+    suspend fun getByIdentificador(identificador: String): UsuarioConIntereses? {
+        return usuarioDAO.getByIdentificador(identificador)
+    }
+
     suspend fun getFotoPerfil(nickname: String): Flow<String?> {
         return usuarioDAO.getImagenByNickname(nickname)
     }

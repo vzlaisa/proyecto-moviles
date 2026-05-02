@@ -6,7 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -16,6 +18,19 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.reposito
 
 class AuthViewModel(private val dataStore : DataStoreManager, private val repository: UsuarioRepository): ViewModel() {
 
+    init {
+        viewModelScope.launch {
+            // Esperar a que el flow del DataStore emita al menos un valor
+            dataStore.nicknameInFlow.collect {
+                // En cuanto el DataStore responde (aunque sea con un string vacío), ya terminó la verificación inicial
+                _isCheckingAccount.value = false
+            }
+        }
+    }
+
+    private val _isCheckingAccount = MutableStateFlow(true)
+    val isCheckingAccount = _isCheckingAccount.asStateFlow()
+
     val isFirstTime = dataStore.isFirstTimeFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -23,6 +38,12 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
     )
 
     val isLoggedIn = dataStore.isLoggedInFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        null
+    )
+
+    val isFingerprintAllowed = dataStore.fingerprintAllowedInFlow.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         null
@@ -89,6 +110,18 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
             } catch(e: Exception) {
                 loginError = "Ocurrió un error al iniciar sesión. Intenta de nuevo."
                 Log.e("LOGIN", "Error al iniciar sesión: ${e.message}")
+            }
+        }
+    }
+
+    fun loginConHuella() {
+        viewModelScope.launch {
+            val usuario = repository.getByIdentificador(nickname.value)
+            if (usuario != null) {
+                dataStore.saveSession(
+                    usuario.usuario.nickname,
+                    usuario.usuario.huellaActiva
+                )
             }
         }
     }
