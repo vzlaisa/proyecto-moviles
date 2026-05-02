@@ -13,19 +13,19 @@ import java.time.LocalDateTime
         ForeignKey(
             entity = UsuarioEntity::class,
             parentColumns = ["id"],
-            childColumns = ["idCreador"],
+            childColumns = ["id_creador"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = InteresEntity::class,
             parentColumns = ["id"],
-            childColumns = ["idInteres"],
+            childColumns = ["id_interes"],
             onDelete = ForeignKey.CASCADE
         ),
     ],
     indices = [
-        Index("idCreador"),
-        Index("idInteres")
+        Index("id_creador"),
+        Index("id_interes")
     ]
 )
 data class ActividadEntity(

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
@@ -58,6 +59,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Gray
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.OrangePrimary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PinkSecondary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PurpleAlt
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -65,7 +67,8 @@ import java.time.Instant
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    onClick: () -> Unit // por mientras para poder probar el login
 ) {
     val filtros by viewModel.filtros.collectAsState()
 
@@ -98,6 +101,11 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
                 ActividadesSection(viewModel = viewModel)
+
+                // Por mientras para pruebas
+                Button({onClick()}) {
+                    Text("Cerrar sesion")
+                }
 
             }
         }
@@ -373,7 +381,7 @@ fun FiltrosSection(
 fun ActividadesSection(
     viewModel: HomeViewModel
 ) {
-    val actividades by viewModel.actividades.collectAsState()
+    /*val actividades by viewModel.actividades.collectAsState()
 
     LazyColumn {
         items(actividades) { item ->
@@ -387,7 +395,7 @@ fun ActividadesSection(
             }
 
         }
-    }
+    }*/
 }
 
 @Preview(showBackground = true)

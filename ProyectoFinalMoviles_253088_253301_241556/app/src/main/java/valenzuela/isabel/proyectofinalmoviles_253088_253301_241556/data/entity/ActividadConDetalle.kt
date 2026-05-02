@@ -9,13 +9,13 @@ data class ActividadConDetalle(
     val actividad: ActividadEntity,
 
     @Relation(
-        parentColumn = "idCreador",
+        parentColumn = "id_creador",
         entityColumn = "id"
     )
     val creador: UsuarioEntity,
 
     @Relation(
-        parentColumn = "idInteres",
+        parentColumn = "id_interes",
         entityColumn = "id"
     )
     val interes: InteresEntity
