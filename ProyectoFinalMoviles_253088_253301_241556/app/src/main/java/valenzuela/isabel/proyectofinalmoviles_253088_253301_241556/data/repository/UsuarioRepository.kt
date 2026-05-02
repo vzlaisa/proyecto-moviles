@@ -13,6 +13,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.exceptio
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.exception.UsuarioYaExisteException
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.exception.ValidationException
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.utils.SecurityUtils
+import java.security.Security
 import java.time.LocalDate
 import kotlin.collections.map
 
@@ -112,9 +113,15 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
         try {
             val usuario = usuarioDAO.getByIdentificador(correo) ?: throw ValidationException("No existe un usuario con ese correo")
 
+            val contraActualHash = usuario.usuario.contrasenia
+
+            if (SecurityUtils.checkPassword(contrasenia, contraActualHash)) throw ValidationException("La nueva contraseña debe de ser diferente a la anterior")
+
             val nuevaContraHasheada = SecurityUtils.hashPassword(contrasenia)
 
             usuarioDAO.updateContrasenia(usuario.usuario.correo, nuevaContraHasheada)
+        } catch (e: ValidationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("REPOSITORY_ERROR", "Error al actualizar contraseña: ${e.message}")
             throw DatabaseException(e)

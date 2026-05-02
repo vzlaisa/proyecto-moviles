@@ -21,13 +21,15 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.Re
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.RegistroPaso4
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CambiarContraViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 
 @Composable
 fun AppNavigation(
     authViewModel: AuthViewModel,
     registroViewModel: RegistroViewModel,
-    cambiarContraViewModel: CambiarContraViewModel
+    cambiarContraViewModel: CambiarContraViewModel,
+    homeViewModel: HomeViewModel
 ) {
     val navController = rememberNavController()
 
@@ -151,6 +153,12 @@ fun AppNavigation(
 
         composable(Screen.ActualizarContra.route) {
             ActualizarContraScreen(
+                onActualizarSuccess = {
+                    cambiarContraViewModel.reset()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
                 cambiarContraViewModel
             )
         }
@@ -158,7 +166,10 @@ fun AppNavigation(
         // Home
         composable(Screen.Home.route) {
             authViewModel.setFirstTime(false)
-            HomeScreen()
+            HomeScreen(
+                onClick = {authViewModel.logout()},
+                viewModel = homeViewModel
+            )
         }
     }
 

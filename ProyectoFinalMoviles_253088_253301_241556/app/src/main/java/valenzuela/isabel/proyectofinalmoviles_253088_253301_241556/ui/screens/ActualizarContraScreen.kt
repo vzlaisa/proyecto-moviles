@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,8 +36,15 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Cam
 
 @Composable
 fun ActualizarContraScreen(
+    onActualizarSuccess: () -> Unit,
     viewModel: CambiarContraViewModel
 ) {
+    LaunchedEffect(viewModel.actualizacionExitosa) {
+        if (viewModel.actualizacionExitosa) {
+            onActualizarSuccess()
+        }
+    }
+
     FondoOndulado(rutaImagen = R.drawable.figura_ondas_azul) {
         CardFondo {
             Column(
@@ -78,12 +86,21 @@ fun ActualizarContraScreen(
                     RowReglaContraseña(texto = texto, cumple = cumple)
                 }
 
+                viewModel.mensajeError?.let { mensaje ->
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        text = mensaje,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
                 Spacer(Modifier.weight(1f))
 
-                // Botón verificar correo
+                // Botón actualizar contraseña
                 BotonPrincipal(
                     text = "Restablecer contraseña",
-                    onClick = {  },
+                    onClick = { viewModel.cambiarContrasenia() },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -118,6 +135,6 @@ private fun RowReglaContraseña(texto: String, cumple: Boolean) {
 @Composable
 fun ActualizarContraScreenPreview() {
     ProyectoFinalMoviles_253088_253301_241556Theme {
-        ActualizarContraScreen(CambiarContraViewModel(UsuarioRepository(AppDatabase.getDatabase(LocalContext.current).usuarioDao())))
+        ActualizarContraScreen({}, CambiarContraViewModel(UsuarioRepository(AppDatabase.getDatabase(LocalContext.current).usuarioDao())))
     }
 }
