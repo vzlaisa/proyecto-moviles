@@ -1,8 +1,5 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -10,11 +7,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.ActualizarContraScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CambiarContraScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.HomeScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.LoginScreen
@@ -24,12 +20,14 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.Re
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.RegistroPaso3
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.RegistroPaso4
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CambiarContraViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 
 @Composable
 fun AppNavigation(
     authViewModel: AuthViewModel,
-    registroViewModel: RegistroViewModel
+    registroViewModel: RegistroViewModel,
+    cambiarContraViewModel: CambiarContraViewModel
 ) {
     val navController = rememberNavController()
 
@@ -144,7 +142,17 @@ fun AppNavigation(
 
         // Cambiar contraseña
         composable(Screen.CambiarContra.route) {
-            CambiarContraScreen()
+            CambiarContraScreen(
+                onBack = { navController.popBackStack() },
+                onVerificarCorreoSuccess = { navController.navigate(Screen.ActualizarContra.route) },
+                cambiarContraViewModel
+            )
+        }
+
+        composable(Screen.ActualizarContra.route) {
+            ActualizarContraScreen(
+                cambiarContraViewModel
+            )
         }
 
         // Home
@@ -162,4 +170,5 @@ sealed class Screen(val route: String) {
     object SignUp: Screen("sign_up")
     object Home: Screen("home")
     object CambiarContra: Screen("cambiar_contrasenia")
+    object ActualizarContra: Screen("actualizar_contrasenia")
 }
