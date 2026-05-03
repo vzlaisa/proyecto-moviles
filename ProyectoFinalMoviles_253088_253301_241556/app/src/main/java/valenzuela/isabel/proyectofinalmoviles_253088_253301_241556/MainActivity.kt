@@ -15,6 +15,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.navigation.Ap
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.ProyectoFinalMoviles_253088_253301_241556Theme
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CambiarContraViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
@@ -39,6 +40,7 @@ class MainActivity : FragmentActivity() {
         val cambiarContraViewModel: CambiarContraViewModel by viewModels { factory }
         val homeViewModel: HomeViewModel by viewModels { factory }
         val perfilViewModel: PerfilViewModel by viewModels { factory }
+        val configViewModel: ConfigViewModel by viewModels { factory }
 
         setContent {
             ProyectoFinalMoviles_253088_253301_241556Theme {
@@ -48,6 +50,7 @@ class MainActivity : FragmentActivity() {
                     cambiarContraViewModel = cambiarContraViewModel,
                     homeViewModel = homeViewModel,
                     perfilViewModel = perfilViewModel,
+                    configViewModel = configViewModel
                 )
             }
         }
@@ -71,6 +74,8 @@ private class JoinlyViewModelFactory(
                 HomeViewModel(actividadRepo) as T
             modelClass.isAssignableFrom(PerfilViewModel::class.java) ->
                 PerfilViewModel(dataStore, usuarioRepo) as T
+            modelClass.isAssignableFrom(ConfigViewModel::class.java) ->
+                ConfigViewModel(dataStore, usuarioRepo) as T
             else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
         }
     }

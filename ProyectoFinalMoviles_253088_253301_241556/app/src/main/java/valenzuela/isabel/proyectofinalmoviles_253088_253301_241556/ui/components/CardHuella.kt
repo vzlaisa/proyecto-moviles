@@ -35,7 +35,7 @@ fun CardHuella(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp),
+            .padding(horizontal = 10.dp, vertical = 15.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = LightBlue)
     ) {

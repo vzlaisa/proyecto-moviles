@@ -36,4 +36,7 @@ interface UsuarioDAO {
 
     @Query("UPDATE usuarios SET contrasenia = :contrasenia WHERE correo = :correo")
     suspend fun updateContrasenia(correo: String, contrasenia: String)
+
+    @Query("UPDATE usuarios SET huella_activa = :value WHERE nickname = :nickname")
+    suspend fun updateHuellaActiva(nickname: String, value: Boolean)
 }

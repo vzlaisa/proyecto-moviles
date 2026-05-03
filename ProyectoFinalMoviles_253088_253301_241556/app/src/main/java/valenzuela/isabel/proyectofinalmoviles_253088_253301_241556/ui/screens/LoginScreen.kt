@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -79,14 +81,16 @@ fun LoginScreen(
                 Column(
                     modifier = Modifier
                         .padding(40.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
                     if (hasAccount) {
                         Column(
-                            modifier = Modifier.padding(top = 20.dp),
+                            modifier = Modifier
+                                .padding(top = 10.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             AsyncImage(
-                                model = fotoPerfil,
+                                model = fotoPerfil?: R.drawable.default_profile_pic,
                                 contentDescription = "Foto de perfil",
                                 modifier = Modifier
                                     .size(100.dp)

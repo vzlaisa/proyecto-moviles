@@ -132,4 +132,23 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
             throw DatabaseException(e)
         }
     }
+
+    suspend fun actualizarHuellaActiva(nickname: String, value: Boolean) {
+        if (nickname.isBlank()) {
+            throw ValidationException("El nickname es obligatorio")
+        }
+
+        try {
+            val usuario = usuarioDAO.getByIdentificador(nickname)
+                ?: throw ValidationException("No existe un usuario con ese nickname")
+
+            usuarioDAO.updateHuellaActiva(nickname, value)
+
+        } catch (e: ValidationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e("REPOSITORY_ERROR", "Error al actualizar huella: ${e.message}")
+            throw DatabaseException(e)
+        }
+    }
 }

@@ -35,6 +35,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Hom
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
 
 @Composable
@@ -43,7 +44,8 @@ fun AppNavigation(
     registroViewModel: RegistroViewModel,
     cambiarContraViewModel: CambiarContraViewModel,
     homeViewModel: HomeViewModel,
-    perfilViewModel: PerfilViewModel
+    perfilViewModel: PerfilViewModel,
+    configViewModel: ConfigViewModel
 ) {
     val navController = rememberNavController()
 
@@ -67,7 +69,10 @@ fun AppNavigation(
     LaunchedEffect(isLoggedIn) {
         // Si está arrancando no hace nada y deja que el splash decida
         if (!yaPasoElSplash) {
-            if (isLoggedIn != null)
+            if (isLoggedIn != null) {
+                yaPasoElSplash = true // Ta terminó la carga inicial
+            }
+            // No navegar para no pelear con el splash
             return@LaunchedEffect
         }
 
@@ -203,7 +208,6 @@ fun AppNavigation(
 
                 // Home
                 composable(Screen.Home.route) {
-                    authViewModel.setFirstTime(false)
                     HomeScreen(
                         viewModel = homeViewModel,
                         onCrearActividadClick = { navController.navigate("crear_actividad_paso_1") }
@@ -219,7 +223,10 @@ fun AppNavigation(
 
                 // Configuración
                 composable(Screen.Configuracion.route) {
-                    ConfiguracionScreen()
+                    ConfiguracionScreen(
+                        onBack = { navController.popBackStack() },
+                        configViewModel
+                    )
                 }
 
                 composable("crear_actividad_paso_1") {
