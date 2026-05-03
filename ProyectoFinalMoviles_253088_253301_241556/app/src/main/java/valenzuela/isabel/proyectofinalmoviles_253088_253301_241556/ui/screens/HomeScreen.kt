@@ -68,7 +68,8 @@ import java.time.Instant
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    onCrearActividadClick: () -> Unit
 ) {
     val filtros by viewModel.filtros.collectAsState()
 
@@ -104,7 +105,17 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 ActividadesSection(viewModel = viewModel)
             }
+
         }
+        Button(
+            onClick = { onCrearActividadClick() },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 32.dp)
+        ) {
+            Text(text = "Crear Nueva Actividad")
+        }
+
     }
 }
 

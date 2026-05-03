@@ -18,6 +18,9 @@ import androidx.navigation.compose.rememberNavController
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.ActualizarContraScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CambiarContraScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.ConfiguracionScreen
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CrearActividadPaso1
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CrearActividadPaso2
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CrearActividadPaso3
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.HomeScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.LoginScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.MainScreen
@@ -31,6 +34,8 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Cam
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
 
 @Composable
 fun AppNavigation(
@@ -41,6 +46,8 @@ fun AppNavigation(
     perfilViewModel: PerfilViewModel
 ) {
     val navController = rememberNavController()
+
+    val crearActividadViewModel: CrearActividadViewModel = viewModel()
 
     // Rastreo de la ruta actual para saber si mostrar la barra
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -198,7 +205,8 @@ fun AppNavigation(
                 composable(Screen.Home.route) {
                     authViewModel.setFirstTime(false)
                     HomeScreen(
-                        viewModel = homeViewModel
+                        viewModel = homeViewModel,
+                        onCrearActividadClick = { navController.navigate("crear_actividad_paso_1") }
                     )
                 }
 
@@ -212,6 +220,32 @@ fun AppNavigation(
                 // Configuración
                 composable(Screen.Configuracion.route) {
                     ConfiguracionScreen()
+                }
+
+                composable("crear_actividad_paso_1") {
+                    CrearActividadPaso1(
+                        viewModel = crearActividadViewModel,
+                        onClose = { navController.popBackStack() },
+                        onNext = { navController.navigate("crear_actividad_paso_2") }
+                    )
+                }
+
+                composable("crear_actividad_paso_2") {
+                    CrearActividadPaso2(
+                        viewModel = crearActividadViewModel,
+                        onClose = { navController.popBackStack("inicio", inclusive = false) },
+                        onNext = { navController.navigate("crear_actividad_paso_3") }
+                    )
+                }
+
+                composable("crear_actividad_paso_3") {
+                    CrearActividadPaso3(
+                        viewModel = crearActividadViewModel,
+                        onClose = { navController.popBackStack("inicio", inclusive = false) },
+                        onPublicar = {
+                            navController.popBackStack("inicio", inclusive = false)
+                        }
+                    )
                 }
             }
         }
