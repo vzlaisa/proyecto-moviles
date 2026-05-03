@@ -15,9 +15,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BottomNavigationBar
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.ActualizarContraScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CambiarContraScreen
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.ConfiguracionScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.HomeScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.LoginScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.MainScreen
@@ -207,6 +207,11 @@ fun AppNavigation(
                     PerfilScreen(
                         perfilViewModel
                     )
+                }
+
+                // Configuración
+                composable(Screen.Configuracion.route) {
+                    ConfiguracionScreen()
                 }
             }
         }

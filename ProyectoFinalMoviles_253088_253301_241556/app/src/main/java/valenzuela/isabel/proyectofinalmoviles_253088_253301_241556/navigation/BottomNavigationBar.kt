@@ -1,4 +1,4 @@
-package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components
+package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.navigation.Screen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.GrayAlt
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.White
 
@@ -89,7 +88,7 @@ fun BottomNavigationBar(
                             text = { Text("Configuración") },
                             onClick = {
                                 showMenu = false
-                                navController.navigate(Screen.Configuracion)
+                                navController.navigate(Screen.Configuracion.route)
                             },
                             leadingIcon = {
                                 Icon(Icons.Default.Settings, null)
