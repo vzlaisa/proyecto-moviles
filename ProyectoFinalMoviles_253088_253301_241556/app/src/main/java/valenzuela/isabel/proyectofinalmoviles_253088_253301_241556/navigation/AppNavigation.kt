@@ -1,5 +1,8 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -7,9 +10,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BottomNavigationBar
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.ActualizarContraScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CambiarContraScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.HomeScreen
@@ -36,6 +42,15 @@ fun AppNavigation(
 ) {
     val navController = rememberNavController()
 
+    // Rastreo de la ruta actual para saber si mostrar la barra
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val rutasConNavigationBar = listOf(
+        Screen.Home.route,
+        Screen.Perfil.route,
+    )
+
     val isFirstTime by authViewModel.isFirstTime.collectAsState()
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
 
@@ -45,7 +60,7 @@ fun AppNavigation(
     LaunchedEffect(isLoggedIn) {
         // Si está arrancando no hace nada y deja que el splash decida
         if (!yaPasoElSplash) {
-            if (isLoggedIn != null) yaPasoElSplash = true
+            if (isLoggedIn != null)
             return@LaunchedEffect
         }
 
@@ -61,128 +76,141 @@ fun AppNavigation(
         }
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = "splash"
-    ) {
-        composable("splash") {
-            SplashRouter(
-                isFirstTime = isFirstTime,
-                isLoggedIn = isLoggedIn,
-                navController = navController
-            )
+    Scaffold(
+        bottomBar = {
+            // Solo se muestra si la ruta actual está en la lista
+            if (currentRoute in rutasConNavigationBar) {
+                BottomNavigationBar(
+                    navController = navController,
+                    currentRoute = currentRoute,
+                    onLogoutClick = { authViewModel.logout() }
+                )
+            }
         }
-
-        // Onboarding
-        composable(Screen.MainScreen.route) {
-            MainScreen(
-                onLoginClick = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0)
-                    }
-                },
-                onSignUpClick = {
-                    navController.navigate(Screen.SignUp.route) {
-                        popUpTo(0)
-                    }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            NavHost(
+                navController = navController,
+                startDestination = "splash"
+            ) {
+                composable("splash") {
+                    SplashRouter(
+                        isFirstTime = isFirstTime,
+                        isLoggedIn = isLoggedIn,
+                        navController = navController
+                    )
                 }
-            )
-        }
 
-        // Login
-        composable(Screen.Login.route) {
-            LoginScreen(
-                onCambiarCuenta = {
-                    authViewModel.clearSession()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0)
-                    }
-                },
-                onCambiarContra = {
-                    navController.navigate(Screen.CambiarContra.route)
-                },
-                onRegistrarse = {
-                    navController.navigate(Screen.SignUp.route)
-                },
-                authViewModel
-            )
-        }
+                // Onboarding
+                composable(Screen.MainScreen.route) {
+                    MainScreen(
+                        onLoginClick = {
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(0)
+                            }
+                        },
+                        onSignUpClick = {
+                            navController.navigate(Screen.SignUp.route) {
+                                popUpTo(0)
+                            }
+                        }
+                    )
+                }
 
-        // Wizard de registrarse
-        composable(Screen.SignUp.route) {
-            RegistroPaso1(
-                onNext = { navController.navigate("signup_step2") },
-                registroViewModel
-            )
-        }
+                // Login
+                composable(Screen.Login.route) {
+                    LoginScreen(
+                        onCambiarCuenta = {
+                            authViewModel.clearSession()
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(0)
+                            }
+                        },
+                        onCambiarContra = {
+                            navController.navigate(Screen.CambiarContra.route)
+                        },
+                        onRegistrarse = {
+                            navController.navigate(Screen.SignUp.route)
+                        },
+                        authViewModel
+                    )
+                }
 
-        composable("signup_step2") {
-            RegistroPaso2(
-                onNext = { navController.navigate("signup_step3") },
-                onBack = { navController.popBackStack() },
-                registroViewModel
-            )
-        }
+                // Wizard de registrarse
+                composable(Screen.SignUp.route) {
+                    RegistroPaso1(
+                        onNext = { navController.navigate("signup_step2") },
+                        registroViewModel
+                    )
+                }
 
-        composable("signup_step3") {
-            RegistroPaso3(
-                onNext = { navController.navigate("signup_step4") },
-                onBack = { navController.popBackStack() },
-                registroViewModel
-            )
-        }
+                composable("signup_step2") {
+                    RegistroPaso2(
+                        onNext = { navController.navigate("signup_step3") },
+                        onBack = { navController.popBackStack() },
+                        registroViewModel
+                    )
+                }
 
-        composable("signup_step4") {
-            RegistroPaso4(
-                onBack = { navController.popBackStack() },
-                onRegistrarseSuccess = {
+                composable("signup_step3") {
+                    RegistroPaso3(
+                        onNext = { navController.navigate("signup_step4") },
+                        onBack = { navController.popBackStack() },
+                        registroViewModel
+                    )
+                }
+
+                composable("signup_step4") {
+                    RegistroPaso4(
+                        onBack = { navController.popBackStack() },
+                        onRegistrarseSuccess = {
+                            authViewModel.setFirstTime(false)
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(Screen.SignUp.route) { inclusive = true }
+                            }
+                        },
+                        registroViewModel
+                    )
+                }
+
+                // Cambiar contraseña
+                composable(Screen.CambiarContra.route) {
+                    CambiarContraScreen(
+                        onBack = { navController.popBackStack() },
+                        onVerificarCorreoSuccess = { navController.navigate(Screen.ActualizarContra.route) },
+                        cambiarContraViewModel
+                    )
+                }
+
+                composable(Screen.ActualizarContra.route) {
+                    ActualizarContraScreen(
+                        onActualizarSuccess = {
+                            cambiarContraViewModel.reset()
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(Screen.Login.route) { inclusive = true }
+                            }
+                        },
+                        cambiarContraViewModel
+                    )
+                }
+
+                // Home
+                composable(Screen.Home.route) {
                     authViewModel.setFirstTime(false)
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.SignUp.route) { inclusive = true }
-                    }
-                },
-                registroViewModel
-            )
-        }
+                    HomeScreen(
+                        viewModel = homeViewModel
+                    )
+                }
 
-        // Cambiar contraseña
-        composable(Screen.CambiarContra.route) {
-            CambiarContraScreen(
-                onBack = { navController.popBackStack() },
-                onVerificarCorreoSuccess = { navController.navigate(Screen.ActualizarContra.route) },
-                cambiarContraViewModel
-            )
-        }
-
-        composable(Screen.ActualizarContra.route) {
-            ActualizarContraScreen(
-                onActualizarSuccess = {
-                    cambiarContraViewModel.reset()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                },
-                cambiarContraViewModel
-            )
-        }
-
-        // Home
-        composable(Screen.Home.route) {
-            authViewModel.setFirstTime(false)
-            HomeScreen(
-                onClick = {authViewModel.logout()},
-                viewModel = homeViewModel
-            )
-        }
-
-        // Perfil
-        composable(Screen.Perfil.route) {
-            PerfilScreen(
-                perfilViewModel
-            )
+                // Perfil
+                composable(Screen.Perfil.route) {
+                    PerfilScreen(
+                        perfilViewModel
+                    )
+                }
+            }
         }
     }
-
 }
 
 sealed class Screen(val route: String) {
@@ -193,4 +221,5 @@ sealed class Screen(val route: String) {
     object CambiarContra: Screen("cambiar_contrasenia")
     object ActualizarContra: Screen("actualizar_contrasenia")
     object Perfil: Screen("perfil")
+    object Configuracion: Screen("configuracion")
 }

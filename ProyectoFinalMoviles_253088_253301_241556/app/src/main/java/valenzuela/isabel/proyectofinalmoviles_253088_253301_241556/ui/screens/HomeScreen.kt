@@ -68,9 +68,7 @@ import java.time.Instant
 
 @Composable
 fun HomeScreen(
-    usuario: UsuarioConIntereses,
-    viewModel: HomeViewModel,
-    onClick: () -> Unit // por mientras para poder probar el login
+    viewModel: HomeViewModel
 ) {
     val filtros by viewModel.filtros.collectAsState()
 
@@ -82,12 +80,13 @@ fun HomeScreen(
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-        
-        HeaderSection(
+
+        // por mientras para que no de error
+        /*HeaderSection(
             nickname = usuario.usuario.nickname,
             textoBusqueda = filtros.textoBusqueda,
             onBusquedaChange = { viewModel.setBusqueda(it) }
-        )
+        )*/
 
         CardFondo {
             Column(modifier = Modifier
@@ -104,12 +103,6 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
                 ActividadesSection(viewModel = viewModel)
-
-                // Por mientras para pruebas
-                Button({onClick()}) {
-                    Text("Cerrar sesion")
-                }
-
             }
         }
     }

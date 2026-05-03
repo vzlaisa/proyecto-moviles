@@ -21,13 +21,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -178,38 +176,21 @@ private fun PerfilContent(datos: UsuarioConIntereses) {
 
             Spacer(Modifier.height(30.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+            // Botón para editar perfil
+            Button(
+                onClick = {}
             ) {
-                // Botón para editar perfil
-                Button(
-                    onClick = {}
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar perfil",
-                        modifier = Modifier.size(18.dp)
-                    )
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Editar perfil",
+                    modifier = Modifier.size(18.dp)
+                )
 
-                    Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(8.dp))
 
-                    Text(text = "Editar perfil")
-                }
-
-                // Botón para configuración
-                IconButton(
-                    onClick = {}
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Configuración",
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                Text(text = "Editar perfil")
             }
+
 
             Spacer(Modifier.height(20.dp))
 
