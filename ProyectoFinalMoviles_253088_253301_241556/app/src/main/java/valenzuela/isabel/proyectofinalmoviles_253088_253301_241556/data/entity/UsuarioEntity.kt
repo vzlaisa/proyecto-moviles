@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Genero
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Period
 
 @Entity(
     tableName = "usuarios",
@@ -55,4 +56,10 @@ data class UsuarioEntity(
     @ColumnInfo(name = "fecha_registro")
     val fechaRegistro: LocalDateTime = LocalDateTime.now()
 ) {
+    val edad: Int
+        get() = Period.between(fechaNacimiento, LocalDate.now()).years
+
+    val nombreCompleto: String
+        get() = listOfNotNull(nombre, apellidoPaterno, apellidoMaterno)
+            .joinToString(" ")
 }

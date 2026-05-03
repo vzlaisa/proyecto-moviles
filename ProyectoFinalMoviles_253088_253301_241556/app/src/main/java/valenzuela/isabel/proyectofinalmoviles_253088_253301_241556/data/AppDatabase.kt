@@ -22,7 +22,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.U
         UsuarioInteresCrossRef::class,
         ActividadEntity::class,
     ],
-    version = 2,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(value = [

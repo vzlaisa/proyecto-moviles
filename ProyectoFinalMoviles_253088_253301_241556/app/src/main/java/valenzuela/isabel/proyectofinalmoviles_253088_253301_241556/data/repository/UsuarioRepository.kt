@@ -32,10 +32,15 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
     }
 
     suspend fun getByIdentificador(identificador: String): UsuarioConIntereses? {
-        return usuarioDAO.getByIdentificador(identificador)
+        return try {
+            usuarioDAO.getByIdentificador(identificador)
+        } catch (e: Exception) {
+            Log.e("REPOSITORY_ERROR", "Error al obtener usuario por identificador: ${e.message}")
+            null
+        }
     }
 
-    suspend fun getFotoPerfil(nickname: String): Flow<String?> {
+    fun getFotoPerfil(nickname: String): Flow<String?> {
         return usuarioDAO.getImagenByNickname(nickname)
     }
 

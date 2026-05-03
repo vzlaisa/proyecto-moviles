@@ -15,6 +15,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.Ca
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.HomeScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.LoginScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.MainScreen
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.PerfilScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.RegistroPaso1
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.RegistroPaso2
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.RegistroPaso3
@@ -22,6 +23,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.Re
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CambiarContraViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 
 @Composable
@@ -29,7 +31,8 @@ fun AppNavigation(
     authViewModel: AuthViewModel,
     registroViewModel: RegistroViewModel,
     cambiarContraViewModel: CambiarContraViewModel,
-    homeViewModel: HomeViewModel
+    homeViewModel: HomeViewModel,
+    perfilViewModel: PerfilViewModel
 ) {
     val navController = rememberNavController()
 
@@ -171,6 +174,13 @@ fun AppNavigation(
                 viewModel = homeViewModel
             )
         }
+
+        // Perfil
+        composable(Screen.Perfil.route) {
+            PerfilScreen(
+                perfilViewModel
+            )
+        }
     }
 
 }
@@ -182,4 +192,5 @@ sealed class Screen(val route: String) {
     object Home: Screen("home")
     object CambiarContra: Screen("cambiar_contrasenia")
     object ActualizarContra: Screen("actualizar_contrasenia")
+    object Perfil: Screen("perfil")
 }

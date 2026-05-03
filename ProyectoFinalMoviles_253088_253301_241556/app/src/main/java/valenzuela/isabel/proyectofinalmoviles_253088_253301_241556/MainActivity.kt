@@ -16,6 +16,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Proy
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CambiarContraViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 
 class MainActivity : FragmentActivity() {
@@ -37,6 +38,7 @@ class MainActivity : FragmentActivity() {
         val registroViewModel: RegistroViewModel by viewModels { factory }
         val cambiarContraViewModel: CambiarContraViewModel by viewModels { factory }
         val homeViewModel: HomeViewModel by viewModels { factory }
+        val perfilViewModel: PerfilViewModel by viewModels { factory }
 
         setContent {
             ProyectoFinalMoviles_253088_253301_241556Theme {
@@ -44,7 +46,8 @@ class MainActivity : FragmentActivity() {
                     authViewModel = authViewModel,
                     registroViewModel = registroViewModel,
                     cambiarContraViewModel = cambiarContraViewModel,
-                    homeViewModel = homeViewModel
+                    homeViewModel = homeViewModel,
+                    perfilViewModel = perfilViewModel,
                 )
             }
         }
@@ -66,6 +69,8 @@ private class JoinlyViewModelFactory(
                 CambiarContraViewModel(usuarioRepo) as T
             modelClass.isAssignableFrom(HomeViewModel::class.java) ->
                 HomeViewModel(actividadRepo) as T
+            modelClass.isAssignableFrom(PerfilViewModel::class.java) ->
+                PerfilViewModel(dataStore, usuarioRepo) as T
             else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
         }
     }
