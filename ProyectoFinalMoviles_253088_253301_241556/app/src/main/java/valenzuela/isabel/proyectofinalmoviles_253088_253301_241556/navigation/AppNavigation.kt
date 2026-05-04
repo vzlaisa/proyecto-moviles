@@ -207,10 +207,7 @@ fun AppNavigation(
 
                 // Home
                 composable(Screen.Home.route) {
-                    HomeScreen(
-                        viewModel = homeViewModel,
-                        onCrearActividadClick = { navController.navigate("crear_actividad_paso_1") }
-                    )
+                    HomeScreen(viewModel = homeViewModel)
                 }
 
                 // Perfil
@@ -228,29 +225,33 @@ fun AppNavigation(
                     )
                 }
 
-                // Wizard de nueva actividad
+                composable(Screen.Home.route) {
+                    authViewModel.setFirstTime(false)
+                    HomeScreen(viewModel = homeViewModel)
+                }
+
                 composable(Screen.NuevaActividad.route) {
                     CrearActividadPaso1(
                         viewModel = crearActividadViewModel,
                         onClose = { navController.popBackStack() },
-                        onNext = { navController.navigate("crear_actividad_paso_2") }
+                        onNext = { navController.navigate(Screen.CrearPaso2.route) }
                     )
                 }
 
-                composable("crear_actividad_paso_2") {
+                composable(Screen.CrearPaso2.route) {
                     CrearActividadPaso2(
                         viewModel = crearActividadViewModel,
-                        onClose = { navController.popBackStack("inicio", inclusive = false) },
-                        onNext = { navController.navigate("crear_actividad_paso_3") }
+                        onClose = { navController.popBackStack() },
+                        onNext = { navController.navigate(Screen.CrearPaso3.route) }
                     )
                 }
 
-                composable("crear_actividad_paso_3") {
+                composable(Screen.CrearPaso3.route) {
                     CrearActividadPaso3(
                         viewModel = crearActividadViewModel,
-                        onClose = { navController.popBackStack("inicio", inclusive = false) },
+                        onClose = { navController.popBackStack() },
                         onPublicar = {
-                            navController.popBackStack("inicio", inclusive = false)
+                            navController.popBackStack(Screen.Home.route, inclusive = false)
                         }
                     )
                 }
@@ -269,4 +270,6 @@ sealed class Screen(val route: String) {
     object Perfil: Screen("perfil")
     object Configuracion: Screen("configuracion")
     object NuevaActividad: Screen("crear_actividad_paso_1")
+    object CrearPaso2: Screen("crear_actividad_paso_2")
+    object CrearPaso3: Screen("crear_actividad_paso_3")
 }

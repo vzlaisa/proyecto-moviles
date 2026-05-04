@@ -69,7 +69,6 @@ import java.time.Instant
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onCrearActividadClick: () -> Unit
 ) {
     val filtros by viewModel.filtros.collectAsState()
 
