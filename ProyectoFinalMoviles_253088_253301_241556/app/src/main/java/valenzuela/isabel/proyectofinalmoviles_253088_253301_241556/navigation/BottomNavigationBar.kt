@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -36,7 +37,8 @@ fun BottomNavigationBar(
 ) {
     val items = listOf(
         Pair(Screen.Home, Icons.Default.Home to "Inicio"),
-        Pair(Screen.Perfil, Icons.Default.Person to "Mi perfil")
+        Pair(Screen.Perfil, Icons.Default.Person to "Mi perfil"),
+        Pair(Screen.NuevaActividad, Icons.Default.Add to "")
     )
 
     var showMenu by remember { mutableStateOf(false) }
@@ -45,7 +47,6 @@ fun BottomNavigationBar(
         containerColor = White,
         tonalElevation = 8.dp
     ) {
-        // Home y perfil
         items.forEach { (screen, info) ->
             val (icon, label) = info
 

@@ -107,15 +107,6 @@ fun HomeScreen(
             }
 
         }
-        Button(
-            onClick = { onCrearActividadClick() },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 32.dp)
-        ) {
-            Text(text = "Crear Nueva Actividad")
-        }
-
     }
 }
 

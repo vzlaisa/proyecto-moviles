@@ -45,11 +45,10 @@ fun AppNavigation(
     cambiarContraViewModel: CambiarContraViewModel,
     homeViewModel: HomeViewModel,
     perfilViewModel: PerfilViewModel,
-    configViewModel: ConfigViewModel
+    configViewModel: ConfigViewModel,
+    crearActividadViewModel: CrearActividadViewModel
 ) {
     val navController = rememberNavController()
-
-    val crearActividadViewModel: CrearActividadViewModel = viewModel()
 
     // Rastreo de la ruta actual para saber si mostrar la barra
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -229,7 +228,8 @@ fun AppNavigation(
                     )
                 }
 
-                composable("crear_actividad_paso_1") {
+                // Wizard de nueva actividad
+                composable(Screen.NuevaActividad.route) {
                     CrearActividadPaso1(
                         viewModel = crearActividadViewModel,
                         onClose = { navController.popBackStack() },
@@ -268,4 +268,5 @@ sealed class Screen(val route: String) {
     object ActualizarContra: Screen("actualizar_contrasenia")
     object Perfil: Screen("perfil")
     object Configuracion: Screen("configuracion")
+    object NuevaActividad: Screen("crear_actividad_paso_1")
 }

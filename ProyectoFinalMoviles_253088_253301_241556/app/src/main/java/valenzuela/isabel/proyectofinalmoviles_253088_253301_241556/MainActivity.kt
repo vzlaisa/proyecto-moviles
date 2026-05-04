@@ -16,6 +16,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Proy
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CambiarContraViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
@@ -41,6 +42,7 @@ class MainActivity : FragmentActivity() {
         val homeViewModel: HomeViewModel by viewModels { factory }
         val perfilViewModel: PerfilViewModel by viewModels { factory }
         val configViewModel: ConfigViewModel by viewModels { factory }
+        val crearActividadViewModel: CrearActividadViewModel  by viewModels { factory }
 
         setContent {
             ProyectoFinalMoviles_253088_253301_241556Theme {
@@ -50,7 +52,8 @@ class MainActivity : FragmentActivity() {
                     cambiarContraViewModel = cambiarContraViewModel,
                     homeViewModel = homeViewModel,
                     perfilViewModel = perfilViewModel,
-                    configViewModel = configViewModel
+                    configViewModel = configViewModel,
+                    crearActividadViewModel = crearActividadViewModel
                 )
             }
         }
@@ -76,6 +79,8 @@ private class JoinlyViewModelFactory(
                 PerfilViewModel(dataStore, usuarioRepo) as T
             modelClass.isAssignableFrom(ConfigViewModel::class.java) ->
                 ConfigViewModel(dataStore, usuarioRepo) as T
+            modelClass.isAssignableFrom(CrearActividadViewModel::class.java) ->
+                CrearActividadViewModel() as T // Falta agregarle el repo
             else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
         }
     }
