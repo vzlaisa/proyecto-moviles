@@ -72,6 +72,8 @@ fun HomeScreen(
 ) {
     val filtros by viewModel.filtros.collectAsState()
 
+    val nickname by viewModel.nickname.collectAsState()
+
     Box(modifier = Modifier.fillMaxSize()) {
 
         Image(
@@ -82,11 +84,11 @@ fun HomeScreen(
         )
 
         // por mientras para que no de error
-        /*HeaderSection(
-            nickname = usuario.usuario.nickname,
+        HeaderSection(
+            nickname = nickname,
             textoBusqueda = filtros.textoBusqueda,
             onBusquedaChange = { viewModel.setBusqueda(it) }
-        )*/
+        )
 
         CardFondo {
             Column(modifier = Modifier
@@ -379,7 +381,7 @@ fun FiltrosSection(
 fun ActividadesSection(
     viewModel: HomeViewModel
 ) {
-    /*val actividades by viewModel.actividades.collectAsState()
+    val actividades by viewModel.actividades.collectAsState()
 
     LazyColumn {
         items(actividades) { item ->
@@ -393,7 +395,7 @@ fun ActividadesSection(
             }
 
         }
-    }*/
+    }
 }
 
 @Preview(showBackground = true)

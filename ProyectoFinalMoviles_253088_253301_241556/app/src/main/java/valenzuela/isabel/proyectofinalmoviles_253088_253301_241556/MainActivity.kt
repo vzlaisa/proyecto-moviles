@@ -74,7 +74,7 @@ private class JoinlyViewModelFactory(
             modelClass.isAssignableFrom(CambiarContraViewModel::class.java) ->
                 CambiarContraViewModel(usuarioRepo) as T
             modelClass.isAssignableFrom(HomeViewModel::class.java) ->
-                HomeViewModel(actividadRepo) as T
+                HomeViewModel(actividadRepo, dataStore) as T
             modelClass.isAssignableFrom(PerfilViewModel::class.java) ->
                 PerfilViewModel(dataStore, usuarioRepo) as T
             modelClass.isAssignableFrom(ConfigViewModel::class.java) ->
