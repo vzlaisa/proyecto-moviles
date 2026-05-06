@@ -233,7 +233,9 @@ fun AppNavigation(
                 composable(Screen.NuevaActividad.route) {
                     CrearActividadPaso1(
                         viewModel = crearActividadViewModel,
-                        onClose = { navController.popBackStack() },
+                        onClose = { crearActividadViewModel.limpiarDatos()
+                            navController.popBackStack()
+                                  },
                         onNext = { navController.navigate(Screen.CrearPaso2.route) }
                     )
                 }
@@ -241,7 +243,11 @@ fun AppNavigation(
                 composable(Screen.CrearPaso2.route) {
                     CrearActividadPaso2(
                         viewModel = crearActividadViewModel,
-                        onClose = { navController.popBackStack() },
+                        onClose = {
+                            crearActividadViewModel.limpiarDatos()
+                            navController.popBackStack(Screen.Home.route, inclusive = false)
+                        },
+                        onBack = { navController.popBackStack() },
                         onNext = { navController.navigate(Screen.CrearPaso3.route) }
                     )
                 }
@@ -249,8 +255,13 @@ fun AppNavigation(
                 composable(Screen.CrearPaso3.route) {
                     CrearActividadPaso3(
                         viewModel = crearActividadViewModel,
-                        onClose = { navController.popBackStack() },
+                        onClose = { crearActividadViewModel.limpiarDatos()
+                            navController.popBackStack(Screen.Home.route, inclusive = false)
+                        },
+                        onBack = { navController.popBackStack() },
                         onPublicar = {
+                            crearActividadViewModel.publicarActividad()
+                            crearActividadViewModel.limpiarDatos()
                             navController.popBackStack(Screen.Home.route, inclusive = false)
                         }
                     )

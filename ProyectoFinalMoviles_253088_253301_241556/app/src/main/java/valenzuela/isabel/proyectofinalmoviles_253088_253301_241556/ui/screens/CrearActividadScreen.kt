@@ -263,6 +263,7 @@ fun CrearActividadPaso1(
 fun CrearActividadPaso2(
     viewModel: CrearActividadViewModel,
     onClose: () -> Unit,
+    onBack: () -> Unit,
     onNext: () -> Unit
 ) {
     CrearActividadLayout(
@@ -417,6 +418,18 @@ fun CrearActividadPaso2(
             }
 
             Spacer(Modifier.height(40.dp))
+
+            Spacer(modifier = Modifier.weight(1f))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                TextButton(
+                    onClick = { onBack() }
+                ) {
+                    Text("Regresar")
+                }
+            }
         }
     }
 }
@@ -425,6 +438,7 @@ fun CrearActividadPaso2(
 fun CrearActividadPaso3(
     viewModel: CrearActividadViewModel,
     onClose: () -> Unit,
+    onBack: () -> Unit,
     onPublicar: () -> Unit
 ) {
     CrearActividadLayout(
@@ -538,6 +552,18 @@ fun CrearActividadPaso3(
             }
 
             Spacer(Modifier.height(40.dp))
+
+            Spacer(modifier = Modifier.weight(1f))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                TextButton(
+                    onClick = { onBack() }
+                ) {
+                    Text("Regresar")
+                }
+            }
         }
     }
 }

@@ -72,4 +72,23 @@ class CrearActividadViewModel : ViewModel() {
             }
         }
     }
+
+    fun limpiarDatos() {
+        nombre = ""
+        categoria = null
+        descripcion = ""
+        ubicacion = ""
+
+        fecha = null
+        hora = null
+        fechaLimite = null
+
+        maxParticipantes = ""
+        isPrivada = false
+        isRecurrente = false
+        fotoUri = null
+
+        publicacionExitosa = false
+        publicacionError = null
+    }
 }
