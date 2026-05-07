@@ -267,7 +267,7 @@ fun CategoriasSection(
             items(intereses) { interes ->
                 Chip(
                     text = interes.label,
-                    selected = seleccionado == interes.ordinal,
+                    selected = seleccionado == (interes.ordinal + 1),
                     onClick = { viewModel.setInteres(interes.ordinal + 1) },
                     color = getColorByInteres(interes)
                 )

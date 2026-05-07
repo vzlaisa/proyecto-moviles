@@ -72,6 +72,7 @@ private class JoinlyViewModelFactory(
     private val dataStore: DataStoreManager,
     private val application: Application
 ) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(AuthViewModel::class.java) ->
@@ -81,13 +82,13 @@ private class JoinlyViewModelFactory(
             modelClass.isAssignableFrom(CambiarContraViewModel::class.java) ->
                 CambiarContraViewModel(usuarioRepo) as T
             modelClass.isAssignableFrom(HomeViewModel::class.java) ->
-                HomeViewModel(actividadRepo, dataStore, application) as T
+                HomeViewModel(repository = actividadRepo, dataStore = dataStore, application = application) as T
             modelClass.isAssignableFrom(PerfilViewModel::class.java) ->
                 PerfilViewModel(dataStore, usuarioRepo) as T
             modelClass.isAssignableFrom(ConfigViewModel::class.java) ->
                 ConfigViewModel(dataStore, usuarioRepo) as T
             modelClass.isAssignableFrom(CrearActividadViewModel::class.java) ->
-                CrearActividadViewModel() as T // Falta agregarle el repo
+                CrearActividadViewModel(actividadRepo, 1) as T
             modelClass.isAssignableFrom(DetalleActividadViewModel::class.java) ->
                 DetalleActividadViewModel(actividadRepo, inscripcionRepo, dataStore) as T
             else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")

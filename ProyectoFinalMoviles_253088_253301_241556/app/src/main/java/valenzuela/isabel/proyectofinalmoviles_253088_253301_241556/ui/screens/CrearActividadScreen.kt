@@ -250,7 +250,7 @@ fun CrearActividadPaso1(
             RequiredLabel("Ubicación")
             OutlinedTextField(
                 value = viewModel.ubicacion,
-                onValueChange = { viewModel.onUbicacionChange(it) },
+                onValueChange = { viewModel.onUbicacionSeleccionada(it, 0.0, 0.0) },
                 placeholder = { Text("Elegir ubicación") },
                 trailingIcon = {
                     Icon(Icons.Default.LocationOn, contentDescription = null)
