@@ -33,12 +33,11 @@ class MainActivity : FragmentActivity() {
         val database by lazy { AppDatabase.getDatabase(this) }
         val usuarioRepo by lazy { UsuarioRepository(database.usuarioDao()) }
         val actividadRepo by lazy { ActividadRepository(database.actividadDao()) }
-//        val inscripcionRepo by lazy { InscripcionRepository(database.inscripcionDao()) }
+        val inscripcionRepo by lazy { InscripcionRepository(database.inscripcionDao()) }
         val dataStore by lazy { DataStoreManager(this) }
-        val application by lazy { Application() }
 
         // Factory única para todos los ViewModels
-        val factory = JoinlyViewModelFactory(usuarioRepo, actividadRepo, dataStore, application)
+        val factory = JoinlyViewModelFactory(usuarioRepo, actividadRepo, inscripcionRepo, dataStore, this.application)
 
         // Delegados de ViewModels
         val authViewModel: AuthViewModel by viewModels { factory }
@@ -48,7 +47,7 @@ class MainActivity : FragmentActivity() {
         val perfilViewModel: PerfilViewModel by viewModels { factory }
         val configViewModel: ConfigViewModel by viewModels { factory }
         val crearActividadViewModel: CrearActividadViewModel  by viewModels { factory }
-//        val detalleActividadViewModel: DetalleActividadViewModel by viewModels { factory }
+        val detalleActividadViewModel: DetalleActividadViewModel by viewModels { factory }
 
         setContent {
             ProyectoFinalMoviles_253088_253301_241556Theme {
@@ -69,7 +68,7 @@ class MainActivity : FragmentActivity() {
 private class JoinlyViewModelFactory(
     private val usuarioRepo: UsuarioRepository,
     private val actividadRepo: ActividadRepository,
-//    private val inscripcionRepo: InscripcionRepository,
+    private val inscripcionRepo: InscripcionRepository,
     private val dataStore: DataStoreManager,
     private val application: Application
 ) : ViewModelProvider.Factory {
@@ -89,8 +88,8 @@ private class JoinlyViewModelFactory(
                 ConfigViewModel(dataStore, usuarioRepo) as T
             modelClass.isAssignableFrom(CrearActividadViewModel::class.java) ->
                 CrearActividadViewModel() as T // Falta agregarle el repo
-//            modelClass.isAssignableFrom(DetalleActividadViewModel::class.java) ->
-//                DetalleActividadViewModel(actividadRepo, inscripcionRepo, dataStore) as T
+            modelClass.isAssignableFrom(DetalleActividadViewModel::class.java) ->
+                DetalleActividadViewModel(actividadRepo, inscripcionRepo, dataStore) as T
             else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
         }
     }

@@ -25,7 +25,7 @@ interface InscripcionDAO {
         SELECT * FROM inscripciones 
         WHERE id_actividad = :idActividad AND estado != 'CANCELADO'
     """)
-    suspend fun getParticipantesActivos(idActividad: Int): Flow<List<InscripcionEntity>>
+    fun getParticipantesActivos(idActividad: Int): Flow<List<InscripcionEntity>>
 
     @Query("""
         UPDATE inscripciones SET estado = :estado

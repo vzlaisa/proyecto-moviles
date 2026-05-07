@@ -10,7 +10,9 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.converte
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.converters.GeneroConverter
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.converters.InteresConverter
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.ActividadDAO
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.InscripcionDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadEntity
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InteresEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioInteresCrossRef
@@ -21,8 +23,9 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.U
         InteresEntity::class,
         UsuarioInteresCrossRef::class,
         ActividadEntity::class,
+        InscripcionEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(value = [
@@ -35,6 +38,7 @@ abstract class AppDatabase: RoomDatabase() {
     // daos
     abstract fun usuarioDao(): UsuarioDAO
     abstract fun actividadDao(): ActividadDAO
+    abstract fun inscripcionDao(): InscripcionDAO
 
     companion object {
         @Volatile

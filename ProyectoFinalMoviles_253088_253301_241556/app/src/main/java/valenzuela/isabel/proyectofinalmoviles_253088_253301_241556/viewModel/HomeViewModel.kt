@@ -1,6 +1,7 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,7 +34,7 @@ import java.time.LocalDateTime
 class HomeViewModel(
     private val repository: ActividadRepository,
     private val dataStore: DataStoreManager,
-    private val application: Application
+    application: Application
 ): AndroidViewModel(application) {
 
     private val _filtros = MutableStateFlow(FiltrosActividades())
@@ -98,9 +99,9 @@ class HomeViewModel(
         _filtros.update { it.copy(distanciaMax = distancia) }
     }
 
-    fun cargarUbicacion() {
+    fun cargarUbicacion(context: Context) {
         viewModelScope.launch {
-            val ubicacion = LocationHelper.getUbicacion(getApplication())
+            val ubicacion = LocationHelper.getUbicacion(context.applicationContext)
             _ubicacionUsuario.value = ubicacion
         }
     }

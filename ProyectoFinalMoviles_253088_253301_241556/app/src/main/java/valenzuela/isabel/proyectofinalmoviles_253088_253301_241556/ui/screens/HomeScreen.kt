@@ -1,7 +1,6 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
 import android.content.pm.PackageManager
-import android.nfc.Tag
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,7 +41,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SportsBasketball
 import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
@@ -80,7 +78,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.R
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadConDetalle
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioConIntereses
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Interes
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardFondo
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.BlueAlt
@@ -89,13 +86,11 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Gray
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.OrangePrimary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PinkSecondary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PurpleAlt
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.Instant
 import java.util.Locale
-import java.util.jar.Manifest
 
 @Composable
 fun HomeScreen(
@@ -115,7 +110,7 @@ fun HomeScreen(
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { concedido ->
-        if (concedido) viewModel.cargarUbicacion()
+        if (concedido) viewModel.cargarUbicacion(context)
     }
 
     // Pedir permiso al entrar a la pantalla
@@ -123,7 +118,7 @@ fun HomeScreen(
         val permiso = android.Manifest.permission.ACCESS_FINE_LOCATION
         when {
             ContextCompat.checkSelfPermission(context, permiso) == PackageManager.PERMISSION_GRANTED -> {
-                viewModel.cargarUbicacion()
+                viewModel.cargarUbicacion(context)
             }
             else -> locationPermissionLauncher.launch(permiso)
         }
