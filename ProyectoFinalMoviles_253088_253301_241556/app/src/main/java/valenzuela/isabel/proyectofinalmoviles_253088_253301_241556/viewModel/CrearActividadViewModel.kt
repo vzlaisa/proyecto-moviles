@@ -43,8 +43,6 @@ class CrearActividadViewModel : ViewModel() {
     var publicacionError by mutableStateOf<String?>(null)
         private set
 
-    var errorFechaLimite by mutableStateOf<String?>(null)
-
 
 
     fun onNombreChange(value: String) { nombre = value }
@@ -53,16 +51,7 @@ class CrearActividadViewModel : ViewModel() {
     fun onUbicacionChange(value: String) { ubicacion = value }
     fun onFechaChange(value: LocalDate) { fecha = value }
     fun onHoraChange(value: LocalTime) { hora = value }
-    fun onFechaLimiteChange(nuevaFechaLimite: LocalDate) {
-        val fechaEvento = fecha
-        if (fechaEvento != null && nuevaFechaLimite.isAfter(fechaEvento)) {
-            var errorFechaLimite by mutableStateOf<String?>(null)
-            errorFechaLimite = "La fecha límite no puede ser posterior a la fecha de la actividad"
-        } else {
-            fechaLimite = nuevaFechaLimite
-            errorFechaLimite = null
-        }
-    }
+    fun onFechaLimiteChange(value: LocalDate) { fechaLimite = value }
     fun onMaxParticipantesChange(value: String) { maxParticipantes = value }
     fun onPrivadaChange(value: Boolean) { isPrivada = value }
     fun onRecurrenteChange(value: Boolean) { isRecurrente = value }

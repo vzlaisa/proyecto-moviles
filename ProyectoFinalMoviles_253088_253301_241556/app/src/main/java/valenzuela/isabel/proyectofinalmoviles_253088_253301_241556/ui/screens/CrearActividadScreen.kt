@@ -399,7 +399,19 @@ fun CrearActividadPaso2(
             )
 
             if (mostrarDatePickerLimite) {
-                val datePickerStateLimite = rememberDatePickerState()
+                val datePickerStateLimite = rememberDatePickerState(
+                    selectableDates = object : SelectableDates {
+                        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                            val fechaActividad = viewModel.fecha
+                            return if (fechaActividad != null) {
+                                val limiteMillis = fechaActividad.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                                utcTimeMillis <= limiteMillis
+                            } else {
+                                true
+                            }
+                        }
+                    }
+                )
                 DatePickerDialog(
                     onDismissRequest = { mostrarDatePickerLimite = false },
                     confirmButton = {
