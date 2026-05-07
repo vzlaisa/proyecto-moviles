@@ -3,6 +3,7 @@ package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,7 @@ class DataStoreManager(private val context: Context) {
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
         val NICKNAME = stringPreferencesKey("nickname")
         val FINGERPRINT_ALLOWED = booleanPreferencesKey("fingerprint_allowed")
+        val USUARIO_ID = intPreferencesKey("usuario_id")
     }
 
     val isFirstTimeFlow: Flow<Boolean> = context.dataStore.data
@@ -30,6 +32,9 @@ class DataStoreManager(private val context: Context) {
     val fingerprintAllowedInFlow: Flow<Boolean> = context.dataStore.data
         .map { it[FINGERPRINT_ALLOWED] ?: false}
 
+    val usuarioIdFlow: Flow<Int> = context.dataStore.data
+        .map { it[USUARIO_ID] ?: 0 }
+
     suspend fun logout() {
         context.dataStore.edit {
             it[IS_LOGGED_IN] = false
@@ -43,12 +48,13 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
-    suspend fun saveSession(nickname: String, fingerprint: Boolean) {
+    suspend fun saveSession(nickname: String, fingerprint: Boolean, usuarioId: Int) {
         context.dataStore.edit {
             it[NICKNAME] = nickname
             it[IS_LOGGED_IN] = true
             it[IS_FIRST_TIME] = false
             it[FINGERPRINT_ALLOWED] = fingerprint
+            it[USUARIO_ID] = usuarioId
         }
     }
 

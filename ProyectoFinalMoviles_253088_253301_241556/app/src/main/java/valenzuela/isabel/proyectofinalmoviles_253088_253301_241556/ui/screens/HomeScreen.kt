@@ -2,6 +2,7 @@ package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
 import android.content.pm.PackageManager
 import android.nfc.Tag
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -128,6 +129,11 @@ fun HomeScreen(
         }
     }
 
+    // Interceptar botón físico de atrás cuando hay detalle abierto
+    BackHandler(enabled = actividadSeleccionada != null) {
+        actividadSeleccionada = null
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
 
         Image(
@@ -165,9 +171,13 @@ fun HomeScreen(
                 }
             }
         } else {
-//            DetalleActividadScreen(
-//                actividad = actividadSeleccionada!!
-//            )
+            DetalleActividadScreen(
+                actividad = actividadSeleccionada!!,
+                usuarioActualId = viewModel.usuarioActualId,
+                onRegresar = { actividadSeleccionada = null },
+                onEditar = {},
+                onEliminar = { actividadSeleccionada = null }
+            )
         }
 
     }
@@ -255,7 +265,7 @@ fun CategoriasSection(
                     text = "Todos",
                     selected = seleccionado == null,
                     onClick = { viewModel.setInteres(null) },
-                    color = GrayAlt
+                    color = GrayEnabled
                 )
             }
 
@@ -491,7 +501,7 @@ fun ActividadesSection(
 
                 Text(
                     text = "No se encontraron actividades",
-                    color = GrayAlt,
+                    color = Color.Black,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -577,7 +587,7 @@ fun ActividadCard(
                 Text(
                     text = "Por: ${actividad.creador.nombre} ${actividad.creador.apellidoPaterno}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = GrayAlt
+                    color = GrayEnabled
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -606,7 +616,7 @@ fun ActividadCard(
                         Text(
                             text = actividad.actividad.descripcion,
                             style = MaterialTheme.typography.bodySmall,
-                            color = GrayAlt,
+                            color = Color.Black,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)

@@ -56,6 +56,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.U
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BotonPrincipal
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardActividad
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.GrayAlt
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.GrayEnabled
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PurpleAlt
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -64,6 +65,7 @@ import java.util.Locale
 fun DetalleActividadScreen(
     actividad: ActividadConDetalle,
     usuarioActualId: Int,
+    onRegresar: () -> Unit,
     onEditar: () -> Unit,
     onEliminar: () -> Unit
 ) {
@@ -341,7 +343,7 @@ fun InfoItem(
             Text(
                 text = valor,
                 style = MaterialTheme.typography.bodySmall,
-                color = GrayAlt
+                color = GrayEnabled
             )
         }
     }

@@ -48,6 +48,20 @@ class HomeViewModel(
         ""
     )
 
+    // Obtiene el id del usuario
+    val usuarioActualId: Int
+        get() = _usuarioActualId.value
+
+    private val _usuarioActualId = MutableStateFlow(0)
+
+    init {
+        viewModelScope.launch {
+            dataStore.usuarioIdFlow.collect { id ->
+                _usuarioActualId.value = id
+            }
+        }
+    }
+
     val actividades = combine(_filtros, _ubicacionUsuario) { filtros, ubicacion ->
         filtros.copy(
             latUsuario = ubicacion?.first,

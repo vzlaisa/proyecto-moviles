@@ -102,7 +102,8 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
                 if (usuario != null) {
                     dataStore.saveSession(
                         usuario.usuario.nickname,
-                        usuario.usuario.huellaActiva
+                        usuario.usuario.huellaActiva,
+                        usuario.usuario.id
                     )
                 } else {
                     loginError = "Correo o contraseña incorrectos"
@@ -120,7 +121,8 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
             if (usuario != null) {
                 dataStore.saveSession(
                     usuario.usuario.nickname,
-                    usuario.usuario.huellaActiva
+                    usuario.usuario.huellaActiva,
+                    usuario.usuario.id
                 )
             }
         }

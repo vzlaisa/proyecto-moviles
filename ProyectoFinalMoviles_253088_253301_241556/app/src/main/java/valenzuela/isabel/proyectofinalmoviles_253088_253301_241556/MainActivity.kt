@@ -1,5 +1,6 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -10,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.AppDatabase
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStoreManager
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.ActividadRepository
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.InscripcionRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.UsuarioRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.navigation.AppNavigation
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.ProyectoFinalMoviles_253088_253301_241556Theme
@@ -17,6 +19,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Aut
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CambiarContraViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.DetalleActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
@@ -30,10 +33,12 @@ class MainActivity : FragmentActivity() {
         val database by lazy { AppDatabase.getDatabase(this) }
         val usuarioRepo by lazy { UsuarioRepository(database.usuarioDao()) }
         val actividadRepo by lazy { ActividadRepository(database.actividadDao()) }
+//        val inscripcionRepo by lazy { InscripcionRepository(database.inscripcionDao()) }
         val dataStore by lazy { DataStoreManager(this) }
+        val application by lazy { Application() }
 
         // Factory única para todos los ViewModels
-        val factory = JoinlyViewModelFactory(usuarioRepo, actividadRepo, dataStore)
+        val factory = JoinlyViewModelFactory(usuarioRepo, actividadRepo, dataStore, application)
 
         // Delegados de ViewModels
         val authViewModel: AuthViewModel by viewModels { factory }
@@ -43,6 +48,7 @@ class MainActivity : FragmentActivity() {
         val perfilViewModel: PerfilViewModel by viewModels { factory }
         val configViewModel: ConfigViewModel by viewModels { factory }
         val crearActividadViewModel: CrearActividadViewModel  by viewModels { factory }
+//        val detalleActividadViewModel: DetalleActividadViewModel by viewModels { factory }
 
         setContent {
             ProyectoFinalMoviles_253088_253301_241556Theme {
@@ -63,7 +69,9 @@ class MainActivity : FragmentActivity() {
 private class JoinlyViewModelFactory(
     private val usuarioRepo: UsuarioRepository,
     private val actividadRepo: ActividadRepository,
-    private val dataStore: DataStoreManager
+//    private val inscripcionRepo: InscripcionRepository,
+    private val dataStore: DataStoreManager,
+    private val application: Application
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
@@ -74,13 +82,15 @@ private class JoinlyViewModelFactory(
             modelClass.isAssignableFrom(CambiarContraViewModel::class.java) ->
                 CambiarContraViewModel(usuarioRepo) as T
             modelClass.isAssignableFrom(HomeViewModel::class.java) ->
-                HomeViewModel(actividadRepo, dataStore) as T
+                HomeViewModel(actividadRepo, dataStore, application) as T
             modelClass.isAssignableFrom(PerfilViewModel::class.java) ->
                 PerfilViewModel(dataStore, usuarioRepo) as T
             modelClass.isAssignableFrom(ConfigViewModel::class.java) ->
                 ConfigViewModel(dataStore, usuarioRepo) as T
             modelClass.isAssignableFrom(CrearActividadViewModel::class.java) ->
                 CrearActividadViewModel() as T // Falta agregarle el repo
+//            modelClass.isAssignableFrom(DetalleActividadViewModel::class.java) ->
+//                DetalleActividadViewModel(actividadRepo, inscripcionRepo, dataStore) as T
             else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
         }
     }

@@ -18,6 +18,12 @@ data class ActividadConDetalle(
         parentColumn = "id_interes",
         entityColumn = "id"
     )
-    val interes: InteresEntity
+    val interes: InteresEntity,
+
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "id_actividad"
+    )
+    val inscripciones: List<InscripcionEntity> = emptyList()
 
 )
