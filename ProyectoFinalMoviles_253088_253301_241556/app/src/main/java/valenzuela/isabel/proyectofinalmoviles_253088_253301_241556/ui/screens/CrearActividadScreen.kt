@@ -55,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -79,6 +80,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Cre
 import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,6 +92,7 @@ fun CrearActividadLayout(
     onNext: () -> Unit,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
     val pasosColores = listOf(PinkSecondary, BlueAlt, OrangePrimary)
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -116,7 +119,10 @@ fun CrearActividadLayout(
                 }
             } else {
                 Button(
-                    onClick = onNext,
+                    onClick = {
+                        onNext()
+                        Toast.makeText(context, "¡Actividad publicada con éxito!", Toast.LENGTH_SHORT).show()
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = OrangePrimary),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)

@@ -13,8 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -32,6 +38,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,6 +71,7 @@ fun LoginScreen(
     var pass by remember { mutableStateOf("") }
     val fotoPerfil by viewModel.fotoPerfil.collectAsState()
     val nickname by viewModel.nickname.collectAsState()
+    var passwordVisible by remember { mutableStateOf(false) }
 
     val activity = LocalActivity.current as? FragmentActivity
     val fingerprintAllowed by viewModel.isFingerprintAllowed.collectAsState()
@@ -138,6 +148,11 @@ fun LoginScreen(
                         OutlinedTextField(
                             value = correo,
                             onValueChange = { correo = it },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Text,
+                                imeAction = ImeAction.Next
+                            ),
                             label = { Text("Ej. correo@gmail.com") },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -159,6 +174,21 @@ fun LoginScreen(
                     OutlinedTextField(
                         value = pass,
                         onValueChange = { pass = it },
+                        singleLine = true,
+                        trailingIcon = {
+                            val image =
+                                if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(imageVector = image, contentDescription = null)
+                            }
+                        },
+                        visualTransformation = if (passwordVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
+
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done
+                        ),
+
                         label = { Text("Ingresa tu contraseña") },
                         modifier = Modifier
                             .fillMaxWidth()

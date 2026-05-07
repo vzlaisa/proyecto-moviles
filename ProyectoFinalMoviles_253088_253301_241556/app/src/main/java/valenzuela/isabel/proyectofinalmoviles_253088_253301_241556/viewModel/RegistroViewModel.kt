@@ -68,6 +68,8 @@ class RegistroViewModel(private val repository: UsuarioRepository): ViewModel() 
     var registroError by mutableStateOf<String?>(null)
         private set
 
+
+
     // Variables para validación
     val formularioPaso1Valido: Boolean
         get() = reglas.all { it.second } && correoValido && passError == null && confirmarPassError == null

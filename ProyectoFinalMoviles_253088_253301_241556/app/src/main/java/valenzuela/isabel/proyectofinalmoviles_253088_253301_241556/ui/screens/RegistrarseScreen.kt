@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -32,6 +33,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -64,6 +67,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -149,13 +155,17 @@ fun RegistroPaso1(
     onNext: () -> Unit,
     viewModel : RegistroViewModel
 ) {
+
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmarPasswordVisible by remember { mutableStateOf(false) }
+
+
     RegistroLayout(1, "Información de acceso", R.drawable.figura_ondas_rosa) {
 
         Column(modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
         ) {
-            // Correo
             RequiredLabel("Correo electrónico")
             RequiredTextField(
                 value = viewModel.correo,
@@ -168,23 +178,53 @@ fun RegistroPaso1(
 
             // Contraseña
             RequiredLabel("Contraseña")
-            RequiredTextField(
+            OutlinedTextField(
                 value = viewModel.pass,
                 onValueChange = { viewModel.onPassChange(it) },
-                placeholder = "Ingresa tu contraseña",
-                error = viewModel.passError
+                placeholder = { Text("Ingresa tu contraseña") },
+                singleLine = true,
+                visualTransformation = if (passwordVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Next
+                ),
+                trailingIcon = {
+                    val image = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(imageVector = image, contentDescription = "Mostrar contraseña")
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
+            viewModel.passError?.let { mensaje ->
+                Text(text = mensaje, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
 
             Spacer(Modifier.height(20.dp))
 
             // Confirmar contraseña
             RequiredLabel("Confirmar contraseña")
-            RequiredTextField(
+            OutlinedTextField(
                 value = viewModel.confirmarPass,
                 onValueChange = { viewModel.onConfirmarPassChange(it) },
-                placeholder = "Confirma tu contraseña",
-                error = viewModel.confirmarPassError
+                placeholder = { Text("Confirma tu contraseña") },
+                singleLine = true,
+                visualTransformation = if (confirmarPasswordVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                trailingIcon = {
+                    val image = if (confirmarPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
+                    IconButton(onClick = { confirmarPasswordVisible = !confirmarPasswordVisible }) {
+                        Icon(imageVector = image, contentDescription = "Mostrar contraseña")
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
+            viewModel.confirmarPassError?.let { mensaje ->
+                Text(text = mensaje, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            }
 
             Spacer(Modifier.height(20.dp))
 
