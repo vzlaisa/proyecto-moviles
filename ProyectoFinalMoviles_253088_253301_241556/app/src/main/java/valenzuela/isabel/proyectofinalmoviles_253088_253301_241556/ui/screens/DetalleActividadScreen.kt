@@ -20,7 +20,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EventAvailable
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Info
@@ -29,6 +32,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,8 +62,59 @@ import java.util.Locale
 
 @Composable
 fun DetalleActividadScreen(
-    actividad: ActividadConDetalle
+    actividad: ActividadConDetalle,
+    usuarioActualId: Int,
+    onEditar: () -> Unit,
+    onEliminar: () -> Unit
 ) {
+
+    val esCreador = actividad.actividad.idCreador == usuarioActualId
+
+    Column {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = {}) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null
+                )
+            }
+
+            Text(modifier = Modifier.weight(1f),
+                text = "Detalle de la Actividad",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+
+            // Configuraciones para creador de actividad
+            if (esCreador) {
+                Row {
+                    // Ícono para editar
+                    IconButton(onClick = onEditar) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = null,
+                            tint = Color.Cyan
+                        )
+                    }
+                    // Ícono para eliminar
+                    IconButton(onClick = onEliminar) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = null,
+                            tint = Color.Red
+                        )
+                    }
+                }
+            } else {
+                Spacer(modifier = Modifier.width(48.dp))
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -361,8 +417,11 @@ fun SeccionParticipantesConfirmados(
             .background(GrayAlt, RoundedCornerShape(12.dp))
             .padding(8.dp)
         ) {
-            if (participantes.isNotEmpty()) {
-                Text("Aún no hay participantes")
+            if (participantes.isEmpty()) {
+                Text(
+                    text = "Aún no hay participantes",
+                    style = MaterialTheme.typography.bodySmall
+                )
             } else {
                 LazyColumn {
                     items(participantes) { usuario ->
