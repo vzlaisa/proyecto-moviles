@@ -471,7 +471,7 @@ fun ActividadesSection(
 ) {
     val actividades by viewModel.actividades.collectAsState()
 
-    Column {
+    Column(modifier = Modifier.fillMaxSize()) {
         Text(modifier = Modifier
             .padding(bottom = 12.dp),
             text = "Actividades",
@@ -482,23 +482,26 @@ fun ActividadesSection(
         if (actividades.isEmpty()) {
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 32.dp),
+                .weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.figura_cambiarcontra),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(250.dp)
-                        .align(Alignment.Center),
-                    contentScale = ContentScale.Fit
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "No se encontraron actividades",
+                        color = Color.Black,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.figura_cambiarcontra),
+                        contentDescription = null,
+                        modifier = Modifier.width(250.dp),
+                        contentScale = ContentScale.Fit
+                    )
 
-                Text(
-                    text = "No se encontraron actividades",
-                    color = Color.Black,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                }
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {

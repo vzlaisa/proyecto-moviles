@@ -13,6 +13,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.I
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.EstadoInscripcion
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.ActividadRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.InscripcionRepository
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.state.UiEstado
 
 class DetalleActividadViewModel(
     private val actividadRepository: ActividadRepository,
@@ -91,10 +92,4 @@ class DetalleActividadViewModel(
             }
         }
     }
-}
-
-sealed class UiEstado {
-    object Idle : UiEstado()
-    object Cargando : UiEstado()
-    data class Error(val mensaje: String) : UiEstado()
 }
