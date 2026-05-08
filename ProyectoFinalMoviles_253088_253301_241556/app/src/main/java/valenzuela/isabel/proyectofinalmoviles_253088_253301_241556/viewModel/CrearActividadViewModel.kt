@@ -87,7 +87,6 @@ class CrearActividadViewModel(
         viewModelScope.launch {
             try {
                 val nuevaActividad = ActividadEntity(
-                    id = 0,
                     nombre = nombre,
                     descripcion = descripcion,
                     fechaHora = LocalDateTime.of(fecha, hora),

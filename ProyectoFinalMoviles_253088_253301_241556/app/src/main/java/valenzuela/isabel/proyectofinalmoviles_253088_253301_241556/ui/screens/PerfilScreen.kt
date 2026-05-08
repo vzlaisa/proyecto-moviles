@@ -49,6 +49,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import androidx.compose.ui.platform.LocalContext
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.R
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InteresEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioConIntereses
@@ -68,7 +71,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Per
 import java.time.LocalDate
 
 @Composable
-fun PerfilScreen(viewModel: PerfilViewModel) {
+fun PerfilScreen(viewModel: PerfilViewModel, onNavigateToEditar: () -> Unit) {
     val datosCompletos = viewModel.usuario.collectAsStateWithLifecycle()
 
     if (datosCompletos.value == null) {
@@ -76,12 +79,21 @@ fun PerfilScreen(viewModel: PerfilViewModel) {
             CircularProgressIndicator()
         }
     } else {
-        PerfilContent(datos = datosCompletos.value!!)
+        PerfilContent(
+            datos = datosCompletos.value!!,
+            onEditClick = {
+                viewModel.activarModoEdicion()
+                onNavigateToEditar()
+            }
+        )
     }
 }
 
 @Composable
-private fun PerfilContent(datos: UsuarioConIntereses) {
+private fun PerfilContent(
+    datos: UsuarioConIntereses,
+    onEditClick: () -> Unit
+) {
     val usuario = datos.usuario
     val intereses = datos.intereses
 
@@ -109,7 +121,11 @@ private fun PerfilContent(datos: UsuarioConIntereses) {
 
             // Foto de perfil
             AsyncImage(
-                model = usuario.fotoPerfil ?: R.drawable.default_profile_pic,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(usuario.fotoPerfil ?: R.drawable.default_profile_pic)
+                    .memoryCachePolicy(CachePolicy.DISABLED)
+                    .diskCachePolicy(CachePolicy.DISABLED)
+                    .build(),
                 contentDescription = "Foto de perfil",
                 modifier = Modifier
                     .size(140.dp)
@@ -178,8 +194,9 @@ private fun PerfilContent(datos: UsuarioConIntereses) {
 
             // Botón para editar perfil
             Button(
-                onClick = {}
-            ) {
+                onClick = onEditClick
+            )
+            {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Editar perfil",
@@ -361,6 +378,8 @@ fun PerfilScreenPreview() {
             )
         )
 
-        PerfilContent(datos = mockUsuario)
+        PerfilContent(
+            datos = mockUsuario,
+            onEditClick = {})
     }
 }

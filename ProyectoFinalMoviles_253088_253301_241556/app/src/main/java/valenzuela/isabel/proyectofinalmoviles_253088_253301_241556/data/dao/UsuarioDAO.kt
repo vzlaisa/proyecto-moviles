@@ -19,6 +19,7 @@ interface UsuarioDAO {
     @Query("SELECT * FROM usuarios")
     fun getAll(): Flow<List<UsuarioConIntereses>>
 
+    @Transaction
     @Query("SELECT * FROM usuarios WHERE correo = :identificador OR nickname = :identificador LIMIT 1")
     suspend fun getByIdentificador(identificador: String): UsuarioConIntereses?
 
@@ -39,4 +40,11 @@ interface UsuarioDAO {
 
     @Query("UPDATE usuarios SET huella_activa = :value WHERE nickname = :nickname")
     suspend fun updateHuellaActiva(nickname: String, value: Boolean)
+
+    @Update
+    suspend fun updateUsuario(usuario: UsuarioEntity)
+
+    @Transaction
+    @Query("DELETE FROM usuario_interes WHERE idUsuario = :usuarioId")
+    suspend fun deleteInteresesByUsuarioId(usuarioId: Int)
 }

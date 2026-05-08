@@ -2,6 +2,7 @@ package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.reposit
 
 import android.database.sqlite.SQLiteConstraintException
 import android.util.Log
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.UsuarioDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InteresEntity
@@ -16,6 +17,9 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.utils.Securit
 import java.security.Security
 import java.time.LocalDate
 import kotlin.collections.map
+import android.graphics.Bitmap
+import java.io.File
+import java.io.FileOutputStream
 
 class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
 
@@ -29,6 +33,17 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
         )
 
         return if (contraseniaCorrecta) usuarioObtenido else null
+    }
+
+    suspend fun guardarImagenNueva(bitmap: Bitmap, nickname: String, internalDir: File): String {
+        val fileName = "profile_${nickname}_${System.currentTimeMillis()}.jpg"
+        val file = File(internalDir, fileName)
+
+        FileOutputStream(file).use { outputStream ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+        }
+
+        return file.absolutePath
     }
 
     suspend fun getByIdentificador(identificador: String): UsuarioConIntereses? {
@@ -106,6 +121,17 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
         }
     }
 
+    suspend fun guardarImagenPerfil(bitmap: Bitmap, nickname: String, internalDir: File): String {
+        val fileName = "profile_${nickname}_${System.currentTimeMillis()}.jpg"
+        val file = File(internalDir, fileName)
+
+        FileOutputStream(file).use { outputStream ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+        }
+
+        return file.absolutePath
+    }
+
     suspend fun actualizarContrasenia(correo: String, contrasenia: String) {
         if (correo.isBlank()) {
             throw ValidationException("El correo es obligatorio")
@@ -148,6 +174,29 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
             throw e
         } catch (e: Exception) {
             Log.e("REPOSITORY_ERROR", "Error al actualizar huella: ${e.message}")
+            throw DatabaseException(e)
+        }
+    }
+
+    @Transaction
+    suspend fun actualizarPerfil(usuario: UsuarioEntity, nuevosIntereses: List<Interes>) {
+        try {
+            usuarioDAO.updateUsuario(usuario)
+
+            //limpiar intereses que el usuario tenia antes
+            usuarioDAO.deleteInteresesByUsuarioId(usuario.id)
+
+            // insertar nuevos intereses seleccionados
+            val interesEntities = nuevosIntereses.map { InteresEntity(nombre = it) }
+            val idsGenerados = usuarioDAO.insertIntereses(interesEntities)
+
+            val crossRefs = idsGenerados.map {
+                UsuarioInteresCrossRef(idUsuario = usuario.id, idInteres = it.toInt())
+            }
+            usuarioDAO.insertCrossRefs(crossRefs)
+
+        } catch (e: Exception) {
+            Log.e("REPOSITORY_ERROR", "Error al actualizar perfil: ${e.message}")
             throw DatabaseException(e)
         }
     }

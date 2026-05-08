@@ -35,6 +35,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Hom
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.EditarPerfilScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
 
@@ -213,7 +214,18 @@ fun AppNavigation(
                 // Perfil
                 composable(Screen.Perfil.route) {
                     PerfilScreen(
-                        perfilViewModel
+                        viewModel = perfilViewModel,
+                        onNavigateToEditar = {
+                            navController.navigate(Screen.EditarPerfil.route)
+                        }
+                    )
+                }
+
+                //Editar Perfil
+                composable(Screen.EditarPerfil.route) {
+                    EditarPerfilScreen(
+                        viewModel = perfilViewModel,
+                        onNavigateBack = { navController.popBackStack() }
                     )
                 }
 
@@ -276,6 +288,7 @@ sealed class Screen(val route: String) {
     object Login: Screen("login")
     object SignUp: Screen("sign_up")
     object Home: Screen("home")
+    object EditarPerfil: Screen("editar_perfil")
     object CambiarContra: Screen("cambiar_contrasenia")
     object ActualizarContra: Screen("actualizar_contrasenia")
     object Perfil: Screen("perfil")

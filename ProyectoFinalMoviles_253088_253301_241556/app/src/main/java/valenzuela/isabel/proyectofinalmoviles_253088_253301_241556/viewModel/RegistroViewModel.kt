@@ -259,6 +259,7 @@ class RegistroViewModel(private val repository: UsuarioRepository): ViewModel() 
         registroError = null
 
         val usuario = UsuarioEntity(
+            id = 0,
             nombre = nombre,
             apellidoPaterno = apellidoPaterno,
             apellidoMaterno = apellidoMaterno,
