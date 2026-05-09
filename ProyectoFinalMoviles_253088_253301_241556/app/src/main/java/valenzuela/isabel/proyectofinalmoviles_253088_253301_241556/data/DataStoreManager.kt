@@ -18,6 +18,7 @@ class DataStoreManager(private val context: Context) {
         val NICKNAME = stringPreferencesKey("nickname")
         val FINGERPRINT_ALLOWED = booleanPreferencesKey("fingerprint_allowed")
         val USUARIO_ID = intPreferencesKey("usuario_id")
+        val IS_NEW_ACCOUNT = booleanPreferencesKey("is_new_account")
     }
 
     val isFirstTimeFlow: Flow<Boolean> = context.dataStore.data
@@ -33,7 +34,10 @@ class DataStoreManager(private val context: Context) {
         .map { it[FINGERPRINT_ALLOWED] ?: false}
 
     val usuarioIdFlow: Flow<Int> = context.dataStore.data
-        .map { it[USUARIO_ID] ?: 0 }
+        .map { it[USUARIO_ID] ?: -1 }
+
+    val isNewAccountInFlow: Flow<Boolean> = context.dataStore.data
+        .map { it[IS_NEW_ACCOUNT] ?: true }
 
     suspend fun logout() {
         context.dataStore.edit {
@@ -45,6 +49,7 @@ class DataStoreManager(private val context: Context) {
         context.dataStore.edit {
             it[NICKNAME] = ""
             it[FINGERPRINT_ALLOWED] = false
+            it[USUARIO_ID] = -1
         }
     }
 
@@ -52,7 +57,6 @@ class DataStoreManager(private val context: Context) {
         context.dataStore.edit {
             it[NICKNAME] = nickname
             it[IS_LOGGED_IN] = true
-            it[IS_FIRST_TIME] = false
             it[FINGERPRINT_ALLOWED] = fingerprint
             it[USUARIO_ID] = usuarioId
         }
@@ -67,6 +71,12 @@ class DataStoreManager(private val context: Context) {
     suspend fun setFingerprintAllowed(value: Boolean) {
         context.dataStore.edit {
             it[FINGERPRINT_ALLOWED] = value
+        }
+    }
+
+    suspend fun setIsNewAccount(value: Boolean) {
+        context.dataStore.edit {
+            it[IS_NEW_ACCOUNT] = value
         }
     }
 }

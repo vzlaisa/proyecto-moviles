@@ -26,8 +26,11 @@ interface UsuarioDAO {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertUsuario(usuario: UsuarioEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertIntereses(intereses: List<InteresEntity>): List<Long>
+    /**
+     * Solo se usa una vez (al iniciar la app para llenar los 10 intereses maestros. No se usa en el registro de usuario.
+     */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIntereses(intereses: List<InteresEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCrossRefs(crossRefs: List<UsuarioInteresCrossRef>)
@@ -47,4 +50,7 @@ interface UsuarioDAO {
     @Transaction
     @Query("DELETE FROM usuario_interes WHERE idUsuario = :usuarioId")
     suspend fun deleteInteresesByUsuarioId(usuarioId: Int)
+
+    @Query("UPDATE usuarios SET es_primer_login = 0 WHERE id = :id")
+    suspend fun updateEsPrimerLogin(id: Int)
 }

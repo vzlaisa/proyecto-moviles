@@ -7,6 +7,9 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.UsuarioDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.converters.DateConverter
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.converters.GeneroConverter
@@ -20,15 +23,6 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.U
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioInteresCrossRef
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Interes
 
-class Converters {
-    @TypeConverter
-    fun fromInteres(interes: Interes): String = interes.label
-
-    @TypeConverter
-    fun toInteres(label: String): Interes {
-        return Interes.values().firstOrNull { it.label == label } ?: Interes.DEPORTE
-    }
-}
 @Database(
     entities = [
         UsuarioEntity::class,
@@ -37,14 +31,13 @@ class Converters {
         ActividadEntity::class,
         InscripcionEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(value = [
     GeneroConverter::class,
     DateConverter::class,
     InteresConverter::class,
-    Converters::class
 ])
 abstract class AppDatabase: RoomDatabase() {
 
@@ -57,21 +50,21 @@ abstract class AppDatabase: RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-
-        val databaseCallback = object : RoomDatabase.Callback() {
+        // Para registrar los intereses que existen
+        private val databaseCallback = object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
-                // Insertamos los intereses
-                db.execSQL("INSERT INTO intereses (id, nombre) VALUES (1, 'Deporte')")
-                db.execSQL("INSERT INTO intereses (id, nombre) VALUES (2, 'Música')")
-                db.execSQL("INSERT INTO intereses (id, nombre) VALUES (3, 'Literatura')")
-                db.execSQL("INSERT INTO intereses (id, nombre) VALUES (4, 'Estudios')")
-                db.execSQL("INSERT INTO intereses (id, nombre) VALUES (5, 'Videojuegos')")
-                db.execSQL("INSERT INTO intereses (id, nombre) VALUES (6, 'Arte')")
-                db.execSQL("INSERT INTO intereses (id, nombre) VALUES (7, 'Juegos')")
-                db.execSQL("INSERT INTO intereses (id, nombre) VALUES (8, 'Social')")
-                db.execSQL("INSERT INTO intereses (id, nombre) VALUES (9, 'Cine')")
-                db.execSQL("INSERT INTO intereses (id, nombre) VALUES (10, 'Aire libre')")
+                // Hilo secundario para no bloquear la creación de la DB
+                INSTANCE?.let { database ->
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val dao = database.usuarioDao()
+                        // 10 intereses basados en el enum
+                        val interesesBase = Interes.entries.map {
+                            InteresEntity(id = it.ordinal + 1, nombre = it)
+                        }
+                        dao.insertIntereses(interesesBase)
+                    }
+                }
             }
         }
 
@@ -83,7 +76,8 @@ abstract class AppDatabase: RoomDatabase() {
                     "joinly_database"
                 )
                     .addCallback(databaseCallback)
-                    .fallbackToDestructiveMigration(true).build()
+                    .fallbackToDestructiveMigration(true)
+                    .build()
 
                 INSTANCE = instance
 

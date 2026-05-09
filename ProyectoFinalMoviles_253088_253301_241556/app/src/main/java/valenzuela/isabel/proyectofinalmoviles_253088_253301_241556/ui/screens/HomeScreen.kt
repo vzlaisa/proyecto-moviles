@@ -81,12 +81,15 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.R
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadConDetalle
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Interes
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardFondo
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.SheetHuella
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.BlueAlt
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.GrayAlt
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.GrayEnabled
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.OrangePrimary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PinkSecondary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PurpleAlt
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import java.time.Instant
 import java.time.ZoneId
@@ -96,7 +99,19 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
+    authViewModel: AuthViewModel,
+    configViewModel: ConfigViewModel
 ) {
+    // Para el dialog de la huella
+    val isNewAccount by authViewModel.isNewAccount.collectAsState(initial = false)
+    var mostrarHuellaSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isNewAccount) {
+        if (isNewAccount == true) {
+            mostrarHuellaSheet = true
+        }
+    }
+
     val filtros by viewModel.filtros.collectAsState()
     val nickname by viewModel.nickname.collectAsState()
     var actividadSeleccionada by remember { mutableStateOf<ActividadConDetalle?>(null) }
@@ -163,6 +178,22 @@ fun HomeScreen(
                 onRegresar = { actividadSeleccionada = null },
                 onEditar = {},
                 onEliminar = { actividadSeleccionada = null }
+            )
+        }
+
+        if (mostrarHuellaSheet) {
+            SheetHuella(
+                onDismiss = {
+                    mostrarHuellaSheet = false // Ocultar el sheet
+                    authViewModel.setIsNewAccount(false) // Guardar en datastore
+                    authViewModel.marcarPrimerLoginCompletado() // Guardar en la base
+                },
+                onConfirm = {
+                    configViewModel.onBiometricoChanged(true)
+                    mostrarHuellaSheet = false
+                    authViewModel.setIsNewAccount(false)
+                    authViewModel.marcarPrimerLoginCompletado()
+                }
             )
         }
     }

@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.UsuarioDAO
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InteresEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioConIntereses
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioInteresCrossRef
@@ -14,7 +13,6 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.exceptio
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.exception.UsuarioYaExisteException
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.exception.ValidationException
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.utils.SecurityUtils
-import java.security.Security
 import java.time.LocalDate
 import kotlin.collections.map
 import android.graphics.Bitmap
@@ -100,15 +98,15 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
             // Insertar usuario y recuperar el id
             val idUsuario = usuarioDAO.insertUsuario(usuarioConHash).toInt()
 
-            // Registrar los intereses en su tabla
-            val interesEntities = intereses.map { InteresEntity(nombre = it) }
-            val idsGenerados = usuarioDAO.insertIntereses(interesEntities)
-
-            // Crear la relación en la tabla intermedia
-            val crossRefs = idsGenerados.map {
-                UsuarioInteresCrossRef(idUsuario = idUsuario, idInteres = it.toInt())
+            // Crear la relación en la tabla intermedia (CrossRef)
+            val crossRefs = intereses.map { interesEnum ->
+                UsuarioInteresCrossRef(
+                    idUsuario = idUsuario,
+                    idInteres = interesEnum.ordinal + 1
+                )
             }
 
+            // Insertar las relaciones
             usuarioDAO.insertCrossRefs(crossRefs)
         } catch (e: SQLiteConstraintException) {
             Log.e("REPOSITORY_ERROR", "Error al registrar usuario: ${e.message}")
@@ -181,23 +179,30 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
     @Transaction
     suspend fun actualizarPerfil(usuario: UsuarioEntity, nuevosIntereses: List<Interes>) {
         try {
+            // Actualizar los datos del usuario
             usuarioDAO.updateUsuario(usuario)
 
-            //limpiar intereses que el usuario tenia antes
+            // Limpiar las relaciones viejas en la tabla intermedia
             usuarioDAO.deleteInteresesByUsuarioId(usuario.id)
 
-            // insertar nuevos intereses seleccionados
-            val interesEntities = nuevosIntereses.map { InteresEntity(nombre = it) }
-            val idsGenerados = usuarioDAO.insertIntereses(interesEntities)
-
-            val crossRefs = idsGenerados.map {
-                UsuarioInteresCrossRef(idUsuario = usuario.id, idInteres = it.toInt())
+            // Crear las nuevas relaciones usando los id de los intereses de la base
+            val crossRefs = nuevosIntereses.map { interesEnum ->
+                UsuarioInteresCrossRef(
+                    idUsuario = usuario.id,
+                    idInteres = interesEnum.ordinal + 1 // Mapeo directo al ID maestro
+                )
             }
-            usuarioDAO.insertCrossRefs(crossRefs)
 
+            // Insertar los nuevos puentes
+            usuarioDAO.insertCrossRefs(crossRefs)
         } catch (e: Exception) {
             Log.e("REPOSITORY_ERROR", "Error al actualizar perfil: ${e.message}")
             throw DatabaseException(e)
         }
+    }
+
+    // Esta es la clave para que el diálogo de huella solo salga una vez
+    suspend fun marcarPrimerLoginCompletado(id: Int) {
+        usuarioDAO.updateEsPrimerLogin(id)
     }
 }

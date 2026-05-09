@@ -54,7 +54,10 @@ data class UsuarioEntity(
     val huellaActiva: Boolean = false,
 
     @ColumnInfo(name = "fecha_registro")
-    val fechaRegistro: LocalDateTime = LocalDateTime.now()
+    val fechaRegistro: LocalDateTime = LocalDateTime.now(),
+
+    @ColumnInfo(name = "es_primer_login")
+    val esPrimerLogin: Boolean = true
 ) {
     val edad: Int
         get() = Period.between(fechaNacimiento, LocalDate.now()).years

@@ -34,7 +34,6 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Cam
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.EditarPerfilScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
@@ -177,6 +176,7 @@ fun AppNavigation(
                         onBack = { navController.popBackStack() },
                         onRegistrarseSuccess = {
                             authViewModel.setFirstTime(false)
+                            registroViewModel.resetFormulario()
                             navController.navigate(Screen.Login.route) {
                                 popUpTo(Screen.SignUp.route) { inclusive = true }
                             }
@@ -208,7 +208,12 @@ fun AppNavigation(
 
                 // Home
                 composable(Screen.Home.route) {
-                    HomeScreen(viewModel = homeViewModel)
+                    authViewModel.setFirstTime(false)
+                    HomeScreen(
+                        viewModel = homeViewModel,
+                        authViewModel = authViewModel,
+                        configViewModel = configViewModel
+                    )
                 }
 
                 // Perfil
@@ -235,11 +240,6 @@ fun AppNavigation(
                         onBack = { navController.popBackStack() },
                         configViewModel
                     )
-                }
-
-                composable(Screen.Home.route) {
-                    authViewModel.setFirstTime(false)
-                    HomeScreen(viewModel = homeViewModel)
                 }
 
                 composable(Screen.NuevaActividad.route) {

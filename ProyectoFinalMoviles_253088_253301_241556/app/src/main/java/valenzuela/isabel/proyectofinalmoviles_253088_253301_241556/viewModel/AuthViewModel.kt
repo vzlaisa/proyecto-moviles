@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -71,6 +72,12 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
             false
         )
 
+    val isNewAccount = dataStore.isNewAccountInFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        null
+    )
+
     var loginError by mutableStateOf<String?>(null)
         private set
 
@@ -105,6 +112,9 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
                         usuario.usuario.huellaActiva,
                         usuario.usuario.id
                     )
+
+                    dataStore.setIsNewAccount(usuario.usuario.esPrimerLogin)
+                    resetErrores()
                 } else {
                     loginError = "Correo o contraseña incorrectos"
                 }
@@ -144,5 +154,24 @@ class AuthViewModel(private val dataStore : DataStoreManager, private val reposi
         viewModelScope.launch {
             dataStore.clearSession()
         }
+    }
+
+    fun setIsNewAccount(value: Boolean) {
+        viewModelScope.launch {
+            dataStore.setIsNewAccount(value)
+        }
+    }
+
+    fun marcarPrimerLoginCompletado() {
+        viewModelScope.launch {
+            val id = dataStore.usuarioIdFlow.first()
+            repository.marcarPrimerLoginCompletado(id)
+        }
+    }
+
+    private fun resetErrores() {
+        correoError = null
+        passError = null
+        loginError = null
     }
 }

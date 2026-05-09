@@ -278,7 +278,6 @@ class RegistroViewModel(private val repository: UsuarioRepository): ViewModel() 
 
                 registroExitoso = true
                 registroError = null
-                limpiarCampos()
             } catch (e: Exception) {
                 registroExitoso = false
                 registroError = "Ocurrió un error al registrar. Intenta de nuevo."
@@ -300,7 +299,8 @@ class RegistroViewModel(private val repository: UsuarioRepository): ViewModel() 
         nickname = ""
         fotoUri = null
         interesesSeleccionados = emptySet()
-        resetErrores()
+
+        registroExitoso = false
     }
 
     private fun resetErrores() {
@@ -315,5 +315,10 @@ class RegistroViewModel(private val repository: UsuarioRepository): ViewModel() 
         nicknameError = null
         interesesError = null
         registroError = null
+    }
+
+    fun resetFormulario() {
+        limpiarCampos()
+        resetErrores()
     }
 }

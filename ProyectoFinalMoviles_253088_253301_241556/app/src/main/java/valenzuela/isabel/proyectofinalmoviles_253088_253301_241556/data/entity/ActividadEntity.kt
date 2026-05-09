@@ -15,6 +15,12 @@ import java.time.LocalDateTime
             parentColumns = ["id"],
             childColumns = ["id_creador"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = InteresEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["id_interes"],
+            onDelete = ForeignKey.NO_ACTION // Para no borrar la actividad si se borra un interés
         )
     ],
     indices = [
