@@ -60,7 +60,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.compose.ui.window.Dialog
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.window.DialogProperties
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.R
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Interes
@@ -81,6 +85,8 @@ import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
 import android.widget.Toast
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -121,7 +127,6 @@ fun CrearActividadLayout(
                 Button(
                     onClick = {
                         onNext()
-                        Toast.makeText(context, "¡Actividad publicada con éxito!", Toast.LENGTH_SHORT).show()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = OrangePrimary),
                     shape = RoundedCornerShape(8.dp),
@@ -436,8 +441,6 @@ fun CrearActividadPaso2(
             }
 
             Spacer(Modifier.height(40.dp))
-
-            Spacer(modifier = Modifier.weight(1f))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -459,14 +462,36 @@ fun CrearActividadPaso3(
     onBack: () -> Unit,
     onPublicar: () -> Unit
 ) {
+    val context = LocalContext.current
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            viewModel.onFotoChange(uri)
+        }
+    )
+
+    LaunchedEffect(viewModel.publicacionExitosa) {
+        if (viewModel.publicacionExitosa) {
+            Toast.makeText(context, "¡Actividad publicada con éxito!", Toast.LENGTH_SHORT).show()
+            viewModel.limpiarDatos()
+            onPublicar()
+        }
+    }
+
+    LaunchedEffect(viewModel.publicacionError) {
+        viewModel.publicacionError?.let { mensajeError ->
+            Toast.makeText(context, mensajeError, Toast.LENGTH_LONG).show()
+        }
+    }
+
     CrearActividadLayout(
         pasoActual = 3,
         tituloPaso = "Configuración",
         rutaImagen = R.drawable.figura_ondas_naranja,
         onClose = onClose,
         onNext = {
-            viewModel.publicarActividad()
-            onPublicar()
+            viewModel.publicarActividad(context)
         }
     ) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -487,7 +512,10 @@ fun CrearActividadPaso3(
 
             Spacer(Modifier.height(24.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Actividad privada", fontWeight = FontWeight.Medium)
                     Text(
@@ -511,7 +539,10 @@ fun CrearActividadPaso3(
 
             Spacer(Modifier.height(20.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Actividad recurrente", fontWeight = FontWeight.Medium)
                     Text(
@@ -539,25 +570,46 @@ fun CrearActividadPaso3(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
+                    .height(140.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(GrayAlt)
-                    .clickable {  },
+                    .clickable {
+                        photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.CameraAlt, contentDescription = null, tint = GrayEnabled, modifier = Modifier.size(40.dp))
+                if (viewModel.fotoUri != null) {
+                    AsyncImage(
+                        model = viewModel.fotoUri,
+                        contentDescription = "Preview de la foto",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.CameraAlt,
+                        contentDescription = null,
+                        tint = GrayEnabled,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
             }
+
+            Spacer(Modifier.height(8.dp))
+
             Text(
                 text = "Tip: \"Sube una foto que inspire\".",
                 style = MaterialTheme.typography.labelSmall,
-                color = GrayEnabled,
-                modifier = Modifier.padding(top = 4.dp)
+                color = GrayEnabled
             )
 
-            Spacer(Modifier.height(10.dp))
-            Row {
+            Spacer(Modifier.height(16.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(
-                    onClick = {  },
+                    onClick = {
+                        photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = GrayAlt, contentColor = Black),
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -569,19 +621,15 @@ fun CrearActividadPaso3(
                 }
             }
 
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(32.dp))
 
-            Spacer(modifier = Modifier.weight(1f))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TextButton(
-                    onClick = { onBack() }
-                ) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                TextButton(onClick = { onBack() }) {
                     Text("Regresar")
                 }
             }
+
+            Spacer(Modifier.height(40.dp))
         }
     }
 }

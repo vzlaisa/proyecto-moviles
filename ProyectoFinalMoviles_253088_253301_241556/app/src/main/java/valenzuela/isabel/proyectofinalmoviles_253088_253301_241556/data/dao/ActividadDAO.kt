@@ -32,7 +32,7 @@ interface ActividadDAO {
         fecha: LocalDate?
     ): Flow<List<ActividadConDetalle>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     suspend fun insertActividad(actividad: ActividadEntity): Long
 
     @Query("SELECT * FROM actividades WHERE id = :id")

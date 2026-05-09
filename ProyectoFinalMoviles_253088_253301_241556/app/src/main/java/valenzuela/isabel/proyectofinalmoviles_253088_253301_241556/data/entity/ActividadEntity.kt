@@ -15,13 +15,7 @@ import java.time.LocalDateTime
             parentColumns = ["id"],
             childColumns = ["id_creador"],
             onDelete = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = InteresEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["id_interes"],
-            onDelete = ForeignKey.CASCADE
-        ),
+        )
     ],
     indices = [
         Index("id_creador"),
@@ -66,7 +60,9 @@ data class ActividadEntity(
     @ColumnInfo(name = "recurrente")
     val recurrente: Boolean = false,
 
-    // Relaciones
+    @ColumnInfo(name = "image_url")
+    val imageUrl: String? = null,
+
     @ColumnInfo(name = "id_creador")
     val idCreador: Int,
 

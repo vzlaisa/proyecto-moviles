@@ -13,6 +13,10 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.reposito
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.LocalDateTime
+import android.content.Context
+import java.io.File
+import java.io.FileOutputStream
+import kotlinx.coroutines.Dispatchers
 
 class CrearActividadViewModel(
     private val actividadRepository: ActividadRepository,
@@ -76,7 +80,7 @@ class CrearActividadViewModel(
     fun onRecurrenteChange(value: Boolean) { isRecurrente = value }
     fun onFotoChange(uri: Uri?) { fotoUri = uri }
 
-    fun publicarActividad() {
+    fun publicarActividad(context: Context) {
         publicacionError = null
 
         if (nombre.isBlank() || categoria == null || fecha == null || hora == null) {
@@ -84,8 +88,9 @@ class CrearActividadViewModel(
             return
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch (Dispatchers.IO){
             try {
+                val localImagePath = fotoUri?.let { uri -> guardarImagenEnLocal(context, uri)}
                 val nuevaActividad = ActividadEntity(
                     nombre = nombre,
                     descripcion = descripcion,
@@ -99,7 +104,8 @@ class CrearActividadViewModel(
                     publica = !isPrivada,
                     recurrente = isRecurrente,
                     idCreador = usuarioActualId,
-                    idInteres = categoria!!.ordinal + 1
+                    idInteres = categoria!!.ordinal + 1,
+                    imageUrl = localImagePath
                 )
 
                 actividadRepository.crearActividad(nuevaActividad)
@@ -111,7 +117,22 @@ class CrearActividadViewModel(
         }
     }
 
+    private fun guardarImagenEnLocal(context: Context, uri: Uri): String? {
+        return try {
+            val inputStream = context.contentResolver.openInputStream(uri)
+            val file = File(context.filesDir, "actividad_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(file)
 
+            inputStream?.copyTo(outputStream)
+
+            inputStream?.close()
+            outputStream.close()
+
+            Uri.fromFile(file).toString()
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     fun limpiarDatos() {
         nombre = ""

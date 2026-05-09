@@ -2,39 +2,17 @@ package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.EventAvailable
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Repeat
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,22 +20,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.R
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadConDetalle
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BotonPrincipal
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardActividad
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.GrayAlt
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.GrayEnabled
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PurpleAlt
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardFondo
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.*
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -69,57 +44,9 @@ fun DetalleActividadScreen(
     onEditar: () -> Unit,
     onEliminar: () -> Unit
 ) {
-
     val esCreador = actividad.actividad.idCreador == usuarioActualId
 
-    Column {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = {}) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = null
-                )
-            }
-
-            Text(modifier = Modifier.weight(1f),
-                text = "Detalle de la Actividad",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-
-            // Configuraciones para creador de actividad
-            if (esCreador) {
-                Row {
-                    // Ícono para editar
-                    IconButton(onClick = onEditar) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = null,
-                            tint = Color.Cyan
-                        )
-                    }
-                    // Ícono para eliminar
-                    IconButton(onClick = onEliminar) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = null,
-                            tint = Color.Red
-                        )
-                    }
-                }
-            } else {
-                Spacer(modifier = Modifier.width(48.dp))
-            }
-        }
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
-
         Image(
             painter = painterResource(R.drawable.fondo_detalleactividad),
             contentDescription = null,
@@ -127,326 +54,260 @@ fun DetalleActividadScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        CardActividad {
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                HeaderImagen(actividad.actividad)
-                Spacer(modifier = Modifier.height(12.dp))
-                TituloActividad(actividad)
-                Spacer(modifier = Modifier.height(12.dp))
-                InfoActividad(actividad.actividad)
+                IconButton(onClick = onRegresar) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "Cerrar", tint = Black)
+                }
 
-                Divider(color = Color.LightGray,
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(vertical = 12.dp)
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = "Detalle de actividad",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Black,
+                    textAlign = TextAlign.Center
                 )
 
-                DescripcionActividad(actividad.actividad)
+                if (esCreador) {
+                    IconButton(onClick = onEditar) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar", tint = GrayEnabled)
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(48.dp))
+                }
+            }
 
-                Divider(color = Color.LightGray,
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(vertical = 12.dp)
-                )
+            CardFondo {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(24.dp)
+                ) {
+                    HeaderImagen(actividad.actividad)
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                SeccionRequisitos()
+                    TituloActividad(actividad)
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                Divider(color = Color.LightGray,
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(vertical = 12.dp)
-                )
+                    InfoActividad(actividad.actividad)
 
-                SeccionParticipantesConfirmados()
-                Spacer(modifier = Modifier.height(20.dp))
+                    HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
 
-                BotonPrincipal(modifier = Modifier
-                    .fillMaxWidth(),
-                    text = if (actividad.actividad.publica) "Unirse" else "Solicitar Unirse",
-                    onClick = {}
-                )
+                    DescripcionActividad(actividad.actividad)
+
+                    HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
+
+                    SeccionRequisitos()
+
+                    HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
+
+                    SeccionParticipantesConfirmados()
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    BotonPrincipal(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = if (actividad.actividad.publica) "Unirse" else "Solicitar unirse",
+                        onClick = {}
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
             }
         }
-
     }
 }
 
-// Imagen de la actividad
 @Composable
 fun HeaderImagen(actividad: ActividadEntity) {
-    Box {
-        Image(modifier = Modifier
+    Box(
+        modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
-            .clip(RoundedCornerShape(16.dp)),
-            painter = painterResource(R.drawable.figura_cambiarcontra), // cambiar por imagen de actividad
-            contentDescription = null,
-            contentScale = ContentScale.Crop
+            .height(200.dp)
+            .clip(RoundedCornerShape(24.dp))
+    ) {
+        AsyncImage(
+            model = actividad.imageUrl ?: R.drawable.fondo_detalleactividad,
+            contentDescription = "Portada de actividad",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
         )
-
-        Row(modifier = Modifier.padding(8.dp)) {
+        Row(modifier = Modifier.padding(12.dp)) {
             if (!actividad.publica) {
-                Tag("Privado")
+                Tag(texto = "Privado", icono = Icons.Outlined.Lock)
                 Spacer(modifier = Modifier.width(8.dp))
             }
-
             if (actividad.recurrente) {
-                Tag("Recurrente")
+                Tag(texto = "Recurrente", icono = Icons.Outlined.Repeat)
             }
         }
     }
 }
 
-// Tags dentro de la imagen
 @Composable
-fun Tag(text: String) {
-    Box(modifier = Modifier
-        .background(Color.White, RoundedCornerShape(50))
-        .padding(horizontal = 10.dp, vertical = 4.dp)
+fun Tag(texto: String, icono: ImageVector? = null) {
+    Row(
+        modifier = Modifier
+            .background(White.copy(alpha = 0.9f), RoundedCornerShape(50))
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text, fontSize = 12.sp)
+        if (icono != null) {
+            Icon(imageVector = icono, contentDescription = null, tint = PurpleAlt, modifier = Modifier.size(14.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+        }
+        Text(texto, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = PurpleAlt)
     }
 }
 
-// Titulo de la actividad
 @Composable
-fun TituloActividad(
-    actividad: ActividadConDetalle
-) {
+fun TituloActividad(actividad: ActividadConDetalle) {
     Column {
-        Text(
-            text = actividad.actividad.nombre,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Organizado por: ${actividad.creador.nombre}")
-            Spacer(modifier = Modifier.weight(1f))
-            ChipMini(actividad.interes.nombre.label)
-        }
-
-        Spacer(modifier = Modifier.height(6.dp))
-    }
-}
-
-// Enseñar el interes al que pertenece la actividad
-@Composable
-fun ChipMini(text: String) {
-    Box(modifier = Modifier
-        .background(Color.White, RoundedCornerShape(50))
-        .padding(horizontal = 10.dp, vertical = 4.dp)
-
-    ) {
-        Text(text, fontSize = 12.sp)
-    }
-}
-
-// Información de la actividad
-@Composable
-fun InfoActividad(
-    actividad: ActividadEntity
-) {
-    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale("es"))
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-
-    Column {
-        Row(modifier = Modifier
-            .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                InfoItem(
-                    icon = Icons.Default.DateRange,
-                    titulo = "Fecha y hora",
-                    valor = actividad.fechaHora.format(dateFormatter)
-                )
-
-                InfoItem(
-                    icon = Icons.Default.AccessTime,
-                    titulo = "",
-                    valor = "${actividad.fechaHora.format(timeFormatter)} hrs"
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-                InfoItem(
-                    icon = Icons.Default.LocationOn,
-                    titulo = "Ubicación",
-                    valor = actividad.ubicacion
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-                InfoItem(
-                    icon = Icons.Default.Group,
-                    titulo = "Participantes",
-                    valor = "0/${actividad.maxParticipantes}" // conectar luego para llevar cuenta de participantes unidos
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                if (actividad.recurrente) {
-                    InfoItem(
-                        icon = Icons.Default.Repeat,
-                        titulo = "",
-                        valor = "Cada primer viernes del mes" // cambiar para la de cada actividad
-                    )
-                }
-
-                actividad.fechaLimite?.let {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    InfoItem(
-                        icon = Icons.Default.EventAvailable,
-                        titulo = "Confirmar antes de ",
-                        valor = it.format(dateFormatter)
-                    )
-                }
-            }
-        }
-    }
-}
-
-//Item para la información
-@Composable
-fun InfoItem(
-    icon: ImageVector,
-    titulo: String,
-    valor: String
-) {
-    Row(modifier = Modifier
-        .padding(bottom = 6.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Icon(modifier = Modifier
-            .size(20.dp),
-            imageVector = icon,
-            contentDescription = null,
-            tint = PurpleAlt // Cambiar dependiendo del interés
-        )
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Column {
-            if (titulo.isNotBlank()) {
-                Text(
-                    text = titulo,
-                    fontWeight = FontWeight.SemiBold,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
+        Row(verticalAlignment = Alignment.Top) {
             Text(
-                text = valor,
-                style = MaterialTheme.typography.bodySmall,
+                text = actividad.actividad.nombre,
+                style = MaterialTheme.typography.headlineSmall,
+                color = Black,
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .background(PurpleAlt.copy(alpha = 0.2f), RoundedCornerShape(50))
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Text(actividad.interes.nombre.label, fontSize = 12.sp, color = PurpleAlt, fontWeight = FontWeight.Bold)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "Organizado por: ${actividad.creador.nombre}",
+                style = MaterialTheme.typography.bodyMedium,
                 color = GrayEnabled
             )
+            if (!actividad.actividad.publica) {
+                Spacer(modifier = Modifier.weight(1f))
+                Tag(texto = "Requiere aprobación")
+            }
         }
     }
 }
 
-// Descripción de la actividad
+@Composable
+fun InfoActividad(actividad: ActividadEntity) {
+    val dateFormatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM 'de' yyyy", Locale("es"))
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.weight(1.2f)) {
+            InfoItem(Icons.Default.DateRange, "Fecha y hora", "${actividad.fechaHora.format(dateFormatter)}\n${actividad.fechaHora.format(timeFormatter)} hrs")
+            Spacer(modifier = Modifier.height(16.dp))
+            InfoItem(Icons.Default.LocationOn, "Ubicación", actividad.ubicacion)
+            Spacer(modifier = Modifier.height(16.dp))
+            InfoItem(Icons.Default.Group, "Participantes", "0/${actividad.maxParticipantes}")
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(modifier = Modifier.weight(0.8f)) {
+            if (actividad.recurrente) {
+                InfoItem(Icons.Outlined.Repeat, "", "Cada primer viernes del mes")
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            actividad.fechaLimite?.let {
+                InfoItem(Icons.Default.EventAvailable, "Confirmar antes de", it.format(dateFormatter))
+            }
+        }
+    }
+}
+
+@Composable
+fun InfoItem(icon: ImageVector, titulo: String, valor: String) {
+    Row(verticalAlignment = Alignment.Top) {
+        Icon(icon, contentDescription = null, tint = PurpleAlt, modifier = Modifier.size(24.dp).padding(top = 2.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            if (titulo.isNotBlank()) {
+                Text(titulo, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge, color = Black)
+            }
+            Text(valor, style = MaterialTheme.typography.bodyMedium, color = GrayEnabled)
+        }
+    }
+}
+
 @Composable
 fun DescripcionActividad(actividad: ActividadEntity) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Info,
-                contentDescription = null,
-                tint = PurpleAlt
-            )
+            Icon(Icons.Default.Info, contentDescription = null, tint = PurpleAlt, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Descripción", fontWeight = FontWeight.Bold)
+            Text("Descripción", fontWeight = FontWeight.Bold, color = Black)
         }
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(actividad.descripcion)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(actividad.descripcion, style = MaterialTheme.typography.bodyMedium, color = GrayEnabled)
     }
 }
 
-// Sección de requisitos (harcodeado por ahora, cambiar para mostrar datos reales)
 @Composable
 fun SeccionRequisitos(
-    requisitos: List<String> = listOf("No se necesita experiencia previa", "Edad mínima: 12+ años"),
-    queLlevar: List<String> = listOf("Ropa cómoda que se pueda ensuciar", "Delantal (opcional)")
+    requisitos: List<String> = listOf("No se necesita experiencia previa.", "Edad mínima 12-16 años."),
+    queLlevar: List<String> = listOf("Ropa cómoda que se pueda ensuciar.", "Delantal (opcional, pero recomendado).")
 ) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Info,
-                contentDescription = null,
-                tint = PurpleAlt
-            )
+            Icon(Icons.Default.Info, contentDescription = null, tint = PurpleAlt, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Requisitos", fontWeight = FontWeight.Bold)
+            Text("Requisitos", fontWeight = FontWeight.Bold, color = Black)
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        requisitos.forEach {
-            Text("• $it")
-        }
+        Spacer(modifier = Modifier.height(4.dp))
+        requisitos.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium, color = GrayEnabled, modifier = Modifier.padding(start = 28.dp)) }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Default.Info,
-                contentDescription = null,
-                tint = PurpleAlt
-            )
+            Icon(Icons.Default.Info, contentDescription = null, tint = PurpleAlt, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Qué llevar", fontWeight = FontWeight.Bold)
+            Text("Qué llevar", fontWeight = FontWeight.Bold, color = Black)
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        queLlevar.forEach {
-            Text("• $it")
-        }
+        Spacer(modifier = Modifier.height(4.dp))
+        queLlevar.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium, color = GrayEnabled, modifier = Modifier.padding(start = 28.dp)) }
     }
 }
 
-// Seccion para participantes confirmados
 @Composable
-fun SeccionParticipantesConfirmados(
-    participantes: List<UsuarioEntity> = emptyList()
-) {
+fun SeccionParticipantesConfirmados(participantes: List<UsuarioEntity> = emptyList()) {
     Column {
-        Text("Participantes Confirmados", fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
-        Box(modifier = Modifier
-            .height(140.dp)
-            .background(GrayAlt, RoundedCornerShape(12.dp))
-            .padding(8.dp)
+        Text("Participantes Confirmados:", fontWeight = FontWeight.Bold, color = Black)
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Box(
+            modifier = Modifier
+                .height(180.dp)
+                .background(Color(0xFFF8F8F8), RoundedCornerShape(16.dp))
+                .padding(12.dp)
         ) {
             if (participantes.isEmpty()) {
-                Text(
-                    text = "Aún no hay participantes",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Text("Aún no hay participantes", style = MaterialTheme.typography.bodyMedium, color = GrayEnabled, modifier = Modifier.align(Alignment.Center))
             } else {
                 LazyColumn {
                     items(participantes) { usuario ->
-                        Row(modifier = Modifier
-                            .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("${usuario.nombre} ${usuario.apellidoPaterno} ${usuario.apellidoMaterno}")
+                        Row(modifier = Modifier.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.AccountCircle, contentDescription = null, modifier = Modifier.size(32.dp), tint = GrayEnabled)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text("${usuario.nombre} ${usuario.apellidoPaterno}", style = MaterialTheme.typography.bodyMedium, color = Black)
                         }
                     }
                 }
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DetalleActividadPreview() {
-    // DetalleActividadScreen()
 }

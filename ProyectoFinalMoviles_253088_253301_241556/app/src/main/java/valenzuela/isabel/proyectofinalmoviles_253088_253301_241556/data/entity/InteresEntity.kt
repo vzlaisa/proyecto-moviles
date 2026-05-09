@@ -7,7 +7,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.In
 
 @Entity(tableName = "intereses")
 data class InteresEntity (
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = false)
     val id: Int = 0,
 
     @ColumnInfo(name = "nombre")

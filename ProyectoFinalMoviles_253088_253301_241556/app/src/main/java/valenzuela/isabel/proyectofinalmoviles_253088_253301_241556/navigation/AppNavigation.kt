@@ -272,8 +272,6 @@ fun AppNavigation(
                         },
                         onBack = { navController.popBackStack() },
                         onPublicar = {
-                            crearActividadViewModel.publicarActividad()
-                            crearActividadViewModel.limpiarDatos()
                             navController.popBackStack(Screen.Home.route, inclusive = false)
                         }
                     )
