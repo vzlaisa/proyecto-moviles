@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -32,6 +31,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.A
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BotonPrincipal
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardFondo
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.SmallTopAppBar
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.*
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -55,33 +55,30 @@ fun DetalleActividadScreen(
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 40.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onRegresar) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "Cerrar", tint = Black)
-                }
-
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = "Detalle de actividad",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Black,
-                    textAlign = TextAlign.Center
-                )
-
-                if (esCreador) {
-                    IconButton(onClick = onEditar) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar", tint = GrayEnabled)
+            SmallTopAppBar(
+                title = "Detalle de actividad",
+                onBack = onRegresar,
+                actionContent = {
+                    if (esCreador) {
+                        Row {
+                            IconButton(onClick = onEditar) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Editar",
+                                    tint = BlueLink
+                                )
+                            }
+                            IconButton(onClick = onEliminar) {
+                                Icon(
+                                    imageVector = Icons.Default.DeleteOutline,
+                                    contentDescription = "Eliminar",
+                                    tint = Color.Red
+                                )
+                            }
+                        }
                     }
-                } else {
-                    Spacer(modifier = Modifier.width(48.dp))
                 }
-            }
+            )
 
             CardFondo {
                 Column(
@@ -112,11 +109,14 @@ fun DetalleActividadScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    BotonPrincipal(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = if (actividad.actividad.publica) "Unirse" else "Solicitar unirse",
-                        onClick = {}
-                    )
+                    if (!esCreador) {
+                        BotonPrincipal(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = if (actividad.actividad.publica) "Unirse" else "Solicitar unirse",
+                            onClick = {}
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(20.dp))
                 }
             }
@@ -133,7 +133,7 @@ fun HeaderImagen(actividad: ActividadEntity) {
             .clip(RoundedCornerShape(24.dp))
     ) {
         AsyncImage(
-            model = actividad.imageUrl ?: R.drawable.fondo_detalleactividad,
+            model = actividad.imageUrl ?: R.drawable.default_activity_cover,
             contentDescription = "Portada de actividad",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -190,7 +190,7 @@ fun TituloActividad(actividad: ActividadConDetalle) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Organizado por: ${actividad.creador.nombre}",
+                text = "Organizado por: ${actividad.creador.nombreCompleto}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = GrayEnabled
             )

@@ -11,16 +11,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.ActualizarContraScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CambiarContraScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.ConfiguracionScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CrearActividadPaso1
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CrearActividadPaso2
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.CrearActividadPaso3
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.DetalleActividadScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.HomeScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.LoginScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.MainScreen
@@ -212,7 +215,10 @@ fun AppNavigation(
                     HomeScreen(
                         viewModel = homeViewModel,
                         authViewModel = authViewModel,
-                        configViewModel = configViewModel
+                        configViewModel = configViewModel,
+                        onClickActividad = { actividad ->
+                            navController.navigate(Screen.DetalleActividad.crearRuta(actividad.actividad.id))
+                        }
                     )
                 }
 
@@ -242,6 +248,7 @@ fun AppNavigation(
                     )
                 }
 
+                // Wizard de crear actividad
                 composable(Screen.NuevaActividad.route) {
                     CrearActividadPaso1(
                         viewModel = crearActividadViewModel,
@@ -276,6 +283,28 @@ fun AppNavigation(
                         }
                     )
                 }
+
+                // Detalle de actividad
+                composable(
+                    route = Screen.DetalleActividad.route,
+                    arguments = listOf(navArgument("actividadId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val id = backStackEntry.arguments?.getInt("actividadId") ?: 0
+
+                    val actividad = homeViewModel.actividades.collectAsState().value.find {
+                        it.actividad.id == id
+                    }
+
+                    actividad?.let {
+                        DetalleActividadScreen(
+                            actividad = it,
+                            usuarioActualId = homeViewModel.usuarioActualId,
+                            onRegresar = { navController.popBackStack() },
+                            onEditar = { },
+                            onEliminar = { }
+                        )
+                    }
+                }
             }
         }
     }
@@ -294,4 +323,8 @@ sealed class Screen(val route: String) {
     object NuevaActividad: Screen("crear_actividad_paso_1")
     object CrearPaso2: Screen("crear_actividad_paso_2")
     object CrearPaso3: Screen("crear_actividad_paso_3")
+
+    object DetalleActividad : Screen("detalle_actividad/{actividadId}") {
+        fun crearRuta(id: Int) = "detalle_actividad/$id"
+    }
 }

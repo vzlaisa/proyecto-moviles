@@ -1,7 +1,6 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
 import android.content.pm.PackageManager
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -100,7 +99,8 @@ import java.util.Locale
 fun HomeScreen(
     viewModel: HomeViewModel,
     authViewModel: AuthViewModel,
-    configViewModel: ConfigViewModel
+    configViewModel: ConfigViewModel,
+    onClickActividad: (ActividadConDetalle) -> Unit
 ) {
     // Para el dialog de la huella
     val isNewAccount by authViewModel.isNewAccount.collectAsState(initial = false)
@@ -114,7 +114,6 @@ fun HomeScreen(
 
     val filtros by viewModel.filtros.collectAsState()
     val nickname by viewModel.nickname.collectAsState()
-    var actividadSeleccionada by remember { mutableStateOf<ActividadConDetalle?>(null) }
     val context = LocalContext.current
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
@@ -133,10 +132,6 @@ fun HomeScreen(
         }
     }
 
-    BackHandler(enabled = actividadSeleccionada != null) {
-        actividadSeleccionada = null
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.fondo_listaactividades),
@@ -151,36 +146,26 @@ fun HomeScreen(
             onBusquedaChange = { viewModel.setBusqueda(it) }
         )
 
-        if (actividadSeleccionada == null) {
-            CardFondo {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    CategoriasSection(viewModel = viewModel)
+        CardFondo {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(8.dp))
+                CategoriasSection(viewModel = viewModel)
 
-                    Spacer(modifier = Modifier.height(18.dp))
-                    FiltrosSection(viewModel = viewModel)
+                Spacer(modifier = Modifier.height(18.dp))
+                FiltrosSection(viewModel = viewModel)
 
-                    Spacer(modifier = Modifier.height(16.dp))
-                    ActividadesSection(
-                        viewModel = viewModel,
-                        onClickActividad = { actividadSeleccionada = it }
-                    )
-                }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ActividadesSection(
+                    viewModel = viewModel,
+                    onClickActividad = onClickActividad
+                )
             }
-        } else {
-            DetalleActividadScreen(
-                actividad = actividadSeleccionada!!,
-                usuarioActualId = viewModel.usuarioActualId,
-                onRegresar = { actividadSeleccionada = null },
-                onEditar = {},
-                onEliminar = { actividadSeleccionada = null }
-            )
         }
-
         if (mostrarHuellaSheet) {
             SheetHuella(
                 onDismiss = {
