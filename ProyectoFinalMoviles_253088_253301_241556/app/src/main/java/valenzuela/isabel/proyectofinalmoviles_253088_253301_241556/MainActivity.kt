@@ -88,7 +88,7 @@ private class JoinlyViewModelFactory(
             modelClass.isAssignableFrom(ConfigViewModel::class.java) ->
                 ConfigViewModel(dataStore, usuarioRepo) as T
             modelClass.isAssignableFrom(CrearActividadViewModel::class.java) ->
-                CrearActividadViewModel(actividadRepo, 1) as T
+                CrearActividadViewModel(dataStore, actividadRepo) as T
             modelClass.isAssignableFrom(DetalleActividadViewModel::class.java) ->
                 DetalleActividadViewModel(actividadRepo, inscripcionRepo, dataStore) as T
             else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")

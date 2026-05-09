@@ -14,15 +14,35 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.LocalDateTime
 import android.content.Context
+import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStoreManager
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.api.NominatimResponse
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.api.RetrofitClient
 
-class CrearActividadViewModel(
-    private val actividadRepository: ActividadRepository,
-    private val usuarioActualId: Int
-) : ViewModel() {
+class CrearActividadViewModel(private val dataStore: DataStoreManager, private val actividadRepository: ActividadRepository): ViewModel() {
 
+    // Obtiene el id del usuario
+    val usuarioActualId: Int
+        get() = _usuarioActualId.value
+
+    private val _usuarioActualId = MutableStateFlow(0)
+
+    init {
+        viewModelScope.launch {
+            dataStore.usuarioIdFlow.collect { id ->
+                _usuarioActualId.value = id
+            }
+        }
+    }
+
+    // Estados del formulario
     var nombre by mutableStateOf("")
         private set
     var categoria by mutableStateOf<Interes?>(null)
@@ -54,20 +74,61 @@ class CrearActividadViewModel(
     var fotoUri by mutableStateOf<Uri?>(null)
         private set
 
+    // Estados de búsqueda para ubicación
+    var queryBusqueda by mutableStateOf("")
+        private set
+    var resultadosBusqueda by mutableStateOf<List<NominatimResponse>>(emptyList())
+        private set
+    var buscandoUbicacion by mutableStateOf(false)
+        private set
+
+    // Estados de control para las screens
     var publicacionExitosa by mutableStateOf(false)
         private set
     var publicacionError by mutableStateOf<String?>(null)
         private set
 
-
-
     fun onNombreChange(value: String) { nombre = value }
     fun onCategoriaChange(value: Interes) { categoria = value }
     fun onDescripcionChange(value: String) { descripcion = value }
+
+    // Lógica del Buscador
+    fun onQueryBusquedaChange(nuevoTexto: String) {
+        queryBusqueda = nuevoTexto
+        if (nuevoTexto.length > 3) {
+            buscarUbicacion(nuevoTexto)
+        } else {
+            resultadosBusqueda = emptyList()
+        }
+    }
+
+    private var searchJob: Job? = null
+    private fun buscarUbicacion(query: String) {
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch(Dispatchers.IO) {
+            delay(500)
+            buscandoUbicacion = true
+            try {
+                val resultados = RetrofitClient.nominatimService.buscarLugar(query)
+                // Volver al hilo principal para actualizar la lista de UI
+                withContext(Dispatchers.Main) {
+                    resultadosBusqueda = resultados
+                }
+            } catch (e: Exception) {
+                Log.e("NOMINATIM_ERROR", "Fallo al buscar: ${e.message}")
+            } finally {
+                buscandoUbicacion = false
+            }
+        }
+    }
+
     fun onUbicacionSeleccionada(nombre: String, lat: Double, lon: Double) {
         ubicacion = nombre
         latitud = lat
         longitud = lon
+
+        queryBusqueda = ""
+        resultadosBusqueda = emptyList()
     }
     fun onFechaChange(value: LocalDate) { fecha = value }
     fun onHoraChange(value: LocalTime) { hora = value }
@@ -85,6 +146,11 @@ class CrearActividadViewModel(
 
         if (nombre.isBlank() || categoria == null || fecha == null || hora == null) {
             publicacionError = "Faltan campos obligatorios"
+            return
+        }
+
+        if (usuarioActualId == -1) {
+            publicacionError = "Error: Sesión de usuario no válida"
             return
         }
 
@@ -109,7 +175,10 @@ class CrearActividadViewModel(
                 )
 
                 actividadRepository.crearActividad(nuevaActividad)
-                publicacionExitosa = true
+
+                withContext(Dispatchers.Main) {
+                    publicacionExitosa = true
+                }
             } catch (e: Exception) {
                 publicacionExitosa = false
                 publicacionError = e.message

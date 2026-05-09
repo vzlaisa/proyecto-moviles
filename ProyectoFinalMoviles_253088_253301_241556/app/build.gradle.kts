@@ -62,11 +62,21 @@ dependencies {
     implementation(libs.androidx.compose.foundation.layout)
     ksp("androidx.room:room-compiler:2.8.4")
 
+    // Encriptación de contraseña
     implementation("org.mindrot:jbcrypt:0.4")
 
+    // Biometrico
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
+    // Permisos de ubicación
     implementation("com.google.android.gms:play-services-location:21.2.0")
+
+    // Nominatim para ubicación
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Para ver los logs
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

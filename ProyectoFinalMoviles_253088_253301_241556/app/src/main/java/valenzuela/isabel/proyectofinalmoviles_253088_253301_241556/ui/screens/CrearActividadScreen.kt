@@ -85,7 +85,12 @@ import java.time.Instant
 import java.time.LocalTime
 import java.time.ZoneId
 import android.widget.Toast
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -182,6 +187,9 @@ fun CrearActividadPaso1(
     onClose: () -> Unit,
     onNext: () -> Unit
 ) {
+    // Estado para controlar la visibilidad de las sugerencias
+    var showSuggestions by remember { mutableStateOf(false) }
+
     CrearActividadLayout(
         pasoActual = 1,
         tituloPaso = "Descripción de actividad",
@@ -253,16 +261,62 @@ fun CrearActividadPaso1(
             Spacer(Modifier.height(20.dp))
 
             RequiredLabel("Ubicación")
-            OutlinedTextField(
-                value = viewModel.ubicacion,
-                onValueChange = { viewModel.onUbicacionSeleccionada(it, 0.0, 0.0) },
-                placeholder = { Text("Elegir ubicación") },
-                trailingIcon = {
-                    Icon(Icons.Default.LocationOn, contentDescription = null)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
+            Box {
+                OutlinedTextField(
+                    value = if (showSuggestions) viewModel.queryBusqueda else viewModel.ubicacion,
+                    onValueChange = {
+                        showSuggestions = true
+                        viewModel.onQueryBusquedaChange(it)
+                    },
+                    placeholder = { Text("Ej. Parque Central o Calle 123") },
+                    trailingIcon = {
+                        if (viewModel.buscandoUbicacion) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        } else {
+                            Icon(Icons.Default.LocationOn, contentDescription = null)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
+                )
+
+                // Lista desplegable de sugerencias de Nominatim
+                if (showSuggestions && viewModel.resultadosBusqueda.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 65.dp) // Posicionar debajo del TextField
+                            .zIndex(1f), // Asegurar que esté por encima de otros elementos
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        colors = CardDefaults.cardColors(containerColor = White),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Column {
+                            viewModel.resultadosBusqueda.forEach { resultado ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = resultado.nombreFormateado,
+                                            maxLines = 2,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    },
+                                    onClick = {
+                                        viewModel.onUbicacionSeleccionada(
+                                            nombre = resultado.nombreFormateado,
+                                            lat = resultado.latitud.toDouble(),
+                                            lon = resultado.longitud.toDouble()
+                                        )
+                                        showSuggestions = false
+                                    }
+                                )
+                                HorizontalDivider(color = GrayAlt.copy(alpha = 0.5f))
+                            }
+                        }
+                    }
+                }
+            }
 
             Spacer(Modifier.height(40.dp))
         }
