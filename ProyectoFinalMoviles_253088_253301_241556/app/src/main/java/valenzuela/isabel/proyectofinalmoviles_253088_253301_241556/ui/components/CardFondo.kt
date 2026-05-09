@@ -18,6 +18,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Whit
 
 @Composable
 fun CardFondo(
+    alturaPorcentaje: Float = 0.8f,
     content: @Composable () -> Unit
 ) {
     Box(
@@ -27,7 +28,7 @@ fun CardFondo(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.8f),
+                .fillMaxHeight(alturaPorcentaje),
             shape = RoundedCornerShape(
                 topStart = 16.dp,
                 topEnd = 16.dp

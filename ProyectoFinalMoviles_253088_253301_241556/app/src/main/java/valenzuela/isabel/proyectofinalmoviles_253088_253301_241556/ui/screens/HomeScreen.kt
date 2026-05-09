@@ -26,12 +26,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.CircleNotifications
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.People
@@ -100,6 +102,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     authViewModel: AuthViewModel,
     configViewModel: ConfigViewModel,
+    onNotificacionClick: () -> Unit,
     onClickActividad: (ActividadConDetalle) -> Unit
 ) {
     // Para el dialog de la huella
@@ -143,29 +146,23 @@ fun HomeScreen(
         HeaderSection(
             nickname = nickname,
             textoBusqueda = filtros.textoBusqueda,
-            onBusquedaChange = { viewModel.setBusqueda(it) }
+            onBusquedaChange = { viewModel.setBusqueda(it) },
+            onNotificacionClick = onNotificacionClick
         )
 
-        CardFondo {
+        CardFondo(alturaPorcentaje = 0.75f) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(30.dp)
             ) {
-                Spacer(modifier = Modifier.height(8.dp))
-                CategoriasSection(viewModel = viewModel)
-
-                Spacer(modifier = Modifier.height(18.dp))
-                FiltrosSection(viewModel = viewModel)
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 ActividadesSection(
                     viewModel = viewModel,
                     onClickActividad = onClickActividad
                 )
             }
         }
+
         if (mostrarHuellaSheet) {
             SheetHuella(
                 onDismiss = {
@@ -185,15 +182,16 @@ fun HomeScreen(
 }
 
 @Composable
-fun HeaderSection(
+private fun HeaderSection(
     nickname: String,
     textoBusqueda: String,
-    onBusquedaChange: (String) -> Unit
+    onBusquedaChange: (String) -> Unit,
+    onNotificacionClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 24.dp)
+            .padding(30.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -205,6 +203,15 @@ fun HeaderSection(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
+
+            IconButton(onClick = { onNotificacionClick() }) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notificaciones",
+                    tint = OrangePrimary,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -235,10 +242,10 @@ fun HeaderSection(
 }
 
 @Composable
-fun CategoriasSection(viewModel: HomeViewModel) {
+private fun CategoriasSection(viewModel: HomeViewModel) {
     val filtros by viewModel.filtros.collectAsState()
     val seleccionado = filtros.idInteres
-    val intereses = Interes.values().toList()
+    val intereses = Interes.entries
 
     Column {
         Text(
@@ -272,7 +279,7 @@ fun CategoriasSection(viewModel: HomeViewModel) {
 }
 
 @Composable
-fun Chip(
+private fun Chip(
     text: String,
     color: Color,
     selected: Boolean,
@@ -301,14 +308,14 @@ private fun getColorByInteres(interes: Interes): Color {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FiltrosSection(viewModel: HomeViewModel) {
+private fun FiltrosSection(viewModel: HomeViewModel) {
     val filtros by viewModel.filtros.collectAsState()
     var mostrarDatePicker by remember { mutableStateOf(false) }
 
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = Icons.Default.Tune, contentDescription = null)
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Filtros adicionales",
                 fontWeight = FontWeight.Bold,
@@ -325,7 +332,7 @@ fun FiltrosSection(viewModel: HomeViewModel) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Default.LocationOn, contentDescription = null, tint = OrangePrimary)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Distancia: ${(filtros.distanciaMax ?: 50f).toInt()} km",
                         style = MaterialTheme.typography.bodyMedium
@@ -354,9 +361,11 @@ fun FiltrosSection(viewModel: HomeViewModel) {
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Default.DateRange, contentDescription = null, tint = OrangePrimary)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(text = "Fecha", style = MaterialTheme.typography.bodyMedium)
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
@@ -412,51 +421,80 @@ fun FiltrosSection(viewModel: HomeViewModel) {
 }
 
 @Composable
-fun ActividadesSection(
+private fun ActividadesSection(
     viewModel: HomeViewModel,
     onClickActividad: (ActividadConDetalle) -> Unit
 ) {
     val actividades by viewModel.actividades.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            modifier = Modifier.padding(bottom = 12.dp),
-            text = "Actividades",
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
-        )
+    // Lazycolumn es el scroll principal
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Categorías
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            CategoriasSection(viewModel = viewModel)
+        }
 
+        // Filtros
+        item {
+            Spacer(modifier = Modifier.height(18.dp))
+            FiltrosSection(viewModel = viewModel)
+        }
+
+        // Título de la sección
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                modifier = Modifier.padding(bottom = 4.dp),
+                text = "Actividades",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+
+        // Cargar actividades
         if (actividades.isEmpty()) {
-            Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = "No se encontraron actividades",
-                        color = Color.Black,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Image(
-                        painter = painterResource(id = R.drawable.figura_cambiarcontra),
-                        contentDescription = null,
-                        modifier = Modifier.width(250.dp),
-                        contentScale = ContentScale.Fit
-                    )
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 40.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "No se encontraron actividades",
+                            color = Color.Black,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Image(
+                            painter = painterResource(id = R.drawable.figura_cambiarcontra),
+                            contentDescription = null,
+                            modifier = Modifier.width(200.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
                 }
             }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(actividades) { item ->
-                    ActividadCard(actividad = item, onClick = { onClickActividad(item) })
-                }
+            // Cargar tarjetas
+            items(actividades) { item ->
+                ActividadCard(actividad = item, onClick = { onClickActividad(item) })
             }
         }
+
+        // Espacio final para que la última card no pegue con el borde
+        item { Spacer(modifier = Modifier.height(20.dp)) }
     }
 }
 
 @Composable
-fun ActividadCard(
+private fun ActividadCard(
     actividad: ActividadConDetalle,
     onClick: () -> Unit
 ) {
@@ -562,7 +600,7 @@ fun ActividadCard(
     }
 }
 
-fun getIconByInteres(interes: Interes): ImageVector {
+private fun getIconByInteres(interes: Interes): ImageVector {
     return when (interes) {
         Interes.DEPORTE -> Icons.Default.SportsBasketball
         Interes.MUSICA -> Icons.Default.MusicNote
