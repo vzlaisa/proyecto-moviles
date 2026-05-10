@@ -14,6 +14,8 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Repeat
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +37,8 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.*
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @Composable
 fun DetalleActividadScreen(
@@ -45,6 +49,7 @@ fun DetalleActividadScreen(
     onEliminar: () -> Unit
 ) {
     val esCreador = actividad.actividad.idCreador == usuarioActualId
+    var mostrarDialogoEliminar by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -68,7 +73,7 @@ fun DetalleActividadScreen(
                                     tint = BlueLink
                                 )
                             }
-                            IconButton(onClick = onEliminar) {
+                            IconButton(onClick = { mostrarDialogoEliminar = true }) {
                                 Icon(
                                     imageVector = Icons.Default.DeleteOutline,
                                     contentDescription = "Eliminar",
@@ -101,8 +106,6 @@ fun DetalleActividadScreen(
 
                     HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
 
-                    SeccionRequisitos()
-
                     HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
 
                     SeccionParticipantesConfirmados()
@@ -119,6 +122,35 @@ fun DetalleActividadScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
                 }
+            }
+
+            if (mostrarDialogoEliminar) {
+                AlertDialog(
+                    onDismissRequest = { mostrarDialogoEliminar = false },
+                    title = {
+                        Text(text = "Eliminar actividad")
+                    },
+                    text = {
+                        Text(text = "¿Estás seguro de que deseas eliminar esta actividad? Esta acción no se puede deshacer.")
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                mostrarDialogoEliminar = false
+                                onEliminar()
+                            }
+                        ) {
+                            Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { mostrarDialogoEliminar = false }
+                        ) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
             }
         }
     }
@@ -257,31 +289,6 @@ fun DescripcionActividad(actividad: ActividadEntity) {
     }
 }
 
-@Composable
-fun SeccionRequisitos(
-    requisitos: List<String> = listOf("No se necesita experiencia previa.", "Edad mínima 12-16 años."),
-    queLlevar: List<String> = listOf("Ropa cómoda que se pueda ensuciar.", "Delantal (opcional, pero recomendado).")
-) {
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Info, contentDescription = null, tint = PurpleAlt, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Requisitos", fontWeight = FontWeight.Bold, color = Black)
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        requisitos.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium, color = GrayEnabled, modifier = Modifier.padding(start = 28.dp)) }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Info, contentDescription = null, tint = PurpleAlt, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Qué llevar", fontWeight = FontWeight.Bold, color = Black)
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        queLlevar.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium, color = GrayEnabled, modifier = Modifier.padding(start = 28.dp)) }
-    }
-}
 
 @Composable
 fun SeccionParticipantesConfirmados(participantes: List<UsuarioEntity> = emptyList()) {

@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadConDetalle
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadEntity
@@ -40,5 +41,8 @@ interface ActividadDAO {
 
     @Delete
     suspend fun deleteActividad(actividad: ActividadEntity)
+
+    @Update
+    suspend fun updateActividad(actividad: ActividadEntity)
 
 }

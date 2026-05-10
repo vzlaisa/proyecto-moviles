@@ -41,6 +41,8 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.Ed
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.NotificacionesScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.EditarActividadViewModel
+
 
 @Composable
 fun AppNavigation(
@@ -50,7 +52,8 @@ fun AppNavigation(
     homeViewModel: HomeViewModel,
     perfilViewModel: PerfilViewModel,
     configViewModel: ConfigViewModel,
-    crearActividadViewModel: CrearActividadViewModel
+    crearActividadViewModel: CrearActividadViewModel,
+    editarActividadViewModel: EditarActividadViewModel
 ) {
     val navController = rememberNavController()
 
@@ -114,6 +117,49 @@ fun AppNavigation(
                         isFirstTime = isFirstTime,
                         isLoggedIn = isLoggedIn,
                         navController = navController
+                    )
+                }
+
+                // Pantallas de Editar Actividad
+                composable(
+                    route = Screen.EditarActividadPaso1.route,
+                    arguments = listOf(navArgument("actividadId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val id = backStackEntry.arguments?.getInt("actividadId") ?: 0
+
+                    LaunchedEffect(id) { editarActividadViewModel.cargarActividad(id) }
+
+                    valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.EditarActividadPaso1(
+                        viewModel = editarActividadViewModel,
+                        onClose = {
+                            editarActividadViewModel.limpiarDatos()
+                            navController.popBackStack()
+                        },
+                        onNext = { navController.navigate(Screen.EditarPaso2.route) }
+                    )
+                }
+
+                composable(Screen.EditarPaso2.route) {
+                    valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.EditarActividadPaso2(
+                        viewModel = editarActividadViewModel,
+                        onClose = {
+                            editarActividadViewModel.limpiarDatos()
+                            navController.popBackStack(Screen.Home.route, inclusive = false)
+                        },
+                        onBack = { navController.popBackStack() },
+                        onNext = { navController.navigate(Screen.EditarPaso3.route) }
+                    )
+                }
+
+                composable(Screen.EditarPaso3.route) {
+                    valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.EditarActividadPaso3(
+                        viewModel = editarActividadViewModel,
+                        onClose = {
+                            editarActividadViewModel.limpiarDatos()
+                            navController.popBackStack(Screen.Home.route, inclusive = false)
+                        },
+                        onBack = { navController.popBackStack() },
+                        onGuardar = { navController.popBackStack(Screen.Home.route, inclusive = false) }
                     )
                 }
 
@@ -303,8 +349,11 @@ fun AppNavigation(
                             actividad = it,
                             usuarioActualId = homeViewModel.usuarioActualId,
                             onRegresar = { navController.popBackStack() },
-                            onEditar = { },
-                            onEliminar = { }
+                            onEditar = { navController.navigate(Screen.EditarActividadPaso1.crearRuta(it.actividad.id))},
+                            onEliminar = {
+                                homeViewModel.eliminarActividad(it.actividad)
+                                navController.popBackStack()
+                            }
                         )
                     }
                 }
@@ -339,4 +388,10 @@ sealed class Screen(val route: String) {
     }
 
     object Notificaciones: Screen("notificaciones")
+
+    object EditarActividadPaso1: Screen("editar_actividad_paso_1/{actividadId}") {
+        fun crearRuta(id: Int) = "editar_actividad_paso_1/$id"
+    }
+    object EditarPaso2: Screen("editar_actividad_paso_2")
+    object EditarPaso3: Screen("editar_actividad_paso_3")
 }

@@ -64,4 +64,14 @@ class ActividadRepository(private val actividadDAO: ActividadDAO) {
         return actividadDAO.getById(id)
     }
 
+    suspend fun actualizarActividad(actividad: ActividadEntity) {
+        if (actividad.nombre.isBlank()) throw ValidationException("El nombre de la actividad es obligatorio")
+        if (actividad.nombre.length < 5) throw ValidationException("El nombre debe tener al menos 5 caracteres")
+        if (actividad.ubicacion.isBlank()) throw ValidationException("La ubicación es obligatoria")
+        if (actividad.descripcion.isBlank()) throw ValidationException("La descripción es obligatoria")
+        if (actividad.maxParticipantes <= 0) throw ValidationException("Debe haber al menos 1 participante")
+
+        actividadDAO.updateActividad(actividad)
+    }
+
 }

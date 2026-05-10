@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -127,6 +128,12 @@ class HomeViewModel(
     fun limpiar() {
         _filtros.value = FiltrosActividades()
         _ubicacionUsuario.value = null
+    }
+
+    fun eliminarActividad(actividad: ActividadEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.eliminarActividad(actividad)
+        }
     }
 
 }

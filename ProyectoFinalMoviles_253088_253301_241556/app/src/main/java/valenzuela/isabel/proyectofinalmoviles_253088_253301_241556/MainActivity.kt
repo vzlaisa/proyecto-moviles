@@ -20,6 +20,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Cam
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.DetalleActividadViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.EditarActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
@@ -48,6 +49,7 @@ class MainActivity : FragmentActivity() {
         val configViewModel: ConfigViewModel by viewModels { factory }
         val crearActividadViewModel: CrearActividadViewModel  by viewModels { factory }
         val detalleActividadViewModel: DetalleActividadViewModel by viewModels { factory }
+        val editarActividadViewModel: EditarActividadViewModel by viewModels { factory }
 
         setContent {
             ProyectoFinalMoviles_253088_253301_241556Theme {
@@ -58,7 +60,8 @@ class MainActivity : FragmentActivity() {
                     homeViewModel = homeViewModel,
                     perfilViewModel = perfilViewModel,
                     configViewModel = configViewModel,
-                    crearActividadViewModel = crearActividadViewModel
+                    crearActividadViewModel = crearActividadViewModel,
+                    editarActividadViewModel = editarActividadViewModel
                 )
             }
         }
@@ -89,6 +92,8 @@ private class JoinlyViewModelFactory(
                 ConfigViewModel(dataStore, usuarioRepo) as T
             modelClass.isAssignableFrom(CrearActividadViewModel::class.java) ->
                 CrearActividadViewModel(dataStore, actividadRepo) as T
+            modelClass.isAssignableFrom(EditarActividadViewModel::class.java) ->
+                EditarActividadViewModel(actividadRepo) as T
             modelClass.isAssignableFrom(DetalleActividadViewModel::class.java) ->
                 DetalleActividadViewModel(actividadRepo, inscripcionRepo, dataStore) as T
             else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
