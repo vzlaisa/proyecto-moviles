@@ -39,6 +39,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Per
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.EditarPerfilScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.NotificacionesScreen
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.ResumenActividadesScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.DetalleActividadViewModel
@@ -66,6 +67,7 @@ fun AppNavigation(
     val rutasConNavigationBar = listOf(
         Screen.Home.route,
         Screen.Perfil.route,
+        Screen.ResumenActividades.route
     )
 
     val isFirstTime by authViewModel.isFirstTime.collectAsState()
@@ -363,6 +365,12 @@ fun AppNavigation(
                         onBack = { navController.popBackStack() }
                     )
                 }
+
+                // Resumen de actividades
+                composable(Screen.ResumenActividades.route) {
+                    ResumenActividadesScreen(
+                    )
+                }
             }
         }
     }
@@ -393,4 +401,6 @@ sealed class Screen(val route: String) {
     }
     object EditarPaso2: Screen("editar_actividad_paso_2")
     object EditarPaso3: Screen("editar_actividad_paso_3")
+
+    object ResumenActividades: Screen("resumen_actividades")
 }
