@@ -33,6 +33,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -74,6 +75,13 @@ import java.time.LocalDate
 fun PerfilScreen(viewModel: PerfilViewModel, onNavigateToEditar: () -> Unit) {
     val datosCompletos = viewModel.usuario.collectAsStateWithLifecycle()
 
+    // Cargar estadísticas al entrar a la pantalla
+    LaunchedEffect(datosCompletos.value) {
+        if (datosCompletos.value != null) {
+            viewModel.cargarEstadisticas()
+        }
+    }
+
     if (datosCompletos.value == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -81,6 +89,8 @@ fun PerfilScreen(viewModel: PerfilViewModel, onNavigateToEditar: () -> Unit) {
     } else {
         PerfilContent(
             datos = datosCompletos.value!!,
+            cantidadActividadesCreadas = viewModel.cantidadActividadesCreadas,
+            cantidadActividadesUnidas = viewModel.cantidadActividadesUnidas,
             onEditClick = {
                 viewModel.activarModoEdicion()
                 onNavigateToEditar()
@@ -92,6 +102,8 @@ fun PerfilScreen(viewModel: PerfilViewModel, onNavigateToEditar: () -> Unit) {
 @Composable
 private fun PerfilContent(
     datos: UsuarioConIntereses,
+    cantidadActividadesCreadas: Int,
+    cantidadActividadesUnidas: Int,
     onEditClick: () -> Unit
 ) {
     val usuario = datos.usuario
@@ -147,8 +159,7 @@ private fun PerfilContent(
             )
 
             Spacer(Modifier.height(30.dp))
-
-            // falta cambiar para usar view model
+            
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -161,7 +172,7 @@ private fun PerfilContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "2",
+                        text = "$cantidadActividadesCreadas",
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
@@ -178,7 +189,7 @@ private fun PerfilContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "5",
+                        text = "$cantidadActividadesUnidas",
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
@@ -380,6 +391,8 @@ fun PerfilScreenPreview() {
 
         PerfilContent(
             datos = mockUsuario,
+            cantidadActividadesUnidas = 10,
+            cantidadActividadesCreadas = 5,
             onEditClick = {})
     }
 }

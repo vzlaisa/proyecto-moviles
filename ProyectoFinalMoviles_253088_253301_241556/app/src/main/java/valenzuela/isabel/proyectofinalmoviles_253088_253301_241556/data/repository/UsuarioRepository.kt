@@ -201,8 +201,25 @@ class UsuarioRepository(private val usuarioDAO: UsuarioDAO) {
         }
     }
 
-    // Esta es la clave para que el diálogo de huella solo salga una vez
     suspend fun marcarPrimerLoginCompletado(id: Int) {
         usuarioDAO.updateEsPrimerLogin(id)
+    }
+
+    suspend fun obtenerCantidadActividadesCreadas(id: Int): Int {
+        return try {
+            usuarioDAO.getCantidadActividadesCreadas(id)
+        } catch (e: Exception) {
+            Log.e("REPOSITORY_ERROR", "Error al obtener conteo de actividades creadas de usuario: ${e.message}")
+            throw DatabaseException(e)
+        }
+    }
+
+    suspend fun obtenerCantidadActividadesUnidas(id: Int): Int {
+        return try {
+            usuarioDAO.getCantidadActividadesUnidas(id)
+        } catch (e: Exception) {
+            Log.e("REPOSITORY_ERROR", "Error al obtener conteo de actividades unidas de usuario: ${e.message}")
+            throw DatabaseException(e)
+        }
     }
 }

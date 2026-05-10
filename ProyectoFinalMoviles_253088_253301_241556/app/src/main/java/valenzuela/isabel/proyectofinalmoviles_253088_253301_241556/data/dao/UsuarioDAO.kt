@@ -53,4 +53,10 @@ interface UsuarioDAO {
 
     @Query("UPDATE usuarios SET es_primer_login = 0 WHERE id = :id")
     suspend fun updateEsPrimerLogin(id: Int)
+
+    @Query("SELECT COUNT(*) FROM actividades WHERE id_creador = :id")
+    suspend fun getCantidadActividadesCreadas(id: Int): Int
+
+    @Query("SELECT COUNT(*) FROM inscripciones WHERE id_usuario = :id AND estado = 'CONFIRMADO'")
+    suspend fun getCantidadActividadesUnidas(id: Int): Int
 }

@@ -1,7 +1,9 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -21,6 +23,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Ge
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Interes
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.UsuarioRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioConIntereses
+
 class PerfilViewModel(
     private val dataStore: DataStoreManager,
     private val repository: UsuarioRepository
@@ -42,6 +45,12 @@ class PerfilViewModel(
             initialValue = null
         )
 
+    var cantidadActividadesCreadas by mutableIntStateOf(0)
+        private set
+
+    var cantidadActividadesUnidas by mutableIntStateOf(0)
+        private set
+
     var enModoEdicion by mutableStateOf(false)
         private set
     var nombreEdit by mutableStateOf("")
@@ -59,6 +68,24 @@ class PerfilViewModel(
     var actualizacionExitosa by mutableStateOf(false)
     var actualizacionError by mutableStateOf<String?>(null)
     var confirmacionPasswordEdit by mutableStateOf("")
+
+    fun cargarEstadisticas() {
+        val id = usuario.value?.usuario?.id?: return
+
+            viewModelScope.launch {
+                try {
+                    val actividadesCreadas = repository.obtenerCantidadActividadesCreadas(id)
+                    val actividadesUnidas = repository.obtenerCantidadActividadesUnidas(id)
+
+                    cantidadActividadesCreadas = actividadesCreadas.coerceAtLeast(0)
+                    cantidadActividadesUnidas = actividadesUnidas.coerceAtLeast(0)
+                } catch (e: Exception) {
+                    Log.e("PERFIL", "Error al cargar estadísticas: ${e.message}")
+                    cantidadActividadesCreadas = 0
+                    cantidadActividadesUnidas = 0
+                }
+            }
+    }
 
     fun activarModoEdicion() {
         val usuarioActual = usuario.value ?: return
