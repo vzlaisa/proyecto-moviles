@@ -1,5 +1,6 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
+import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,9 +15,11 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Repeat
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,17 +42,38 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import coil.request.Disposable
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BotonAccionUsuario
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.state.UiEstado
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.DetalleActividadViewModel
 
 @Composable
 fun DetalleActividadScreen(
     actividad: ActividadConDetalle,
-    usuarioActualId: Int,
+    viewModel: DetalleActividadViewModel,
     onRegresar: () -> Unit,
     onEditar: () -> Unit,
     onEliminar: () -> Unit
 ) {
+    val usuarioActualId by viewModel.usuarioActualId.collectAsState()
+    val estadoInscripcion by viewModel.estadoInscripcion.collectAsState()
+    val participantes by viewModel.participantes.collectAsState()
+    val uiEstado by viewModel.uiEstado.collectAsState()
+
     val esCreador = actividad.actividad.idCreador == usuarioActualId
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
+
+    // Cargar datos al entrar
+    LaunchedEffect(actividad.actividad.id) {
+        viewModel.cargar(actividad)
+    }
+
+    // Limpiar datos al salir
+    DisposableEffect(Unit) {
+        onDispose { viewModel.limpiar() }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -98,7 +122,7 @@ fun DetalleActividadScreen(
                     TituloActividad(actividad)
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    InfoActividad(actividad.actividad)
+                    InfoActividad(actividad = actividad.actividad, totalParticipantes = participantes.size)
 
                     HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
 
@@ -108,15 +132,21 @@ fun DetalleActividadScreen(
 
                     HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
 
-                    SeccionParticipantesConfirmados()
+                    SeccionParticipantesConfirmados(
+                        idCreador = actividad.actividad.idCreador,
+                        nombreCreador = actividad.creador.nombreCompleto,
+                        inscripciones = participantes
+                    )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
                     if (!esCreador) {
-                        BotonPrincipal(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = if (actividad.actividad.publica) "Unirse" else "Solicitar unirse",
-                            onClick = {}
+                        BotonAccionUsuario(
+                            actividad = actividad.actividad,
+                            estado = estadoInscripcion,
+                            cargando = uiEstado is UiEstado.Cargando,
+                            onUnirse = { viewModel.unirse() },
+                            onAbandonar = { viewModel.abandonar() }
                         )
                     }
 
@@ -235,7 +265,10 @@ fun TituloActividad(actividad: ActividadConDetalle) {
 }
 
 @Composable
-fun InfoActividad(actividad: ActividadEntity) {
+fun InfoActividad(
+    actividad: ActividadEntity,
+    totalParticipantes: Int
+) {
     val dateFormatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM 'de' yyyy", Locale("es"))
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
@@ -245,14 +278,15 @@ fun InfoActividad(actividad: ActividadEntity) {
             Spacer(modifier = Modifier.height(16.dp))
             InfoItem(Icons.Default.LocationOn, "Ubicación", actividad.ubicacion)
             Spacer(modifier = Modifier.height(16.dp))
-            InfoItem(Icons.Default.Group, "Participantes", "0/${actividad.maxParticipantes}")
+            InfoItem(Icons.Default.Group, "Participantes",
+                "$totalParticipantes/${actividad.maxParticipantes}")
         }
 
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(modifier = Modifier.weight(0.8f)) {
             if (actividad.recurrente) {
-                InfoItem(Icons.Outlined.Repeat, "", "Cada primer viernes del mes")
+                InfoItem(Icons.Outlined.Repeat, "Actividad recurrente", "")
                 Spacer(modifier = Modifier.height(16.dp))
             }
             actividad.fechaLimite?.let {
@@ -271,7 +305,7 @@ fun InfoItem(icon: ImageVector, titulo: String, valor: String) {
             if (titulo.isNotBlank()) {
                 Text(titulo, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge, color = Black)
             }
-            Text(valor, style = MaterialTheme.typography.bodyMedium, color = GrayEnabled)
+            Text(valor, style = MaterialTheme.typography.bodyMedium, color = Black)
         }
     }
 }
@@ -285,13 +319,17 @@ fun DescripcionActividad(actividad: ActividadEntity) {
             Text("Descripción", fontWeight = FontWeight.Bold, color = Black)
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(actividad.descripcion, style = MaterialTheme.typography.bodyMedium, color = GrayEnabled)
+        Text(actividad.descripcion, style = MaterialTheme.typography.bodyMedium, color = Black)
     }
 }
 
 
 @Composable
-fun SeccionParticipantesConfirmados(participantes: List<UsuarioEntity> = emptyList()) {
+fun SeccionParticipantesConfirmados(
+    idCreador: Int,
+    nombreCreador: String,
+    inscripciones: List<InscripcionEntity>
+) {
     Column {
         Text("Participantes Confirmados:", fontWeight = FontWeight.Bold, color = Black)
         Spacer(modifier = Modifier.height(12.dp))
@@ -302,15 +340,43 @@ fun SeccionParticipantesConfirmados(participantes: List<UsuarioEntity> = emptyLi
                 .background(Color(0xFFF8F8F8), RoundedCornerShape(16.dp))
                 .padding(12.dp)
         ) {
-            if (participantes.isEmpty()) {
-                Text("Aún no hay participantes", style = MaterialTheme.typography.bodyMedium, color = GrayEnabled, modifier = Modifier.align(Alignment.Center))
+            if (inscripciones.isEmpty()) {
+                Text(
+                    text = "Aún no hay participantes",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Black,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             } else {
                 LazyColumn {
-                    items(participantes) { usuario ->
-                        Row(modifier = Modifier.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.AccountCircle, contentDescription = null, modifier = Modifier.size(32.dp), tint = GrayEnabled)
+                    items(inscripciones) { inscripcion ->
+                        Row(modifier = Modifier
+                            .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = null,
+                                modifier = Modifier.size(32.dp),
+                                tint = Black
+                            )
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text("${usuario.nombre} ${usuario.apellidoPaterno}", style = MaterialTheme.typography.bodyMedium, color = Black)
+                            Column {
+                                val nombre = if (inscripcion.idUsuario == idCreador)
+                                    nombreCreador else "Usuario ${inscripcion.idUsuario}"
+                                Text(
+                                    nombre,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Black
+                                )
+                                if (inscripcion.idUsuario == idCreador) {
+                                    Text(
+                                        "(Organizador)",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = GrayEnabled
+                                    )
+                                }
+                            }
                         }
                     }
                 }

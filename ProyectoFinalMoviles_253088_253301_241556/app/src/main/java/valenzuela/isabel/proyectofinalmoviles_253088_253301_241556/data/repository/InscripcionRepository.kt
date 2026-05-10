@@ -12,7 +12,7 @@ class InscripcionRepository(private val dao: InscripcionDAO) {
         dao.insertar(InscripcionEntity(idUsuario = idUsuario, idActividad = idActividad, estado = estado))
     }
 
-    suspend fun abandonar(idActividad: Int, idUsuario: Int) {
+    fun abandonar(idActividad: Int, idUsuario: Int) {
         dao.eliminar(idActividad, idUsuario)
     }
 

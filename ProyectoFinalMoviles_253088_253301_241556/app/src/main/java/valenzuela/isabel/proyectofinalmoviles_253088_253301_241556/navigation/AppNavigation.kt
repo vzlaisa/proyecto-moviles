@@ -41,6 +41,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.Ed
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.NotificacionesScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.DetalleActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.EditarActividadViewModel
 
 
@@ -53,7 +54,8 @@ fun AppNavigation(
     perfilViewModel: PerfilViewModel,
     configViewModel: ConfigViewModel,
     crearActividadViewModel: CrearActividadViewModel,
-    editarActividadViewModel: EditarActividadViewModel
+    editarActividadViewModel: EditarActividadViewModel,
+    detalleActividadViewModel: DetalleActividadViewModel
 ) {
     val navController = rememberNavController()
 
@@ -347,13 +349,10 @@ fun AppNavigation(
                     actividad?.let {
                         DetalleActividadScreen(
                             actividad = it,
-                            usuarioActualId = homeViewModel.usuarioActualId,
+                            viewModel = detalleActividadViewModel,
                             onRegresar = { navController.popBackStack() },
-                            onEditar = { navController.navigate(Screen.EditarActividadPaso1.crearRuta(it.actividad.id))},
-                            onEliminar = {
-                                homeViewModel.eliminarActividad(it.actividad)
-                                navController.popBackStack()
-                            }
+                            onEditar = { },
+                            onEliminar = { navController.popBackStack() }
                         )
                     }
                 }

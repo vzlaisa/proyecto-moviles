@@ -19,7 +19,7 @@ interface InscripcionDAO {
         WHERE id_actividad = :idActividad AND id_usuario = :idUsuario
         LIMIT 1
     """)
-    suspend fun getInscripcion(idActividad: Int, idUsuario: Int): InscripcionEntity
+    suspend fun getInscripcion(idActividad: Int, idUsuario: Int): InscripcionEntity?
 
     @Query("""
         SELECT * FROM inscripciones 
@@ -34,6 +34,6 @@ interface InscripcionDAO {
     suspend fun actualizarEstado(idActividad: Int, idUsuario: Int, estado: EstadoInscripcion)
 
     @Query("DELETE FROM inscripciones WHERE id_actividad = :idActividad AND id_usuario = :idUsuario")
-    suspend fun eliminar(idActividad: Int, idUsuario: Int)
+    fun eliminar(idActividad: Int, idUsuario: Int)
 
 }

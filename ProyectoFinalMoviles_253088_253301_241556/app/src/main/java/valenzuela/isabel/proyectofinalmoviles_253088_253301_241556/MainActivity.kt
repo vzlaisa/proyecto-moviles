@@ -61,6 +61,7 @@ class MainActivity : FragmentActivity() {
                     perfilViewModel = perfilViewModel,
                     configViewModel = configViewModel,
                     crearActividadViewModel = crearActividadViewModel,
+                    detalleActividadViewModel = detalleActividadViewModel,
                     editarActividadViewModel = editarActividadViewModel
                 )
             }
