@@ -89,6 +89,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Gray
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.OrangePrimary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PinkSecondary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.PurpleAlt
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.White
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
@@ -204,13 +205,20 @@ private fun HeaderSection(
                 modifier = Modifier.weight(1f)
             )
 
-            IconButton(onClick = { onNotificacionClick() }) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notificaciones",
-                    tint = OrangePrimary,
-                    modifier = Modifier.size(30.dp)
-                )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(color = White, shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                IconButton(onClick = { onNotificacionClick() }) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notificaciones",
+                        tint = OrangePrimary,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
             }
         }
 

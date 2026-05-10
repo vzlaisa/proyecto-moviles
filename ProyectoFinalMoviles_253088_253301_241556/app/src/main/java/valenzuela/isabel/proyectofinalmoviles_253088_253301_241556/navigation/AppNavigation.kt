@@ -38,6 +38,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Hom
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.EditarPerfilScreen
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens.NotificacionesScreen
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
 
@@ -219,7 +220,7 @@ fun AppNavigation(
                         onClickActividad = { actividad ->
                             navController.navigate(Screen.DetalleActividad.crearRuta(actividad.actividad.id))
                         },
-                        onNotificacionClick = {}
+                        onNotificacionClick = { navController.navigate(Screen.Notificaciones.route) }
                     )
                 }
 
@@ -306,6 +307,13 @@ fun AppNavigation(
                         )
                     }
                 }
+
+                // Notificaciones
+                composable(Screen.Notificaciones.route) {
+                    NotificacionesScreen(
+                        onBack = { navController.popBackStack() }
+                    )
+                }
             }
         }
     }
@@ -325,7 +333,9 @@ sealed class Screen(val route: String) {
     object CrearPaso2: Screen("crear_actividad_paso_2")
     object CrearPaso3: Screen("crear_actividad_paso_3")
 
-    object DetalleActividad : Screen("detalle_actividad/{actividadId}") {
+    object DetalleActividad: Screen("detalle_actividad/{actividadId}") {
         fun crearRuta(id: Int) = "detalle_actividad/$id"
     }
+
+    object Notificaciones: Screen("notificaciones")
 }
