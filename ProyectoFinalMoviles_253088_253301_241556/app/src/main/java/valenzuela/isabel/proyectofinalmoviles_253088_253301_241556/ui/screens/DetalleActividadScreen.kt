@@ -44,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import coil.request.Disposable
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionConUsuario
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BotonAccionUsuario
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.state.UiEstado
@@ -146,7 +147,8 @@ fun DetalleActividadScreen(
                             estado = estadoInscripcion,
                             cargando = uiEstado is UiEstado.Cargando,
                             onUnirse = { viewModel.unirse() },
-                            onAbandonar = { viewModel.abandonar() }
+                            onAbandonar = { viewModel.abandonar() },
+                            onConfirmarAsistencia = { viewModel.confirmarAsistencia() }
                         )
                     }
 
@@ -328,7 +330,7 @@ fun DescripcionActividad(actividad: ActividadEntity) {
 fun SeccionParticipantesConfirmados(
     idCreador: Int,
     nombreCreador: String,
-    inscripciones: List<InscripcionEntity>
+    inscripciones: List<InscripcionConUsuario>
 ) {
     Column {
         Text("Participantes Confirmados:", fontWeight = FontWeight.Bold, color = Black)
@@ -349,9 +351,9 @@ fun SeccionParticipantesConfirmados(
                 )
             } else {
                 LazyColumn {
-                    items(inscripciones) { inscripcion ->
-                        Row(modifier = Modifier
-                            .padding(vertical = 8.dp),
+                    items(inscripciones) { item ->
+                        Row(
+                            modifier = Modifier.padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
@@ -362,18 +364,16 @@ fun SeccionParticipantesConfirmados(
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
-                                val nombre = if (inscripcion.idUsuario == idCreador)
-                                    nombreCreador else "Usuario ${inscripcion.idUsuario}"
                                 Text(
-                                    nombre,
+                                    text = item.usuario.nombreCompleto,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Black
                                 )
-                                if (inscripcion.idUsuario == idCreador) {
+                                if (item.inscripcion.idUsuario == idCreador) {
                                     Text(
                                         "(Organizador)",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = GrayEnabled
+                                        color = OrangePrimary
                                     )
                                 }
                             }

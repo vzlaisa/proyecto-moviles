@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStoreManager
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadConDetalle
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionConUsuario
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.EstadoInscripcion
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.ActividadRepository
@@ -34,7 +35,7 @@ class DetalleActividadViewModel(
     private val _estadoInscripcion = MutableStateFlow<EstadoInscripcion?>(null)
     val estadoInscripcion = _estadoInscripcion.asStateFlow()
 
-    private val _participantes = MutableStateFlow<List<InscripcionEntity>>(emptyList())
+    private val _participantes = MutableStateFlow<List<InscripcionConUsuario>>(emptyList())
     val participantes = _participantes.asStateFlow()
 
     private val _uiEstado = MutableStateFlow<UiEstado>(UiEstado.Idle)
@@ -58,7 +59,7 @@ class DetalleActividadViewModel(
         // Participantes en tiempo real
         participantesJob?.cancel()
         participantesJob = viewModelScope.launch {
-            inscripcionRepository.getParticipantesActivos(actividad.actividad.id)
+            inscripcionRepository.getParticipantesConNombre(actividad.actividad.id)
                 .collect { _participantes.value = it }
         }
     }
@@ -110,6 +111,23 @@ class DetalleActividadViewModel(
                 onExito()
             } catch (e: Exception) {
                 _uiEstado.value = UiEstado.Error("No se pudo eliminar la actividad")
+            }
+        }
+    }
+
+    fun confirmarAsistencia() {
+        val actividad = _actividad.value ?: return
+        viewModelScope.launch {
+            try {
+                _uiEstado.value = UiEstado.Cargando
+                inscripcionRepository.confirmarAsistencia(
+                    actividad.actividad.id,
+                    usuarioActualId.value
+                )
+                _estadoInscripcion.value = EstadoInscripcion.ASISTENCIA_CONFIRMADA
+                _uiEstado.value = UiEstado.Idle
+            } catch (e: Exception) {
+                _uiEstado.value = UiEstado.Error("No se pudo confirmar la asistencia")
             }
         }
     }

@@ -2,6 +2,7 @@ package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.reposit
 
 import kotlinx.coroutines.flow.Flow
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.InscripcionDAO
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionConUsuario
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.EstadoInscripcion
 
@@ -22,5 +23,13 @@ class InscripcionRepository(private val dao: InscripcionDAO) {
 
     suspend fun getParticipantesActivos(idActividad: Int): Flow<List<InscripcionEntity>> {
         return dao.getParticipantesActivos(idActividad)
+    }
+
+    fun getParticipantesConNombre(idActividad: Int): Flow<List<InscripcionConUsuario>> {
+        return dao.getParticipantesConNombre(idActividad)
+    }
+
+    suspend fun confirmarAsistencia(idActividad: Int, idUsuario: Int) {
+        dao.actualizarEstado(idActividad, idUsuario, EstadoInscripcion.ASISTENCIA_CONFIRMADA)
     }
 }

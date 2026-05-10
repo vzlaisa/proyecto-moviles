@@ -1,13 +1,20 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -29,7 +36,8 @@ fun BotonAccionUsuario(
     estado: EstadoInscripcion?,
     cargando: Boolean,
     onUnirse: () -> Unit,
-    onAbandonar: () -> Unit
+    onAbandonar: () -> Unit,
+    onConfirmarAsistencia: () -> Unit
 ) {
     val ahora = LocalDateTime.now()
     val antesLimite = actividad.fechaLimite?.isAfter(ahora) ?: false
@@ -82,7 +90,7 @@ fun BotonAccionUsuario(
                     BotonPrincipal(
                         modifier = Modifier.fillMaxWidth(),
                         text = "Confirmar asistencia",
-                        onClick = {}
+                        onClick = onConfirmarAsistencia
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                 }
@@ -99,6 +107,22 @@ fun BotonAccionUsuario(
                         fontWeight = FontWeight.Medium
                     )
                 }
+            }
+        }
+        EstadoInscripcion.ASISTENCIA_CONFIRMADA -> {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .background(Color(0xFFE8F5E9), RoundedCornerShape(24.dp)),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Asistencia confirmada", color = Color(0xFF4CAF50),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium)
             }
         }
         EstadoInscripcion.CANCELADO -> {
