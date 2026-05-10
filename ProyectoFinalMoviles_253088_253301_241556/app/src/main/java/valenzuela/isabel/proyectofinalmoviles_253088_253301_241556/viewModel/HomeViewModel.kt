@@ -124,4 +124,9 @@ class HomeViewModel(
         }
     }
 
+    fun limpiar() {
+        _filtros.value = FiltrosActividades()
+        _ubicacionUsuario.value = null
+    }
+
 }
