@@ -2,6 +2,7 @@ package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -114,6 +115,7 @@ class HomeViewModel(
         val lat = filtros.latUsuario ?: return lista
         val lon = filtros.lonUsuario ?: return lista
         val maxKm = filtros.distanciaMax ?: return lista
+        Log.d("DISTANCIA", "Usuario: ($lat, $lon) | Filtro: ${maxKm}km")
 
         return lista.filter { item ->
             val distancia = LocationHelper.calcularDistanciaKm(
@@ -121,6 +123,7 @@ class HomeViewModel(
                 item.actividad.latitud,
                 item.actividad.longitud
             )
+            Log.d("DISTANCIA", "${item.actividad.nombre}: lat=${item.actividad.latitud}, lon=${item.actividad.longitud} → ${distancia}km")
             distancia <= maxKm
         }
     }

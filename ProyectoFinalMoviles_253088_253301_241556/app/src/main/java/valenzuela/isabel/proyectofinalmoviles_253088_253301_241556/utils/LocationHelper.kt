@@ -1,7 +1,9 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.utils
 
 import android.content.Context
+import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.math.atan2
@@ -16,16 +18,26 @@ object LocationHelper {
 
         return suspendCancellableCoroutine { cont ->
             try {
-                fusedClient.lastLocation.
-                addOnSuccessListener { location ->
-                    if (location != null) {
-                        cont.resume(Pair(location.latitude, location.longitude))
-                    } else {
-                        cont.resume(null)
+                val request = CurrentLocationRequest.Builder()
+                    .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                    .setMaxUpdateAgeMillis(0)
+                    .build()
+
+                fusedClient.getCurrentLocation(request, null)
+                    .addOnSuccessListener { location ->
+                        if (location != null) {
+                            cont.resume(Pair(location.latitude, location.longitude))
+                        } else {
+                            // fallback a lastLocation
+                            fusedClient.lastLocation
+                                .addOnSuccessListener { last ->
+                                    cont.resume(if (last != null) Pair(last.latitude, last.longitude) else null)
+                                }
+                                .addOnFailureListener { cont.resume(null) }
+                        }
                     }
-                }.addOnFailureListener {
-                    cont.resume(null)
-                }
+                    .addOnFailureListener { cont.resume(null) }
+
             } catch (e: SecurityException) {
                 cont.resume(null)
             }
