@@ -82,6 +82,7 @@ fun AppNavigation(
         // Esto solo corre si el usuario hace login o logout manualmente
         if (isLoggedIn == true) {
             navController.navigate(Screen.Home.route) {
+                homeViewModel.limpiar()
                 popUpTo(0) { inclusive = true }
             }
         } else if (isLoggedIn == false) {
