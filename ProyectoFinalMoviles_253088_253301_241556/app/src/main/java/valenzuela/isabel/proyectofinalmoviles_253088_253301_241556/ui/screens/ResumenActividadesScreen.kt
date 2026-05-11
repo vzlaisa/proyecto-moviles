@@ -37,7 +37,7 @@ fun ResumenActividadesScreen() {
                 .fillMaxWidth()
                 .padding(30.dp)
         ) {
-            Spacer(Modifier.height(70.dp))
+            Spacer(Modifier.height(60.dp))
 
             Text(
                 text = "Resumen mensual",
