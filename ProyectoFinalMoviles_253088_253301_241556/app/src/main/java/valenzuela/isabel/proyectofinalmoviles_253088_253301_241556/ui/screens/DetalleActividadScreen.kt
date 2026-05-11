@@ -1,5 +1,6 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
+import android.util.Log
 import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +44,8 @@ import java.util.Locale
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.max
+import androidx.room.util.TableInfo
 import coil.request.Disposable
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionConUsuario
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
@@ -62,6 +65,11 @@ fun DetalleActividadScreen(
     val estadoInscripcion by viewModel.estadoInscripcion.collectAsState()
     val participantes by viewModel.participantes.collectAsState()
     val uiEstado by viewModel.uiEstado.collectAsState()
+
+    val participantesConfirmados by viewModel.participantesConfirmados.collectAsState()
+    val solicitudesPendientes by viewModel.solicitudesPendientes.collectAsState()
+
+    val colorInteres = getColorByInteres(actividad.interes.nombre)
 
     val esCreador = actividad.actividad.idCreador == usuarioActualId
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
@@ -131,16 +139,17 @@ fun DetalleActividadScreen(
 
                     HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
 
-                    HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
-
                     SeccionParticipantesConfirmados(
                         idCreador = actividad.actividad.idCreador,
-                        nombreCreador = actividad.creador.nombreCompleto,
-                        inscripciones = participantes
+                        inscripciones = participantesConfirmados,
+                        esCreador = esCreador,
+                        colorInteres = colorInteres,
+                        onExpulsar = { idUsuario -> viewModel.expulsarParticipante(idUsuario) }
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
+                    // Mostrar botón para unirse si no es creador
                     if (!esCreador) {
                         BotonAccionUsuario(
                             actividad = actividad.actividad,
@@ -149,6 +158,17 @@ fun DetalleActividadScreen(
                             onUnirse = { viewModel.unirse() },
                             onAbandonar = { viewModel.abandonar() },
                             onConfirmarAsistencia = { viewModel.confirmarAsistencia() }
+                        )
+                    }
+
+                    // Mostrar solicitudes pendientes solo al creador y si la actividad es privada
+                    if (esCreador && !actividad.actividad.publica && solicitudesPendientes.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        SeccionSolicitudesPendientes(
+                            solicitudes = solicitudesPendientes,
+                            colorInteres = colorInteres,
+                            onAceptar = { idUsuario -> viewModel.aceptarSolicitud(idUsuario) },
+                            onRechazar = { idUsuario -> viewModel.rechazarSolicitud(idUsuario) }
                         )
                     }
 
@@ -329,8 +349,10 @@ fun DescripcionActividad(actividad: ActividadEntity) {
 @Composable
 fun SeccionParticipantesConfirmados(
     idCreador: Int,
-    nombreCreador: String,
-    inscripciones: List<InscripcionConUsuario>
+    inscripciones: List<InscripcionConUsuario>,
+    esCreador: Boolean,
+    colorInteres: Color,
+    onExpulsar: (Int) -> Unit
 ) {
     Column {
         Text("Participantes Confirmados:", fontWeight = FontWeight.Bold, color = Black)
@@ -377,8 +399,128 @@ fun SeccionParticipantesConfirmados(
                                     )
                                 }
                             }
+
+                            if (esCreador && item.inscripcion.idUsuario != idCreador) {
+                                IconButton(
+                                    onClick = { onExpulsar(item.inscripcion.idUsuario) },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Expulsar",
+                                        tint = Color.Red,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SeccionSolicitudesPendientes(
+    solicitudes: List<InscripcionConUsuario>,
+    colorInteres: Color,
+    onAceptar: (Int) -> Unit,
+    onRechazar: (Int) -> Unit
+) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.PersonAdd,
+                contentDescription = null,
+                tint = colorInteres,
+                modifier = Modifier.size(22.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Solicitudes Pendientes",
+                fontWeight = FontWeight.Bold,
+                color = Black,
+                modifier = Modifier.weight(1f)
+            )
+            // Contador
+            Box(modifier = Modifier
+                .background(colorInteres, RoundedCornerShape(50))
+                .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "${solicitudes.size}",
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Box(modifier = Modifier.fillMaxWidth()
+            .heightIn(min = 60.dp, max = 220.dp)
+            .background(colorInteres.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            .padding(12.dp)
+        ) {
+            LazyColumn {
+                items(solicitudes) { item ->
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.AccountCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(36.dp),
+                            tint = Black
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = item.usuario.nombreCompleto,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Black
+                            )
+                            Text(
+                                text = item.inscripcion.fechaInscripcion
+                                    .format(DateTimeFormatter.ofPattern("d 'de' MMMM, HH:mm", Locale("es"))),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = GrayEnabled
+                            )
+                        }
+                        // Botón para aceptar
+                        IconButton(
+                            onClick = { onAceptar(item.inscripcion.idUsuario) },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color(0xFF4CAF50).copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Aceptar",
+                                tint = Color(0xFF4CAF50),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        // Botón para rechazar
+                        IconButton(
+                            onClick = { onRechazar(item.inscripcion.idUsuario) },
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color.Red.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Rechazar",
+                                tint = Color.Red,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+
                 }
             }
         }

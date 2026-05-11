@@ -306,7 +306,7 @@ private fun Chip(
     }
 }
 
-private fun getColorByInteres(interes: Interes): Color {
+fun getColorByInteres(interes: Interes): Color {
     return when (interes) {
         Interes.DEPORTE, Interes.JUEGOS, Interes.ESTUDIO, Interes.AIRE_LIBRE -> BlueAlt
         Interes.LITERATURA, Interes.ARTE, Interes.CINE -> PinkSecondary

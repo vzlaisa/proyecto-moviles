@@ -114,7 +114,7 @@ fun BotonAccionUsuario(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .background(Color(0xFFE8F5E9), RoundedCornerShape(24.dp)),
+                    .background(color = OrangePrimary, RoundedCornerShape(24.dp)),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {

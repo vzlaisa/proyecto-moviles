@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStoreManager
@@ -42,6 +43,23 @@ class DetalleActividadViewModel(
     val uiEstado = _uiEstado.asStateFlow()
 
     private var participantesJob: Job? = null
+
+    // Separar participantes confirmados de los pendientes
+    val participantesConfirmados = _participantes.map { lista ->
+        lista.filter { it.inscripcion.estado != EstadoInscripcion.PENDIENTE }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        emptyList()
+    )
+
+    val solicitudesPendientes = _participantes.map { lista ->
+        lista.filter { it.inscripcion.estado == EstadoInscripcion.PENDIENTE }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        emptyList()
+    )
 
     fun cargar(actividad: ActividadConDetalle) {
         // Evita recargar si es la misma actividad
@@ -93,13 +111,15 @@ class DetalleActividadViewModel(
 
     fun abandonar() {
         val actividad = _actividad.value ?: return
-        try {
-            _uiEstado.value = UiEstado.Cargando
-            inscripcionRepository.abandonar(actividad.actividad.id, usuarioActualId.value)
-            _estadoInscripcion.value = null
-            _uiEstado.value = UiEstado.Idle
-        } catch (e: Exception) {
-            _uiEstado.value = UiEstado.Error("No se pudo abandonar la actividad")
+        viewModelScope.launch {
+            try {
+                _uiEstado.value = UiEstado.Cargando
+                inscripcionRepository.abandonar(actividad.actividad.id, usuarioActualId.value)
+                _estadoInscripcion.value = null
+                _uiEstado.value = UiEstado.Idle
+            } catch (e: Exception) {
+                _uiEstado.value = UiEstado.Error("No se pudo abandonar la actividad")
+            }
         }
     }
 
@@ -128,6 +148,43 @@ class DetalleActividadViewModel(
                 _uiEstado.value = UiEstado.Idle
             } catch (e: Exception) {
                 _uiEstado.value = UiEstado.Error("No se pudo confirmar la asistencia")
+            }
+        }
+    }
+
+    fun expulsarParticipante(idUsuario: Int) {
+        val actividad = _actividad.value ?: return
+        viewModelScope.launch {
+            try {
+                inscripcionRepository.abandonar(actividad.actividad.id, idUsuario)
+            } catch (e: Exception) {
+                _uiEstado.value = UiEstado.Error("No se pudo eliminar al participante")
+            }
+        }
+    }
+
+    fun aceptarSolicitud(idUsuario: Int) {
+        val actividad = _actividad.value ?: return
+        viewModelScope.launch {
+            try {
+                inscripcionRepository.actualizarEstado(
+                    actividad.actividad.id,
+                    idUsuario,
+                    EstadoInscripcion.CONFIRMADO
+                )
+            } catch (e: Exception) {
+                _uiEstado.value = UiEstado.Error("No se pudo aceptar la solicitud")
+            }
+        }
+    }
+
+    fun rechazarSolicitud(idUsuario: Int) {
+        val actividad = _actividad.value ?: return
+        viewModelScope.launch {
+            try {
+                inscripcionRepository.abandonar(actividad.actividad.id, idUsuario)
+            } catch (e: Exception) {
+                _uiEstado.value = UiEstado.Error("No se pudo rechazar la solicitud")
             }
         }
     }

@@ -13,7 +13,7 @@ class InscripcionRepository(private val dao: InscripcionDAO) {
         dao.insertar(InscripcionEntity(idUsuario = idUsuario, idActividad = idActividad, estado = estado))
     }
 
-    fun abandonar(idActividad: Int, idUsuario: Int) {
+    suspend fun abandonar(idActividad: Int, idUsuario: Int) {
         dao.eliminar(idActividad, idUsuario)
     }
 
@@ -32,4 +32,9 @@ class InscripcionRepository(private val dao: InscripcionDAO) {
     suspend fun confirmarAsistencia(idActividad: Int, idUsuario: Int) {
         dao.actualizarEstado(idActividad, idUsuario, EstadoInscripcion.ASISTENCIA_CONFIRMADA)
     }
+
+    suspend fun actualizarEstado(idActividad: Int, idUsuario: Int, estado: EstadoInscripcion) {
+        dao.actualizarEstado(idActividad, idUsuario, estado)
+    }
+
 }
