@@ -1,9 +1,8 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
-import android.util.Log
-import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Repeat
 import androidx.compose.material3.*
@@ -34,8 +34,6 @@ import coil.compose.AsyncImage
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.R
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadConDetalle
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadEntity
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioEntity
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BotonPrincipal
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardFondo
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.SmallTopAppBar
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.*
@@ -44,11 +42,7 @@ import java.util.Locale
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.max
-import androidx.room.util.TableInfo
-import coil.request.Disposable
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionConUsuario
-import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BotonAccionUsuario
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.state.UiEstado
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.DetalleActividadViewModel
@@ -125,17 +119,17 @@ fun DetalleActividadScreen(
                         .verticalScroll(rememberScrollState())
                         .padding(24.dp)
                 ) {
-                    HeaderImagen(actividad.actividad)
+                    HeaderImagen(actividad.actividad, colorInteres = colorInteres)
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    TituloActividad(actividad)
+                    TituloActividad(actividad, colorInteres)
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    InfoActividad(actividad = actividad.actividad, totalParticipantes = participantes.size)
+                    InfoActividad(actividad = actividad.actividad, totalParticipantes = participantes.size, colorInteres = colorInteres)
 
                     HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
 
-                    DescripcionActividad(actividad.actividad)
+                    DescripcionActividad(actividad.actividad, colorInteres = colorInteres)
 
                     HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
 
@@ -209,7 +203,10 @@ fun DetalleActividadScreen(
 }
 
 @Composable
-fun HeaderImagen(actividad: ActividadEntity) {
+fun HeaderImagen(
+    actividad: ActividadEntity,
+    colorInteres: Color
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,18 +221,22 @@ fun HeaderImagen(actividad: ActividadEntity) {
         )
         Row(modifier = Modifier.padding(12.dp)) {
             if (!actividad.publica) {
-                Tag(texto = "Privado", icono = Icons.Outlined.Lock)
+                Tag(texto = "Privado", icono = Icons.Outlined.Lock, colorInteres = colorInteres)
                 Spacer(modifier = Modifier.width(8.dp))
             }
             if (actividad.recurrente) {
-                Tag(texto = "Recurrente", icono = Icons.Outlined.Repeat)
+                Tag(texto = "Recurrente", icono = Icons.Outlined.Repeat, colorInteres = colorInteres)
             }
         }
     }
 }
 
 @Composable
-fun Tag(texto: String, icono: ImageVector? = null) {
+fun Tag(
+    texto: String,
+    icono: ImageVector? = null,
+    colorInteres: Color
+) {
     Row(
         modifier = Modifier
             .background(White.copy(alpha = 0.9f), RoundedCornerShape(50))
@@ -243,15 +244,18 @@ fun Tag(texto: String, icono: ImageVector? = null) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icono != null) {
-            Icon(imageVector = icono, contentDescription = null, tint = PurpleAlt, modifier = Modifier.size(14.dp))
+            Icon(imageVector = icono, contentDescription = null, tint = colorInteres, modifier = Modifier.size(14.dp))
             Spacer(modifier = Modifier.width(4.dp))
         }
-        Text(texto, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = PurpleAlt)
+        Text(texto, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = colorInteres)
     }
 }
 
 @Composable
-fun TituloActividad(actividad: ActividadConDetalle) {
+fun TituloActividad(
+    actividad: ActividadConDetalle,
+    colorInteres: Color
+) {
     Column {
         Row(verticalAlignment = Alignment.Top) {
             Text(
@@ -263,24 +267,42 @@ fun TituloActividad(actividad: ActividadConDetalle) {
             Spacer(modifier = Modifier.width(8.dp))
             Box(
                 modifier = Modifier
-                    .background(PurpleAlt.copy(alpha = 0.2f), RoundedCornerShape(50))
+                    .background(colorInteres.copy(alpha = 0.2f), RoundedCornerShape(50))
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
-                Text(actividad.interes.nombre.label, fontSize = 12.sp, color = PurpleAlt, fontWeight = FontWeight.Bold)
+                Text(actividad.interes.nombre.label, fontSize = 12.sp, color = colorInteres, fontWeight = FontWeight.Bold)
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(horizontalAlignment = Alignment.Start) {
             Text(
                 text = "Organizado por: ${actividad.creador.nombreCompleto}",
                 style = MaterialTheme.typography.bodyMedium,
-                color = GrayEnabled
+                color = Black
             )
             if (!actividad.actividad.publica) {
-                Spacer(modifier = Modifier.weight(1f))
-                Tag(texto = "Requiere aprobación")
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(modifier = Modifier
+                        .background(colorInteres.copy(alpha = 0.15f),RoundedCornerShape(50))
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.CheckCircle,
+                        contentDescription = null,
+                        tint = colorInteres,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Requiere aprobación",
+                        color = colorInteres,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }
@@ -289,39 +311,45 @@ fun TituloActividad(actividad: ActividadConDetalle) {
 @Composable
 fun InfoActividad(
     actividad: ActividadEntity,
-    totalParticipantes: Int
+    totalParticipantes: Int,
+    colorInteres: Color
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM 'de' yyyy", Locale("es"))
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     Row(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.weight(1.2f)) {
-            InfoItem(Icons.Default.DateRange, "Fecha y hora", "${actividad.fechaHora.format(dateFormatter)}\n${actividad.fechaHora.format(timeFormatter)} hrs")
+            InfoItem(Icons.Default.DateRange, "Fecha y hora", "${actividad.fechaHora.format(dateFormatter)}\n${actividad.fechaHora.format(timeFormatter)} hrs", colorInteres = colorInteres)
             Spacer(modifier = Modifier.height(16.dp))
-            InfoItem(Icons.Default.LocationOn, "Ubicación", actividad.ubicacion)
+            InfoItem(Icons.Default.LocationOn, "Ubicación", actividad.ubicacion, colorInteres = colorInteres)
             Spacer(modifier = Modifier.height(16.dp))
             InfoItem(Icons.Default.Group, "Participantes",
-                "$totalParticipantes/${actividad.maxParticipantes}")
+                "$totalParticipantes/${actividad.maxParticipantes}", colorInteres = colorInteres)
         }
 
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(modifier = Modifier.weight(0.8f)) {
             if (actividad.recurrente) {
-                InfoItem(Icons.Outlined.Repeat, "Actividad recurrente", "")
+                InfoItem(Icons.Outlined.Repeat, "Actividad recurrente", "", colorInteres)
                 Spacer(modifier = Modifier.height(16.dp))
             }
             actividad.fechaLimite?.let {
-                InfoItem(Icons.Default.EventAvailable, "Confirmar antes de", it.format(dateFormatter))
+                InfoItem(Icons.Default.EventAvailable, "Confirmar antes de", it.format(dateFormatter), colorInteres)
             }
         }
     }
 }
 
 @Composable
-fun InfoItem(icon: ImageVector, titulo: String, valor: String) {
+fun InfoItem(
+    icon: ImageVector,
+    titulo: String,
+    valor: String,
+    colorInteres: Color
+) {
     Row(verticalAlignment = Alignment.Top) {
-        Icon(icon, contentDescription = null, tint = PurpleAlt, modifier = Modifier.size(24.dp).padding(top = 2.dp))
+        Icon(icon, contentDescription = null, tint = colorInteres, modifier = Modifier.size(24.dp).padding(top = 2.dp))
         Spacer(modifier = Modifier.width(8.dp))
         Column {
             if (titulo.isNotBlank()) {
@@ -333,10 +361,13 @@ fun InfoItem(icon: ImageVector, titulo: String, valor: String) {
 }
 
 @Composable
-fun DescripcionActividad(actividad: ActividadEntity) {
+fun DescripcionActividad(
+    actividad: ActividadEntity,
+    colorInteres: Color
+) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Info, contentDescription = null, tint = PurpleAlt, modifier = Modifier.size(20.dp))
+            Icon(Icons.Default.Info, contentDescription = null, tint = colorInteres, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
             Text("Descripción", fontWeight = FontWeight.Bold, color = Black)
         }
@@ -361,21 +392,15 @@ fun SeccionParticipantesConfirmados(
         Box(
             modifier = Modifier
                 .height(180.dp)
-                .background(Color(0xFFF8F8F8), RoundedCornerShape(16.dp))
+                .background(colorInteres.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
                 .padding(12.dp)
         ) {
-            if (inscripciones.isEmpty()) {
-                Text(
-                    text = "Aún no hay participantes",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Black,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
+            if (inscripciones.isNotEmpty()) {
                 LazyColumn {
                     items(inscripciones) { item ->
-                        Row(
-                            modifier = Modifier.padding(vertical = 8.dp),
+                        Row(modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
@@ -399,7 +424,7 @@ fun SeccionParticipantesConfirmados(
                                     )
                                 }
                             }
-
+                            Spacer(modifier = Modifier.weight(1f))
                             if (esCreador && item.inscripcion.idUsuario != idCreador) {
                                 IconButton(
                                     onClick = { onExpulsar(item.inscripcion.idUsuario) },
@@ -416,6 +441,13 @@ fun SeccionParticipantesConfirmados(
                         }
                     }
                 }
+            } else {
+                Text(
+                    text = "Aún no hay participantes",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Black,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }
@@ -490,37 +522,40 @@ fun SeccionSolicitudesPendientes(
                                 color = GrayEnabled
                             )
                         }
-                        // Botón para aceptar
-                        IconButton(
-                            onClick = { onAceptar(item.inscripcion.idUsuario) },
-                            modifier = Modifier
+
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            // Botón para aceptar
+                            Box(modifier = Modifier
                                 .size(36.dp)
                                 .background(Color(0xFF4CAF50).copy(alpha = 0.15f), RoundedCornerShape(8.dp))
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Aceptar",
-                                tint = Color(0xFF4CAF50),
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
-                        // Botón para rechazar
-                        IconButton(
-                            onClick = { onRechazar(item.inscripcion.idUsuario) },
-                            modifier = Modifier
+                                .clickable { onAceptar(item.inscripcion.idUsuario) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Aceptar",
+                                    tint = Color(0xFF4CAF50),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            // Botón para rechazar
+                            Box(modifier = Modifier
                                 .size(36.dp)
                                 .background(Color.Red.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Rechazar",
-                                tint = Color.Red,
-                                modifier = Modifier.size(18.dp)
-                            )
+                                .clickable { onRechazar(item.inscripcion.idUsuario) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Rechazar",
+                                    tint = Color.Red,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
                         }
                     }
-
                 }
             }
         }

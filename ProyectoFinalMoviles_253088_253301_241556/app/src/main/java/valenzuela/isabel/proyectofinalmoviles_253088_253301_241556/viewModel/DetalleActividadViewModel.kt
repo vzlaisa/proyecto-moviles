@@ -1,5 +1,6 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -104,7 +105,7 @@ class DetalleActividadViewModel(
                     else EstadoInscripcion.PENDIENTE
                 _uiEstado.value = UiEstado.Idle
             } catch (e: Exception) {
-                _uiEstado.value = UiEstado.Error("No se pudo completar la inscripción")
+                _uiEstado.value = UiEstado.Error(e.message ?: "No se pudo completar la inscripción")
             }
         }
     }
@@ -154,10 +155,13 @@ class DetalleActividadViewModel(
 
     fun expulsarParticipante(idUsuario: Int) {
         val actividad = _actividad.value ?: return
+        Log.d("EXPULSAR", "Intentando expulsar usuario $idUsuario")
         viewModelScope.launch {
             try {
                 inscripcionRepository.abandonar(actividad.actividad.id, idUsuario)
+                Log.d("EXPULSAR", "Usuario expulsado")
             } catch (e: Exception) {
+                Log.e("EXPULSAR", e.message ?: "Error")
                 _uiEstado.value = UiEstado.Error("No se pudo eliminar al participante")
             }
         }
