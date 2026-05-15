@@ -26,7 +26,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Casino
-import androidx.compose.material.icons.filled.CircleNotifications
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Image
@@ -542,8 +541,8 @@ private fun ActividadCard(
                     modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    if (!actividad.actividad.publica) Tag("Privado")
-                    if (actividad.actividad.recurrente) Tag("Recurrente")
+                    if (!actividad.actividad.publica) Tag("Privado", null, colorInteres)
+                    if (actividad.actividad.recurrente) Tag("Recurrente", null, colorInteres)
                 }
             }
 

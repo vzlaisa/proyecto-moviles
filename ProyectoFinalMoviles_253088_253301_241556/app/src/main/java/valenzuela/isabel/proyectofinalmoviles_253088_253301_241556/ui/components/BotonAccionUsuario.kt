@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,8 +28,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.EstadoInscripcion
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Black
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.GrayEnabled
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.OrangePrimary
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.White
 import java.time.LocalDateTime
 
 @Composable
@@ -62,16 +66,15 @@ fun BotonAccionUsuario(
         }
         EstadoInscripcion.PENDIENTE -> {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                OutlinedButton(modifier = Modifier
+                Button(modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(56.dp).background(OrangePrimary),
                     onClick = onAbandonar,
-                    shape = RoundedCornerShape(24.dp),
-                    border = BorderStroke(1.dp, Color.Red)
+                    shape = RoundedCornerShape(24.dp)
                 ) {
                     Text(
                         "Cancelar solicitud",
-                        color = Color.White,
+                        color = White,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium
                     )
@@ -94,15 +97,14 @@ fun BotonAccionUsuario(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                 }
-                OutlinedButton(
+                Button(
                     onClick = onAbandonar,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    border = BorderStroke(1.dp, Color.Red)
+                    modifier = Modifier.fillMaxWidth().height(56.dp).background(OrangePrimary),
+                    shape = RoundedCornerShape(24.dp)
                 ) {
                     Text(
                         "Abandonar actividad",
-                        color = Color.White,
+                        color = White,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium
                     )
@@ -110,17 +112,16 @@ fun BotonAccionUsuario(
             }
         }
         EstadoInscripcion.ASISTENCIA_CONFIRMADA -> {
-            Row(
-                modifier = Modifier
+            Row(modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
                     .background(color = OrangePrimary, RoundedCornerShape(24.dp)),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50))
+                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Black)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Asistencia confirmada", color = Color(0xFF4CAF50),
+                Text("Asistencia confirmada", color = Black,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium)
             }
