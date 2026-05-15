@@ -93,7 +93,7 @@ fun DetalleActividadScreen(
                 actionContent = {
                     if (esCreador) {
                         Row {
-                            IconButton(onClick = onEditar) {
+                            IconButton(onClick = { onEditar() }) {
                                 Icon(
                                     imageVector = Icons.Default.Edit,
                                     contentDescription = "Editar",

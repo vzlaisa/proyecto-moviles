@@ -353,7 +353,11 @@ fun AppNavigation(
                             actividad = it,
                             viewModel = detalleActividadViewModel,
                             onRegresar = { navController.popBackStack() },
-                            onEditar = { },
+                            onEditar = {
+                                navController.navigate(
+                                    Screen.EditarActividadPaso1.crearRuta(it.actividad.id)
+                                )
+                            },
                             onEliminar = { navController.popBackStack() }
                         )
                     }
