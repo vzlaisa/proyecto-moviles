@@ -15,6 +15,9 @@ import java.time.LocalTime
 import java.time.LocalDateTime
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
@@ -142,65 +145,67 @@ class CrearActividadViewModel(private val dataStore: DataStoreManager, private v
     fun onFotoChange(uri: Uri?) { fotoUri = uri }
 
     fun publicarActividad(context: Context) {
-        publicacionError = null
-
         if (nombre.isBlank() || categoria == null || fecha == null || hora == null) {
             publicacionError = "Faltan campos obligatorios"
             return
         }
 
-        if (usuarioActualId == -1) {
-            publicacionError = "Error: Sesión de usuario no válida"
-            return
-        }
+        buscandoUbicacion = true
+        val db = FirebaseFirestore.getInstance()
 
-        viewModelScope.launch (Dispatchers.IO){
-            try {
-                val localImagePath = fotoUri?.let { uri -> guardarImagenEnLocal(context, uri)}
-                val nuevaActividad = ActividadEntity(
-                    nombre = nombre,
-                    descripcion = descripcion,
-                    fechaHora = LocalDateTime.of(fecha, hora),
-                    fechaLimite = fechaLimite?.atTime(23, 59),
-                    fechaCreacion = LocalDateTime.now(),
-                    ubicacion = ubicacion,
-                    latitud = latitud,
-                    longitud = longitud,
-                    maxParticipantes = maxParticipantes.toIntOrNull() ?: 1,
-                    publica = !isPrivada,
-                    recurrente = isRecurrente,
-                    idCreador = usuarioActualId,
-                    idInteres = categoria!!.ordinal + 1,
-                    imageUrl = localImagePath
-                )
+        val actividadCloud = hashMapOf(
+            "nombre" to nombre,
+            "descripcion" to descripcion,
+            "fechaHora" to LocalDateTime.of(fecha, hora).toString(),
+            "ubicacion" to ubicacion,
+            "latitud" to latitud,
+            "longitud" to longitud,
+            "idCreador" to usuarioActualId,
+            "categoria" to categoria?.name,
+            "fechaCreacion" to LocalDateTime.now().toString()
+        )
 
-                actividadRepository.crearActividad(nuevaActividad)
+        db.collection("actividades")
+            .add(actividadCloud)
+            .addOnSuccessListener { documentReference ->
+                viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        val nuevaActividad = ActividadEntity(
+                            nombre = nombre,
+                            descripcion = descripcion,
+                            fechaHora = LocalDateTime.of(fecha, hora),
+                            fechaLimite = fechaLimite?.atTime(23, 59),
+                            fechaCreacion = LocalDateTime.now(),
+                            ubicacion = ubicacion,
+                            latitud = latitud,
+                            longitud = longitud,
+                            maxParticipantes = maxParticipantes.toIntOrNull() ?: 1,
+                            publica = !isPrivada,
+                            recurrente = isRecurrente,
+                            idCreador = usuarioActualId,
+                            idInteres = (categoria?.ordinal ?: 0) + 1,
+                            imageUrl = null
+                        )
+                        actividadRepository.crearActividad(nuevaActividad)
 
-                withContext(Dispatchers.Main) {
-                    publicacionExitosa = true
+                        withContext(Dispatchers.Main) {
+                            publicacionExitosa = true
+                            buscandoUbicacion = false
+                        }
+                    } catch (roomEx: Exception) {
+                        Log.e("ROOM_ERROR", "Fallo al guardar localmente: ${roomEx.message}")
+                        withContext(Dispatchers.Main) {
+                            publicacionExitosa = true
+                            buscandoUbicacion = false
+                        }
+                    }
                 }
-            } catch (e: Exception) {
-                publicacionExitosa = false
-                publicacionError = e.message
             }
-        }
-    }
-
-    private fun guardarImagenEnLocal(context: Context, uri: Uri): String? {
-        return try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val file = File(context.filesDir, "actividad_${System.currentTimeMillis()}.jpg")
-            val outputStream = FileOutputStream(file)
-
-            inputStream?.copyTo(outputStream)
-
-            inputStream?.close()
-            outputStream.close()
-
-            Uri.fromFile(file).toString()
-        } catch (e: Exception) {
-            null
-        }
+            .addOnFailureListener { e ->
+                Log.e("FIRESTORE_ERROR", "Fallo al subir a la nube: ${e.message}")
+                publicacionError = "Error al sincronizar con la nube: ${e.message}"
+                buscandoUbicacion = false
+            }
     }
 
     fun limpiarDatos() {

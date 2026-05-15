@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "982591932276",
+    "project_id": "joinlyapp-30eca",
+    "storage_bucket": "joinlyapp-30eca.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982591932276:android:0cfcdb3b465fbdb159ce21",
+        "android_client_info": {
+          "package_name": "valenzuela.isabel.proyectofinalmoviles_253088_253301_241556"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB41C5OEHX94eJ5bWFZpQczbr7uxgcMgW0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

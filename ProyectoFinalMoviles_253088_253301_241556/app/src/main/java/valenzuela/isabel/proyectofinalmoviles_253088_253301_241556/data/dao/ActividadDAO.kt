@@ -45,4 +45,7 @@ interface ActividadDAO {
     @Update
     suspend fun updateActividad(actividad: ActividadEntity)
 
+    @Query("DELETE FROM actividades")
+    suspend fun limpiarActividadesLocales()
+
 }

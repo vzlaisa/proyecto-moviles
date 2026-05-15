@@ -64,6 +64,10 @@ class ActividadRepository(private val actividadDAO: ActividadDAO) {
         return actividadDAO.getById(id)
     }
 
+    suspend fun limpiarActividadesLocales() {
+        actividadDAO.limpiarActividadesLocales()
+    }
+
     suspend fun actualizarActividad(actividad: ActividadEntity) {
         if (actividad.nombre.isBlank()) throw ValidationException("El nombre de la actividad es obligatorio")
         if (actividad.nombre.length < 5) throw ValidationException("El nombre debe tener al menos 5 caracteres")
