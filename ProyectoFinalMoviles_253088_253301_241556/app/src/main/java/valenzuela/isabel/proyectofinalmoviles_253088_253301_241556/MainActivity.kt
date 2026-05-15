@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Application
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -11,8 +12,10 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.messaging.FirebaseMessaging
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.AppDatabase
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStoreManager
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.SyncManager
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.ActividadRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.InscripcionRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.NotificacionRepository
@@ -31,6 +34,8 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Per
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 
 class MainActivity : FragmentActivity() {
+    private lateinit var syncManager: SyncManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -42,6 +47,15 @@ class MainActivity : FragmentActivity() {
             )
         }
 
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("TOKEN_FIREBASE", task.result)
+                } else {
+                    Log.e("TOKEN_FIREBASE", "Error", task.exception)
+                }
+            }
+
         enableEdgeToEdge()
 
         // Inicialización de dependencias
@@ -49,8 +63,15 @@ class MainActivity : FragmentActivity() {
         val usuarioRepo by lazy { UsuarioRepository(database.usuarioDao()) }
         val actividadRepo by lazy { ActividadRepository(database.actividadDao()) }
         val inscripcionRepo by lazy { InscripcionRepository(database.inscripcionDao()) }
-        val notificacionRepo by lazy { NotificacionRepository(database.notificacionDao(),) }
+        val notificacionRepo by lazy { NotificacionRepository(database.notificacionDao()) }
         val dataStore by lazy { DataStoreManager(this) }
+
+        syncManager = SyncManager(
+            actividadDAO = database.actividadDao(),
+            usuarioDAO = database.usuarioDao(),
+            inscripcionDAO = database.inscripcionDao()
+        )
+        syncManager.iniciar()
 
         // Factory única para todos los ViewModels
         val factory = JoinlyViewModelFactory(usuarioRepo, actividadRepo, inscripcionRepo, notificacionRepo, dataStore, this.application)
@@ -81,6 +102,11 @@ class MainActivity : FragmentActivity() {
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        syncManager.detener()
     }
 }
 
