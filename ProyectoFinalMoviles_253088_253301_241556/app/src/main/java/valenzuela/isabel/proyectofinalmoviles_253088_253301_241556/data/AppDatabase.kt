@@ -14,11 +14,14 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.Usua
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.converters.DateConverter
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.converters.GeneroConverter
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.converters.InteresConverter
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.converters.TipoNotificacionConverter
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.ActividadDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.InscripcionDAO
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.NotificacionDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InteresEntity
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.NotificacionEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioInteresCrossRef
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Interes
@@ -29,15 +32,17 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.In
         InteresEntity::class,
         UsuarioInteresCrossRef::class,
         ActividadEntity::class,
-        InscripcionEntity::class
+        InscripcionEntity::class,
+        NotificacionEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(value = [
     GeneroConverter::class,
     DateConverter::class,
     InteresConverter::class,
+    TipoNotificacionConverter::class
 ])
 abstract class AppDatabase: RoomDatabase() {
 
@@ -45,6 +50,7 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDAO
     abstract fun actividadDao(): ActividadDAO
     abstract fun inscripcionDao(): InscripcionDAO
+    abstract fun notificacionDao(): NotificacionDAO
 
     companion object {
         @Volatile

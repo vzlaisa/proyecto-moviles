@@ -12,6 +12,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.AppDatab
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStoreManager
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.ActividadRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.InscripcionRepository
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.NotificacionRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.UsuarioRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.navigation.AppNavigation
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.ProyectoFinalMoviles_253088_253301_241556Theme
@@ -22,6 +23,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Cre
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.DetalleActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.EditarActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.NotificacionViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
 
@@ -35,10 +37,11 @@ class MainActivity : FragmentActivity() {
         val usuarioRepo by lazy { UsuarioRepository(database.usuarioDao()) }
         val actividadRepo by lazy { ActividadRepository(database.actividadDao()) }
         val inscripcionRepo by lazy { InscripcionRepository(database.inscripcionDao()) }
+        val notificacionRepo by lazy { NotificacionRepository(database.notificacionDao(),) }
         val dataStore by lazy { DataStoreManager(this) }
 
         // Factory única para todos los ViewModels
-        val factory = JoinlyViewModelFactory(usuarioRepo, actividadRepo, inscripcionRepo, dataStore, this.application)
+        val factory = JoinlyViewModelFactory(usuarioRepo, actividadRepo, inscripcionRepo, notificacionRepo, dataStore, this.application)
 
         // Delegados de ViewModels
         val authViewModel: AuthViewModel by viewModels { factory }
@@ -73,6 +76,7 @@ private class JoinlyViewModelFactory(
     private val usuarioRepo: UsuarioRepository,
     private val actividadRepo: ActividadRepository,
     private val inscripcionRepo: InscripcionRepository,
+    private val notificacionRepo: NotificacionRepository,
     private val dataStore: DataStoreManager,
     private val application: Application
 ) : ViewModelProvider.Factory {
@@ -97,6 +101,8 @@ private class JoinlyViewModelFactory(
                 EditarActividadViewModel(actividadRepo) as T
             modelClass.isAssignableFrom(DetalleActividadViewModel::class.java) ->
                 DetalleActividadViewModel(actividadRepo, inscripcionRepo, dataStore) as T
+            modelClass.isAssignableFrom(NotificacionViewModel::class.java) ->
+                NotificacionViewModel(dataStore, notificacionRepo) as T
             else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
         }
     }
