@@ -35,7 +35,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.In
         InscripcionEntity::class,
         NotificacionEntity::class,
     ],
-    version = 8,
+    version = 10,
     exportSchema = false
 )
 @TypeConverters(value = [
@@ -58,13 +58,22 @@ abstract class AppDatabase: RoomDatabase() {
 
         // Para registrar los intereses que existen
         private val databaseCallback = object : RoomDatabase.Callback() {
+            // Se llama cuando la base se crea por primera vez
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
-                // Hilo secundario para no bloquear la creación de la DB
+                insertarIntereses()
+            }
+
+            // Se llama cuando hay migración destructiva (cambio de versión)
+            override fun onDestructiveMigration(db: SupportSQLiteDatabase) {
+                super.onDestructiveMigration(db)
+                insertarIntereses()
+            }
+
+            private fun insertarIntereses() {
                 INSTANCE?.let { database ->
                     CoroutineScope(Dispatchers.IO).launch {
                         val dao = database.usuarioDao()
-                        // 10 intereses basados en el enum
                         val interesesBase = Interes.entries.map {
                             InteresEntity(id = it.ordinal + 1, nombre = it)
                         }
