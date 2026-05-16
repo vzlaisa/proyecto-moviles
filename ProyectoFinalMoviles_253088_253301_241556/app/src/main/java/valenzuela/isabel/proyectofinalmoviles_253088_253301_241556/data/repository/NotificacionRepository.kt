@@ -39,5 +39,27 @@ class NotificacionRepository(private val notificacionDAO: NotificacionDAO) {
 
     suspend fun marcarTodasComoLeidas(userId: Int) {
         notificacionDAO.marcarTodasComoLeidas(userId)
+
+        try {
+            // Obtener notificaciones no leídas del usuario de la nube
+            val snapshot = firestore.collection("notificaciones")
+                .whereEqualTo("idUsuario", userId)
+                .whereEqualTo("leida", false)
+                .get()
+                .await()
+
+            // Crear paquete de operaciones, es para agrupar todas las operaciones en una sola petición
+            val batch = firestore.batch()
+
+            for (doc in snapshot.documents) {
+                val ref = firestore.collection("notificaciones").document(doc.id)
+                batch.update(ref, "leida", true)
+            }
+
+            batch.commit().await()
+
+        } catch (e: Exception) {
+            Log.w("SYNC", "Error al marcar todas como leídas: ${e.message}")
+        }
     }
 }
