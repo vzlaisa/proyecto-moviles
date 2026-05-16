@@ -1,10 +1,15 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository
 
+import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.tasks.await
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.NotificacionDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.NotificacionEntity
 
 class NotificacionRepository(private val notificacionDAO: NotificacionDAO) {
+
+    private val firestore = FirebaseFirestore.getInstance()
 
     fun getNotificaciones(userId: Int): Flow<List<NotificacionEntity>> {
         return notificacionDAO.getAllNotificaciones(userId)
@@ -20,6 +25,16 @@ class NotificacionRepository(private val notificacionDAO: NotificacionDAO) {
 
     suspend fun marcarComoLeida(firestoreId: String) {
         notificacionDAO.marcarComoLeida(firestoreId)
+
+        try {
+            firestore.collection("notificaciones")
+                .document(firestoreId)
+                .update(mapOf(
+                    "leida" to true
+                )).await()
+        } catch (e: Exception) {
+            Log.w("SYNC", "Sin red al actualizar notificación como leída: ${e.message}")
+        }
     }
 
     suspend fun marcarTodasComoLeidas(userId: Int) {

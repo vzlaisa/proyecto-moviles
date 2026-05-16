@@ -1,13 +1,23 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +35,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.R
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardFondo
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardNotificacion
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.SmallTopAppBar
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.OrangePrimary
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.ProyectoFinalMoviles_253088_253301_241556Theme
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.utils.DateUtils.toNotificationString
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.NotificacionViewModel
@@ -65,6 +76,27 @@ fun NotificacionesScreen(
                         fontWeight = FontWeight.SemiBold
                     )
                 } else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.marcarTodoComoLeido() },
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(20.dp),
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = OrangePrimary
+                        )
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        Text("Marcar todas como leídas")
+                    }
+
+                    Spacer(modifier = Modifier.height(30.dp))
+
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
