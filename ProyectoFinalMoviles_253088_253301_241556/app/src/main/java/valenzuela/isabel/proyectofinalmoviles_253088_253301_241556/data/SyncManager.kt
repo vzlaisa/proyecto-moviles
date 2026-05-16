@@ -5,6 +5,7 @@ import android.util.Log
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -59,15 +60,32 @@ class SyncManager(
         listeners.forEach { it.remove() }
         listeners.clear()
 
-        // Usuarios primero, el resto espera a que terminen
-        listeners.add(escucharUsuarios {
-            // Se ejecuta cuando usuarios ya están en local
-            listeners.add(escucharActividades())
+        scope.launch {
+            val usuariosListos = CompletableDeferred<Unit>()
+            val actividadesListas = CompletableDeferred<Unit>()
+
+            listeners.add(
+                escucharUsuarios {
+                    usuariosListos.complete(Unit)
+                }
+            )
+
+            usuariosListos.await()
+
+            listeners.add(
+                escucharActividades {
+                    actividadesListas.complete(Unit)
+                }
+            )
+
+            actividadesListas.await()
+
             listeners.add(escucharInscripciones())
+
             if (idUsuario > 0) {
                 listeners.add(escucharNotificaciones(idUsuario))
             }
-        })
+        }
     }
 
     /**
@@ -86,7 +104,7 @@ class SyncManager(
      * - los convierte a ActividadEntity
      * - los guarda en Room
      */
-    private fun escucharActividades(): ListenerRegistration {
+    private fun escucharActividades(onCompletado: (() -> Unit)? = null): ListenerRegistration {
         return firestore.collection("actividades")
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
@@ -124,9 +142,11 @@ class SyncManager(
 
                             actividadDAO.insertActividad(actividad)
                         } catch (e: SQLiteConstraintException) {
-                            Log.w("SYNC", "Actividad $id ignorada — creador $idCreador no existe aún")
+                            Log.w("SYNC", "Actividad $id ignorada, creador $idCreador no existe aún")
                         }
                     }
+
+                    onCompletado?.invoke()
                 }
             }
     }
@@ -206,7 +226,7 @@ class SyncManager(
                                 )
                             )
                         } catch (e: SQLiteConstraintException) {
-                            Log.w("SYNC", "Inscripción ignorada (fk faltante)")
+                            Log.w("SYNC", "Inscripción ${idUsuario}_$idActividad ignorada (fk faltante)")
                         }
                     }
                 }
