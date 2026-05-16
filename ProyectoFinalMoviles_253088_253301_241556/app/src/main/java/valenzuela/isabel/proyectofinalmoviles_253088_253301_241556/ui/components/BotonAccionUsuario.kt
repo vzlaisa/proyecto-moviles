@@ -119,9 +119,9 @@ fun BotonAccionUsuario(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Black)
+                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = White)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Asistencia confirmada", color = Black,
+                Text("Asistencia confirmada", color = White,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium)
             }

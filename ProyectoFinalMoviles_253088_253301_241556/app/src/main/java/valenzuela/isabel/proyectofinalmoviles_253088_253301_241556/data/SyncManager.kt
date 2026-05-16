@@ -192,7 +192,8 @@ class SyncManager(
                                 InscripcionEntity(
                                     idUsuario = idUsuario,
                                     idActividad = idActividad,
-                                    estado = estado
+                                    estado = estado,
+                                    fechaInscripcion = document.getString("fechaInscripcion")?.let { LocalDateTime.parse(it) } ?: LocalDateTime.now()
                                 )
                             )
                         } catch (e: SQLiteConstraintException) {

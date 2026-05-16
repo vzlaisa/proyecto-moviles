@@ -13,7 +13,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Es
 @Dao
 interface InscripcionDAO {
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertar(inscripcion: InscripcionEntity)
 
     @Query("""
@@ -47,5 +47,12 @@ interface InscripcionDAO {
         AND inscripciones.estado != 'CANCELADO'
     """)
     fun getParticipantesConNombre(idActividad: Int): Flow<List<InscripcionConUsuario>>
+
+    @Query("""
+        SELECT COUNT(*) FROM inscripciones
+        WHERE id_actividad = :idActividad
+        AND estado IN ('CONFIRMADO', 'ASISTENCIA_CONFIRMADA')
+    """)
+    suspend fun contarParticipantesConfirmados(idActividad: Int): Int
 
 }
