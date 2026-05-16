@@ -8,7 +8,6 @@ import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.ActividadDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.InscripcionDAO
@@ -60,10 +59,15 @@ class SyncManager(
         listeners.forEach { it.remove() }
         listeners.clear()
 
-        listeners.add(escucharActividades())
-        listeners.add(escucharUsuarios())
-        listeners.add(escucharInscripciones())
-        listeners.add(escucharNotificaciones(idUsuario))
+        // Usuarios primero, el resto espera a que terminen
+        listeners.add(escucharUsuarios {
+            // Se ejecuta cuando usuarios ya están en local
+            listeners.add(escucharActividades())
+            listeners.add(escucharInscripciones())
+            if (idUsuario > 0) {
+                listeners.add(escucharNotificaciones(idUsuario))
+            }
+        })
     }
 
     /**
@@ -134,7 +138,7 @@ class SyncManager(
      * - datos del usuario
      * - intereses del usuario
      */
-    private fun escucharUsuarios(): ListenerRegistration {
+    private fun escucharUsuarios(onCompletado: (() -> Unit)? = null): ListenerRegistration {
         return firestore.collection("usuarios")
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
@@ -144,37 +148,35 @@ class SyncManager(
                         val id = document.getLong("id")?.toInt() ?: continue
 
                         try {
-                            usuarioDAO.insertUsuario(
-                                UsuarioEntity(
-                                    id = id,
-                                    nombre = document.getString("nombre") ?: "",
-                                    apellidoPaterno = document.getString("apellidoPaterno") ?: "",
-                                    apellidoMaterno = document.getString("apellidoMaterno"),
-                                    nickname = document.getString("nickname") ?: "",
-                                    correo = document.getString("correo") ?: "",
-                                    contrasenia = document.getString("contrasenia") ?: "",
-                                    genero = Genero.valueOf(document.getString("genero") ?: "OTRO"),
-                                    ocupacion = document.getString("ocupacion") ?: "",
-                                    fechaNacimiento = LocalDate.parse(document.getString("fechaNacimiento")),
-                                    fotoPerfil = document.getString("fotoPerfil"),
-                                    huellaActiva = document.getBoolean("huellaActiva") ?: false,
-                                    fechaRegistro = LocalDateTime.parse(document.getString("fechaRegistro")),
-                                    esPrimerLogin = document.getBoolean("esPrimerLogin") ?: true
-                                )
-                            )
+                            usuarioDAO.insertUsuario(UsuarioEntity(
+                                id = id,
+                                nombre = document.getString("nombre") ?: "",
+                                apellidoPaterno = document.getString("apellidoPaterno") ?: "",
+                                apellidoMaterno = document.getString("apellidoMaterno"),
+                                nickname = document.getString("nickname") ?: "",
+                                correo = document.getString("correo") ?: "",
+                                contrasenia = document.getString("contrasenia") ?: "",
+                                genero = Genero.valueOf(document.getString("genero") ?: "OTRO"),
+                                ocupacion = document.getString("ocupacion") ?: "",
+                                fechaNacimiento = LocalDate.parse(document.getString("fechaNacimiento")),
+                                fotoPerfil = document.getString("fotoPerfil"),
+                                huellaActiva = document.getBoolean("huellaActiva") ?: false,
+                                fechaRegistro = LocalDateTime.parse(document.getString("fechaRegistro")),
+                                esPrimerLogin = document.getBoolean("esPrimerLogin") ?: true
+                            ))
 
                             val interesesStr = document.get("intereses") as? List<String> ?: emptyList()
                             usuarioDAO.deleteInteresesByUsuarioId(id)
                             usuarioDAO.insertCrossRefs(interesesStr.map {
-                                UsuarioInteresCrossRef(
-                                    idUsuario = id,
-                                    idInteres = Interes.valueOf(it).ordinal + 1
-                                )
+                                UsuarioInteresCrossRef(idUsuario = id, idInteres = Interes.valueOf(it).ordinal + 1)
                             })
                         } catch (e: Exception) {
                             Log.w("SYNC", "Usuario $id ignorado: ${e.message}")
                         }
                     }
+
+                    // Notificar que usuarios ya están listos
+                    onCompletado?.invoke()
                 }
             }
     }
@@ -215,13 +217,14 @@ class SyncManager(
         Log.d("SYNC", "Escuchando notificaciones de usuario $idUsuario")
 
         return firestore.collection("notificaciones")
-            .whereEqualTo("idUsuario", idUsuario)  // solo las del usuario actual
+            .whereEqualTo("idUsuario", idUsuario)
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) return@addSnapshotListener
 
                 scope.launch {
                     for (change in snapshot.documentChanges) {
-                        if (change.type != DocumentChange.Type.ADDED) continue
+                        if (change.type != DocumentChange.Type.ADDED &&
+                            change.type != DocumentChange.Type.MODIFIED) continue
 
                         val document = change.document
                         val tipoStr = document.getString("tipo") ?: continue
@@ -230,19 +233,18 @@ class SyncManager(
                         } catch (e: Exception) { continue }
 
                         try {
-                            notificacionDAO.insertar(
-                                NotificacionEntity(
-                                    idUsuario = idUsuario,
-                                    titulo = document.getString("titulo") ?: "",
-                                    mensaje = document.getString("mensaje") ?: "",
-                                    fecha = document.getString("fecha")
-                                        ?.let { LocalDateTime.parse(it) }
-                                        ?: LocalDateTime.now(),
-                                    tipo = tipo,
-                                    idActividad = document.getLong("idActividad")?.toInt(),
-                                    leida = document.getBoolean("leida") ?: false
-                                )
-                            )
+                            notificacionDAO.insertar(NotificacionEntity(
+                                firestoreId = document.id,
+                                idUsuario = idUsuario,
+                                titulo = document.getString("titulo") ?: "",
+                                mensaje = document.getString("mensaje") ?: "",
+                                fecha = document.getString("fecha")
+                                    ?.let { LocalDateTime.parse(it) }
+                                    ?: LocalDateTime.now(),
+                                tipo = tipo,
+                                idActividad = document.getLong("idActividad")?.toInt(),
+                                leida = document.getBoolean("leida") ?: false
+                            ))
                         } catch (e: Exception) {
                             Log.w("SYNC", "Notificación ignorada: ${e.message}")
                         }

@@ -23,7 +23,7 @@ interface UsuarioDAO {
     @Query("SELECT * FROM usuarios WHERE correo = :identificador OR nickname = :identificador LIMIT 1")
     suspend fun getByIdentificador(identificador: String): UsuarioConIntereses?
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUsuario(usuario: UsuarioEntity): Long
 
     /**

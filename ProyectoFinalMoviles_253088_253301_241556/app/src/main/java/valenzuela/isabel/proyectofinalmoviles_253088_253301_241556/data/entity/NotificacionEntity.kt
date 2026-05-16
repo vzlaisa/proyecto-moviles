@@ -30,8 +30,8 @@ import java.time.LocalDateTime
     ]
 )
 data class NotificacionEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey
+    val firestoreId: String,
 
     @ColumnInfo(name = "id_usuario")
     val idUsuario: Int,

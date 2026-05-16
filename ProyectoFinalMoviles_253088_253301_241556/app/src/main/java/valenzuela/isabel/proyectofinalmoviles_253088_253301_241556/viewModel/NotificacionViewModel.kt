@@ -43,9 +43,9 @@ class NotificacionViewModel(private val dataStore: DataStoreManager, private val
         initialValue = 0
     )
 
-    fun marcarComoLeida(id: Int) {
+    fun marcarComoLeida(firestoreId: String) {
         viewModelScope.launch {
-            repository.marcarComoLeida(id)
+            repository.marcarComoLeida(firestoreId)
         }
     }
 
@@ -55,12 +55,6 @@ class NotificacionViewModel(private val dataStore: DataStoreManager, private val
             if (currentId != -1) {
                 repository.marcarTodasComoLeidas(currentId)
             }
-        }
-    }
-
-    fun eliminarNotificacion(id: Int) {
-        viewModelScope.launch {
-            repository.eliminar(id)
         }
     }
 }

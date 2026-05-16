@@ -18,15 +18,11 @@ class NotificacionRepository(private val notificacionDAO: NotificacionDAO) {
         notificacionDAO.insertar(notificacion)
     }
 
-    suspend fun marcarComoLeida(id: Int) {
-        notificacionDAO.marcarComoLeida(id)
+    suspend fun marcarComoLeida(firestoreId: String) {
+        notificacionDAO.marcarComoLeida(firestoreId)
     }
 
     suspend fun marcarTodasComoLeidas(userId: Int) {
         notificacionDAO.marcarTodasComoLeidas(userId)
-    }
-
-    suspend fun eliminar(id: Int) {
-        notificacionDAO.eliminar(id)
     }
 }

@@ -19,11 +19,8 @@ interface NotificacionDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertar(notificacion: NotificacionEntity)
 
-    @Query("UPDATE notificaciones SET leida = 1 WHERE id = :id")
-    suspend fun marcarComoLeida(id: Int)
-
-    @Query("DELETE FROM notificaciones WHERE id = :id")
-    suspend fun eliminar(id: Int)
+    @Query("UPDATE notificaciones SET leida = 1 WHERE firestoreId = :firestoreId")
+    suspend fun marcarComoLeida(firestoreId: String)
 
     @Query("UPDATE notificaciones SET leida = 1 WHERE id_usuario = :userId")
     suspend fun marcarTodasComoLeidas(userId: Int)
