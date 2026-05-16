@@ -35,16 +35,11 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlinx.coroutines.tasks.await
 
-
 class HomeViewModel(
     private val repository: ActividadRepository,
     private val dataStore: DataStoreManager,
     application: Application
 ): AndroidViewModel(application) {
-
-    init {
-        sincronizarDesdeNube()
-    }
 
     private val _filtros = MutableStateFlow(FiltrosActividades())
     val filtros = _filtros.asStateFlow()
@@ -59,18 +54,11 @@ class HomeViewModel(
     )
 
     // Obtiene el id del usuario
-    val usuarioActualId: Int
-        get() = _usuarioActualId.value
-
-    private val _usuarioActualId = MutableStateFlow(0)
-
-    init {
-        viewModelScope.launch {
-            dataStore.usuarioIdFlow.collect { id ->
-                _usuarioActualId.value = id
-            }
-        }
-    }
+    val usuarioActualId = dataStore.usuarioIdFlow.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        0
+    )
 
     val actividades = combine(_filtros, _ubicacionUsuario) { filtros, ubicacion ->
         filtros.copy(
@@ -106,57 +94,6 @@ class HomeViewModel(
 
     fun setDistancia(distancia: Float) {
         _filtros.update { it.copy(distanciaMax = distancia) }
-    }
-
-    fun sincronizarDesdeNube() {
-        val db = FirebaseFirestore.getInstance()
-
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val result = db.collection("actividades").get().await()
-
-                //borra cache local para que no haya duplicados
-                repository.limpiarActividadesLocales()
-
-                for (document in result.documents) {
-                    val nombreNube = document.getString("nombre") ?: "Actividad sin nombre"
-                    val descripcionNube = document.getString("descripcion") ?: ""
-                    val ubicacionNube = document.getString("ubicacion") ?: "Ubicación desconocida"
-                    val latitudNube = document.getDouble("latitud") ?: 0.0
-                    val longitudNube = document.getDouble("longitud") ?: 0.0
-                    val idCreadorNube = document.getLong("idCreador")?.toInt() ?: 1
-
-                    val fechaHoraStr = document.getString("fechaHora")
-                    val fechaHoraNube = try {
-                        if (fechaHoraStr != null) LocalDateTime.parse(fechaHoraStr) else LocalDateTime.now()
-                    } catch (e: Exception) {
-                        LocalDateTime.now()
-                    }
-
-                    val nuevaActividad = ActividadEntity(
-                        nombre = nombreNube,
-                        descripcion = descripcionNube,
-                        fechaHora = fechaHoraNube,
-                        fechaLimite = fechaHoraNube,
-                        fechaCreacion = LocalDateTime.now(),
-                        ubicacion = ubicacionNube,
-                        latitud = latitudNube,
-                        longitud = longitudNube,
-                        maxParticipantes = 10,
-                        publica = true,
-                        recurrente = false,
-                        idCreador = idCreadorNube,
-                        idInteres = 1,
-                        imageUrl = null
-                    )
-
-                    repository.crearActividad(nuevaActividad)
-                    Log.d("FIRESTORE_SYNC", "Sincronizada: $nombreNube")
-                }
-            } catch (e: Exception) {
-                Log.e("FIRESTORE_SYNC", "Error al sincronizar con la nube", e)
-            }
-        }
     }
 
     fun cargarUbicacion(context: Context) {

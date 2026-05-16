@@ -1,6 +1,9 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository
 
+import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.tasks.await
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.ActividadDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadConDetalle
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadEntity
@@ -9,6 +12,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class ActividadRepository(private val actividadDAO: ActividadDAO) {
+
+    private val firestore = FirebaseFirestore.getInstance()
 
     fun getActividades(): Flow<List<ActividadConDetalle>> {
         return actividadDAO.getActividades()
@@ -53,11 +58,48 @@ class ActividadRepository(private val actividadDAO: ActividadDAO) {
         if (actividad.idCreador <=0) throw ValidationException("El id del creador es inválido")
         if (actividad.idInteres <=0) throw ValidationException("El id del interés es inválido")
 
-        return actividadDAO.insertActividad(actividad)
+        // Registrar en room
+        val id = actividadDAO.insertActividad(actividad)
+
+        // Registrar en firebase
+        try {
+            firestore.collection("actividades")
+                .document(id.toString())
+                .set(mapOf(
+                    "id" to id,
+                    "nombre" to actividad.nombre,
+                    "descripcion" to actividad.descripcion,
+                    "fechaHora" to actividad.fechaHora.toString(),
+                    "fechaLimite" to actividad.fechaLimite?.toString(),
+                    "fechaCreacion" to actividad.fechaCreacion.toString(),
+                    "ubicacion" to actividad.ubicacion,
+                    "latitud" to actividad.latitud,
+                    "longitud" to actividad.longitud,
+                    "maxParticipantes" to actividad.maxParticipantes,
+                    "publica" to actividad.publica,
+                    "recurrente" to actividad.recurrente,
+                    "idCreador" to actividad.idCreador,
+                    "idInteres" to actividad.idInteres,
+                    "imageUrl" to actividad.imageUrl
+                )).await()
+        } catch (e: Exception) {
+            Log.w("SYNC", "Sin red al crear actividad, se sincronizará después: ${e.message}")
+        }
+
+        return id
     }
 
     suspend fun eliminarActividad(actividad: ActividadEntity) {
         actividadDAO.deleteActividad(actividad)
+
+        try {
+            firestore.collection("actividades")
+                .document(actividad.id.toString())
+                .delete()
+                .await()
+        } catch (e: Exception) {
+            Log.w("SYNC", "Sin red al eliminar actividad, se sincronizará después: ${e.message}")
+        }
     }
 
     suspend fun getActividadById(id: Int): ActividadEntity {
@@ -76,6 +118,26 @@ class ActividadRepository(private val actividadDAO: ActividadDAO) {
         if (actividad.maxParticipantes <= 0) throw ValidationException("Debe haber al menos 1 participante")
 
         actividadDAO.updateActividad(actividad)
-    }
 
+        try {
+            firestore.collection("actividades")
+                .document(actividad.id.toString())
+                .update(mapOf(
+                    "nombre" to actividad.nombre,
+                    "descripcion" to actividad.descripcion,
+                    "fechaHora" to actividad.fechaHora.toString(),
+                    "fechaLimite" to actividad.fechaLimite?.toString(),
+                    "ubicacion" to actividad.ubicacion,
+                    "latitud" to actividad.latitud,
+                    "longitud" to actividad.longitud,
+                    "maxParticipantes" to actividad.maxParticipantes,
+                    "publica" to actividad.publica,
+                    "recurrente" to actividad.recurrente,
+                    "idInteres" to actividad.idInteres,
+                    "imageUrl" to actividad.imageUrl
+                )).await()
+        } catch (e: Exception) {
+            Log.w("SYNC", "Sin red al actualizar actividad, se sincronizará después: ${e.message}")
+        }
+    }
 }
