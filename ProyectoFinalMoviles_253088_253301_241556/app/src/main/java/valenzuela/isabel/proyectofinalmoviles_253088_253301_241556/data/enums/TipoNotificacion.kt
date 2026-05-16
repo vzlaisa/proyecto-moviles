@@ -3,7 +3,10 @@ package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums
 enum class TipoNotificacion(val label: String) {
     NUEVA_SOLICITUD("Solicitud de unión"),       // Alguien pidió unirse (para el creador)
     SOLICITUD_ACEPTADA("Solicitud aprobada"),    // El creador te aceptó (para el interesado)
-    SOLICITUD_RECHAZADA("Solicitud rechazada"),  // El creador te rechazó (para el interesado)
+
+    SOLICITUD_RECHAZADA("Solicitud rechazada"), // El creador te rechazó (para el interesado)
     NUEVO_PARTICIPANTE("Nuevo miembro"),         // Alguien se unió directo (en actividad pública)
+
+    PARTICIPANTE_EXPULSADO("Has sido removido"), // El creador borró a alguien de la actividad
     MENSAJE_SISTEMA("Aviso")
 }

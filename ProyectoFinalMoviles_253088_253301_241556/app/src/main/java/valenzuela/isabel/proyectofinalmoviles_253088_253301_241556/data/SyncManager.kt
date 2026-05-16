@@ -2,22 +2,27 @@ package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data
 
 import android.database.sqlite.SQLiteConstraintException
 import android.util.Log
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.ActividadDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.InscripcionDAO
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.NotificacionDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.UsuarioDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.NotificacionEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.UsuarioInteresCrossRef
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.EstadoInscripcion
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Genero
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.Interes
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.TipoNotificacion
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -30,7 +35,8 @@ import java.time.LocalDateTime
 class SyncManager(
     private val actividadDAO: ActividadDAO,
     private val usuarioDAO: UsuarioDAO,
-    private val inscripcionDAO: InscripcionDAO
+    private val inscripcionDAO: InscripcionDAO,
+    private val notificacionDAO: NotificacionDAO
 ) {
     private val firestore = FirebaseFirestore.getInstance()
     private val listeners = mutableListOf<ListenerRegistration>()
@@ -50,13 +56,14 @@ class SyncManager(
      *
      * Primero elimina listeners previos para evitar duplicados.
      */
-    fun iniciar() {
+    fun iniciar(idUsuario: Int) {
         listeners.forEach { it.remove() }
         listeners.clear()
 
         listeners.add(escucharActividades())
         listeners.add(escucharUsuarios())
         listeners.add(escucharInscripciones())
+        listeners.add(escucharNotificaciones(idUsuario))
     }
 
     /**
@@ -198,6 +205,46 @@ class SyncManager(
                             )
                         } catch (e: SQLiteConstraintException) {
                             Log.w("SYNC", "Inscripción ignorada (fk faltante)")
+                        }
+                    }
+                }
+            }
+    }
+
+    private fun escucharNotificaciones(idUsuario: Int): ListenerRegistration {
+        Log.d("SYNC", "Escuchando notificaciones de usuario $idUsuario")
+
+        return firestore.collection("notificaciones")
+            .whereEqualTo("idUsuario", idUsuario)  // solo las del usuario actual
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+
+                scope.launch {
+                    for (change in snapshot.documentChanges) {
+                        if (change.type != DocumentChange.Type.ADDED) continue
+
+                        val document = change.document
+                        val tipoStr = document.getString("tipo") ?: continue
+                        val tipo = try {
+                            TipoNotificacion.valueOf(tipoStr)
+                        } catch (e: Exception) { continue }
+
+                        try {
+                            notificacionDAO.insertar(
+                                NotificacionEntity(
+                                    idUsuario = idUsuario,
+                                    titulo = document.getString("titulo") ?: "",
+                                    mensaje = document.getString("mensaje") ?: "",
+                                    fecha = document.getString("fecha")
+                                        ?.let { LocalDateTime.parse(it) }
+                                        ?: LocalDateTime.now(),
+                                    tipo = tipo,
+                                    idActividad = document.getLong("idActividad")?.toInt(),
+                                    leida = document.getBoolean("leida") ?: false
+                                )
+                            )
+                        } catch (e: Exception) {
+                            Log.w("SYNC", "Notificación ignorada: ${e.message}")
                         }
                     }
                 }

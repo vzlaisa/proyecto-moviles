@@ -44,10 +44,10 @@ fun CardNotificacion(
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = if (leida) White else BlueAlt.copy(alpha = 0.05f)
+        colors = CardDefaults.cardColors(
+            containerColor = if (leida) White else BlueAlt.copy(alpha = 0.1f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {

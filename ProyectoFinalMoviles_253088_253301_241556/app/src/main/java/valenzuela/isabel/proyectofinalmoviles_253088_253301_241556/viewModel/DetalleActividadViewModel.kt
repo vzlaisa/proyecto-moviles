@@ -15,6 +15,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.A
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionConUsuario
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.EstadoInscripcion
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.TipoNotificacion
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.ActividadRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.repository.InscripcionRepository
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.state.UiEstado
@@ -158,7 +159,7 @@ class DetalleActividadViewModel(
         Log.d("EXPULSAR", "Intentando expulsar usuario $idUsuario")
         viewModelScope.launch {
             try {
-                inscripcionRepository.abandonar(actividad.actividad.id, idUsuario)
+                inscripcionRepository.abandonar(actividad.actividad.id, idUsuario, TipoNotificacion.PARTICIPANTE_EXPULSADO)
                 Log.d("EXPULSAR", "Usuario expulsado")
             } catch (e: Exception) {
                 Log.e("EXPULSAR", e.message ?: "Error")
@@ -186,7 +187,7 @@ class DetalleActividadViewModel(
         val actividad = _actividad.value ?: return
         viewModelScope.launch {
             try {
-                inscripcionRepository.abandonar(actividad.actividad.id, idUsuario)
+                inscripcionRepository.abandonar(actividad.actividad.id, idUsuario, TipoNotificacion.SOLICITUD_RECHAZADA)
             } catch (e: Exception) {
                 _uiEstado.value = UiEstado.Error("No se pudo rechazar la solicitud")
             }

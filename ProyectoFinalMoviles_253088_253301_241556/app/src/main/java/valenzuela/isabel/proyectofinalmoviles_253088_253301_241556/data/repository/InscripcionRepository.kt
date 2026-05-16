@@ -11,7 +11,9 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.Insc
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionConUsuario
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionEntity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.EstadoInscripcion
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.TipoNotificacion
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.exception.ValidationException
+import java.time.LocalDateTime
 
 class InscripcionRepository(private val dao: InscripcionDAO, private val actividadDAO: ActividadDAO) {
 
@@ -47,6 +49,27 @@ class InscripcionRepository(private val dao: InscripcionDAO, private val activid
             Log.w("SYNC", "Sin red al guardar inscripción: ${e.message}")
         }
 
+        if (esPublica) {
+            // Notificar al creador
+            crearNotificacion(
+                idUsuario = actividad.idCreador,
+                titulo = "Nuevo participante",
+                mensaje = "Alguien se unió a '${actividad.nombre}'",
+                tipo = TipoNotificacion.NUEVO_PARTICIPANTE,
+                idActividad = idActividad
+            )
+
+        } else {
+            // Notificar al creador
+            crearNotificacion(
+                idUsuario = actividad.idCreador,
+                titulo = "Nueva solicitud",
+                mensaje = "Alguien quiere unirse a '${actividad.nombre}'",
+                tipo = TipoNotificacion.NUEVA_SOLICITUD,
+                idActividad = idActividad
+            )
+        }
+
 
 //        val existente = dao.getInscripcion(idActividad, idUsuario)
 //        if (existente?.estado == EstadoInscripcion.ASISTENCIA_CONFIRMADA) {
@@ -57,7 +80,9 @@ class InscripcionRepository(private val dao: InscripcionDAO, private val activid
 //        dao.insertar(InscripcionEntity(idUsuario = idUsuario, idActividad = idActividad, estado = estado))
     }
 
-    suspend fun abandonar(idActividad: Int, idUsuario: Int) = withContext(Dispatchers.IO) {
+    suspend fun abandonar(idActividad: Int, idUsuario: Int, tipoNotificacion: TipoNotificacion? = null) = withContext(Dispatchers.IO) {
+        val actividad = actividadDAO.getById(idActividad)
+
         // Eliminar en Room
         dao.eliminar(idActividad, idUsuario)
 
@@ -69,6 +94,31 @@ class InscripcionRepository(private val dao: InscripcionDAO, private val activid
                 .await()
         } catch (e: Exception) {
             Log.w("SYNC", "Sin red al eliminar inscripción: ${e.message}")
+        }
+
+        // Crear notificación si aplica
+        when (tipoNotificacion) {
+            TipoNotificacion.SOLICITUD_RECHAZADA -> {
+                crearNotificacion(
+                    idUsuario = idUsuario,
+                    titulo = "Solicitud rechazada",
+                    mensaje = "Tu solicitud fue rechazada en '${actividad.nombre}'",
+                    tipo = TipoNotificacion.SOLICITUD_RECHAZADA,
+                    idActividad = idActividad
+                )
+            }
+
+            TipoNotificacion.PARTICIPANTE_EXPULSADO -> {
+                crearNotificacion(
+                    idUsuario = idUsuario,
+                    titulo = "Has sido removido",
+                    mensaje = "Fuiste removido de '${actividad.nombre}'",
+                    tipo = TipoNotificacion.MENSAJE_SISTEMA,
+                    idActividad = idActividad
+                )
+            }
+
+            else -> Unit
         }
     }
 
@@ -108,6 +158,47 @@ class InscripcionRepository(private val dao: InscripcionDAO, private val activid
                 .update("estado", estado.name).await()
         } catch(e: Exception) {
             Log.w("SYNC", "Sin red al actualizar estado: ${e.message}")
+        }
+
+        val actividad = actividadDAO.getById(idActividad)
+
+        when (estado) {
+            EstadoInscripcion.CONFIRMADO -> {
+                crearNotificacion(
+                    idUsuario = idUsuario,
+                    titulo = "Solicitud aceptada",
+                    mensaje = "Fuiste aceptado en '${actividad.nombre}'",
+                    tipo = TipoNotificacion.SOLICITUD_ACEPTADA,
+                    idActividad = idActividad
+                )
+            }
+
+            else -> Unit
+        }
+    }
+
+    private suspend fun crearNotificacion(
+        idUsuario: Int,
+        titulo: String,
+        mensaje: String,
+        tipo: TipoNotificacion,
+        idActividad: Int?
+    ) {
+        try {
+            firestore.collection("notificaciones")
+                .add(
+                    mapOf(
+                        "idUsuario" to idUsuario,
+                        "titulo" to titulo,
+                        "mensaje" to mensaje,
+                        "tipo" to tipo.name,
+                        "idActividad" to idActividad,
+                        "fecha" to LocalDateTime.now().toString(),
+                        "leida" to false
+                    )
+                ).await()
+        } catch (e: Exception) {
+            Log.w("SYNC", "Error al crear notificación: ${e.message}")
         }
     }
 

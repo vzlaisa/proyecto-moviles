@@ -44,6 +44,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Con
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.CrearActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.DetalleActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.EditarActividadViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.NotificacionViewModel
 
 
 @Composable
@@ -56,7 +57,8 @@ fun AppNavigation(
     configViewModel: ConfigViewModel,
     crearActividadViewModel: CrearActividadViewModel,
     editarActividadViewModel: EditarActividadViewModel,
-    detalleActividadViewModel: DetalleActividadViewModel
+    detalleActividadViewModel: DetalleActividadViewModel,
+    notificacionViewModel: NotificacionViewModel
 ) {
     val navController = rememberNavController()
 
@@ -366,7 +368,8 @@ fun AppNavigation(
                 // Notificaciones
                 composable(Screen.Notificaciones.route) {
                     NotificacionesScreen(
-                        onBack = { navController.popBackStack() }
+                        onBack = { navController.popBackStack() },
+                        notificacionViewModel
                     )
                 }
 

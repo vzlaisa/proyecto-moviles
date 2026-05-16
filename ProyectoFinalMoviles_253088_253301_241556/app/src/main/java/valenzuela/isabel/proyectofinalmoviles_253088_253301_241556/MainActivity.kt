@@ -12,7 +12,9 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.launch
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.AppDatabase
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStoreManager
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.SyncManager
@@ -69,9 +71,18 @@ class MainActivity : FragmentActivity() {
         syncManager = SyncManager(
             actividadDAO = database.actividadDao(),
             usuarioDAO = database.usuarioDao(),
-            inscripcionDAO = database.inscripcionDao()
+            inscripcionDAO = database.inscripcionDao(),
+            notificacionDAO = database.notificacionDao()
         )
-        syncManager.iniciar()
+
+        // Iniciar sincronización cuando ya exista usuario
+        lifecycleScope.launch {
+            dataStore.usuarioIdFlow.collect { idUsuario ->
+                if (idUsuario != 0) {
+                    syncManager.iniciar(idUsuario)
+                }
+            }
+        }
 
         // Factory única para todos los ViewModels
         val factory = JoinlyViewModelFactory(usuarioRepo, actividadRepo, inscripcionRepo, notificacionRepo, dataStore, this.application)
@@ -86,6 +97,7 @@ class MainActivity : FragmentActivity() {
         val crearActividadViewModel: CrearActividadViewModel  by viewModels { factory }
         val detalleActividadViewModel: DetalleActividadViewModel by viewModels { factory }
         val editarActividadViewModel: EditarActividadViewModel by viewModels { factory }
+        val notificacionViewModel: NotificacionViewModel by viewModels { factory }
 
         setContent {
             ProyectoFinalMoviles_253088_253301_241556Theme {
@@ -98,7 +110,8 @@ class MainActivity : FragmentActivity() {
                     configViewModel = configViewModel,
                     crearActividadViewModel = crearActividadViewModel,
                     detalleActividadViewModel = detalleActividadViewModel,
-                    editarActividadViewModel = editarActividadViewModel
+                    editarActividadViewModel = editarActividadViewModel,
+                    notificacionViewModel = notificacionViewModel
                 )
             }
         }

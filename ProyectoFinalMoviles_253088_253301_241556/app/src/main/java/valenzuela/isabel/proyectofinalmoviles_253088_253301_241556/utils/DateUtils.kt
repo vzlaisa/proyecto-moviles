@@ -22,4 +22,10 @@ object DateUtils {
             if (it.isLowerCase()) it.titlecase(locale) else it.toString()
         }
     }
+
+    fun LocalDateTime.toNotificationString(): String {
+        val locale = Locale.forLanguageTag("es-ES")
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", locale)
+        return this.format(formatter)
+    }
 }
