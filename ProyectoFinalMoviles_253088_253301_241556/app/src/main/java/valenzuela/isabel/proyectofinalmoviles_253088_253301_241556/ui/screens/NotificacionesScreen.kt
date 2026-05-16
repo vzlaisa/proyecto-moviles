@@ -32,6 +32,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Not
 @Composable
 fun NotificacionesScreen(
     onBack: () -> Unit,
+    onNotificacionClick: (Int) -> Unit,
     viewModel: NotificacionViewModel
 ) {
     val notificaciones by viewModel.notificaciones.collectAsState()
@@ -73,7 +74,13 @@ fun NotificacionesScreen(
                                 titulo = notificacion.titulo,
                                 mensaje = notificacion.mensaje,
                                 fecha = notificacion.fecha.toNotificationString(),
-                                leida = notificacion.leida
+                                leida = notificacion.leida,
+                                onClick = {
+                                    notificacion.idActividad?.let {
+                                        onNotificacionClick(it)
+                                        viewModel.marcarComoLeida(notificacion.firestoreId)
+                                    }
+                                }
                             )
                         }
                     }

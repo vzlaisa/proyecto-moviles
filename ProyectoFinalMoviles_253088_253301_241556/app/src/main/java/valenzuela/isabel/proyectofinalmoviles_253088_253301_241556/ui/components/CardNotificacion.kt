@@ -1,6 +1,7 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,14 +39,16 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Whit
 
 @Composable
 fun CardNotificacion(
-    titulo: String = "Nueva actividad",
-    mensaje: String = "Alguien se ha unido a tu taller de acuarela.",
-    fecha: String = "15/04/2026",
-    leida: Boolean = false
+    titulo: String,
+    mensaje: String,
+    fecha: String,
+    leida: Boolean,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (leida) White else BlueAlt.copy(alpha = 0.15f)
@@ -119,6 +122,5 @@ fun CardNotificacion(
 @Composable
 fun CardNotificacionPreview() {
     ProyectoFinalMoviles_253088_253301_241556Theme {
-        CardNotificacion()
     }
 }

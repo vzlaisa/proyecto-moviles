@@ -369,6 +369,9 @@ fun AppNavigation(
                 composable(Screen.Notificaciones.route) {
                     NotificacionesScreen(
                         onBack = { navController.popBackStack() },
+                        onNotificacionClick = { idActividad ->
+                            navController.navigate(Screen.DetalleActividad.crearRuta(idActividad))
+                        },
                         notificacionViewModel
                     )
                 }
