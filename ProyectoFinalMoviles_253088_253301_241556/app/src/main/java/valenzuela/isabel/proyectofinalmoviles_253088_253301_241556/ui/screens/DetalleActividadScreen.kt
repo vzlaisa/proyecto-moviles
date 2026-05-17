@@ -1,5 +1,6 @@
 package valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.screens
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,9 +43,13 @@ import java.util.Locale
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.fragment.app.FragmentActivity
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InscripcionConUsuario
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.EstadoInscripcion
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.BotonAccionUsuario
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.components.CardHuella
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.state.UiEstado
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.utils.BiometricUtils
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.DetalleActividadViewModel
 
 @Composable
@@ -67,6 +72,13 @@ fun DetalleActividadScreen(
 
     val esCreador = actividad.actividad.idCreador == usuarioActualId
     var mostrarDialogoEliminar by remember { mutableStateOf(false) }
+
+    val activity = LocalActivity.current as? FragmentActivity
+    var identidadConfirmada by remember {
+        mutableStateOf(false)
+    }
+
+    val totalParticipantesMostrados = participantes.count { it.inscripcion.estado != EstadoInscripcion.PENDIENTE }
 
     // Cargar datos al entrar
     LaunchedEffect(actividad.actividad.id) {
@@ -125,7 +137,7 @@ fun DetalleActividadScreen(
                     TituloActividad(actividad, colorInteres)
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    InfoActividad(actividad = actividad.actividad, totalParticipantes = participantes.size, colorInteres = colorInteres)
+                    InfoActividad(actividad = actividad.actividad, totalParticipantes = totalParticipantesMostrados, colorInteres = colorInteres)
 
                     HorizontalDivider(color = GrayAlt, thickness = 1.dp, modifier = Modifier.padding(vertical = 16.dp))
 
@@ -172,26 +184,63 @@ fun DetalleActividadScreen(
 
             if (mostrarDialogoEliminar) {
                 AlertDialog(
-                    onDismissRequest = { mostrarDialogoEliminar = false },
-                    title = {
-                        Text(text = "Eliminar actividad")
+                    onDismissRequest = {
+                        mostrarDialogoEliminar = false
+                        identidadConfirmada = false
                     },
+                    title = { Text(text = "¿Estás seguro que desea eliminar la actividad?") },
                     text = {
-                        Text(text = "¿Estás seguro de que deseas eliminar esta actividad? Esta acción no se puede deshacer.")
+                        Column {
+                            Text(text = "Una vez que elimines la actividad, ya no se podrá recuperar.")
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text(
+                                text = "Confirmar identidad:",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = GrayEnabled
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            if (activity != null) {
+                                Box(modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(170.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CardHuella(
+                                        text = if (identidadConfirmada) "Identidad confirmada" else "Autenticación con huella digital",
+                                        activity = activity,
+                                        onSuccess = { identidadConfirmada = true }
+                                    )
+                                }
+                            }
+                        }
                     },
                     confirmButton = {
-                        TextButton(
+                        Button(
                             onClick = {
-                                mostrarDialogoEliminar = false
                                 onEliminar()
-                            }
+                                mostrarDialogoEliminar = false
+                                identidadConfirmada = false
+                            },
+                            enabled = identidadConfirmada,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = OrangePrimary,
+                                disabledContainerColor = GrayEnabled
+                            ),
+                            shape = RoundedCornerShape(14.dp)
                         ) {
-                            Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                            Text("Eliminar")
                         }
                     },
                     dismissButton = {
-                        TextButton(
-                            onClick = { mostrarDialogoEliminar = false }
+                        Button(
+                            onClick = {
+                                mostrarDialogoEliminar = false
+                                identidadConfirmada = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = PurpleAlt
+                            ),
+                            shape = RoundedCornerShape(14.dp)
                         ) {
                             Text("Cancelar")
                         }
