@@ -270,6 +270,7 @@ fun AppNavigation(
                         viewModel = homeViewModel,
                         authViewModel = authViewModel,
                         configViewModel = configViewModel,
+                        notificacionViewModel = notificacionViewModel,
                         onClickActividad = { actividad ->
                             navController.navigate(Screen.DetalleActividad.crearRuta(actividad.actividad.id))
                         },
