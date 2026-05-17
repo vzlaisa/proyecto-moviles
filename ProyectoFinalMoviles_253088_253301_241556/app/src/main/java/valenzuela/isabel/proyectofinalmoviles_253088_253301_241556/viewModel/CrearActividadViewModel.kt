@@ -28,6 +28,8 @@ import kotlinx.coroutines.withContext
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.DataStoreManager
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.api.NominatimResponse
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.api.RetrofitClient
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.exception.ValidationException
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.utils.ImageUploader
 
 class CrearActividadViewModel(private val dataStore: DataStoreManager, private val actividadRepository: ActividadRepository): ViewModel() {
 
@@ -75,6 +77,8 @@ class CrearActividadViewModel(private val dataStore: DataStoreManager, private v
     var isRecurrente by mutableStateOf(false)
         private set
     var fotoUri by mutableStateOf<Uri?>(null)
+        private set
+    var publicando by mutableStateOf(false)
         private set
 
     // Estados de búsqueda para ubicación
@@ -145,67 +149,72 @@ class CrearActividadViewModel(private val dataStore: DataStoreManager, private v
     fun onFotoChange(uri: Uri?) { fotoUri = uri }
 
     fun publicarActividad(context: Context) {
+        if (publicando) return
+
         if (nombre.isBlank() || categoria == null || fecha == null || hora == null) {
             publicacionError = "Faltan campos obligatorios"
             return
         }
 
-        buscandoUbicacion = true
-        val db = FirebaseFirestore.getInstance()
+        publicando = true
+        publicacionError = null
 
-        val actividadCloud = hashMapOf(
-            "nombre" to nombre,
-            "descripcion" to descripcion,
-            "fechaHora" to LocalDateTime.of(fecha, hora).toString(),
-            "ubicacion" to ubicacion,
-            "latitud" to latitud,
-            "longitud" to longitud,
-            "idCreador" to usuarioActualId,
-            "categoria" to categoria?.name,
-            "fechaCreacion" to LocalDateTime.now().toString()
-        )
+        val appContext = context.applicationContext
+        val fotoSeleccionada = fotoUri
 
-        db.collection("actividades")
-            .add(actividadCloud)
-            .addOnSuccessListener { documentReference ->
-                viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val urlFoto: String? = fotoSeleccionada?.let { uri ->
                     try {
-                        val nuevaActividad = ActividadEntity(
-                            nombre = nombre,
-                            descripcion = descripcion,
-                            fechaHora = LocalDateTime.of(fecha, hora),
-                            fechaLimite = fechaLimite?.atTime(23, 59),
-                            fechaCreacion = LocalDateTime.now(),
-                            ubicacion = ubicacion,
-                            latitud = latitud,
-                            longitud = longitud,
-                            maxParticipantes = maxParticipantes.toIntOrNull() ?: 1,
-                            publica = !isPrivada,
-                            recurrente = isRecurrente,
-                            idCreador = usuarioActualId,
-                            idInteres = (categoria?.ordinal ?: 0) + 1,
-                            imageUrl = null
+                        ImageUploader.subirFotoActividad(
+                            context = appContext,
+                            uri = uri,
+                            idCreador = usuarioActualId
                         )
-                        actividadRepository.crearActividad(nuevaActividad)
-
-                        withContext(Dispatchers.Main) {
-                            publicacionExitosa = true
-                            buscandoUbicacion = false
-                        }
-                    } catch (roomEx: Exception) {
-                        Log.e("ROOM_ERROR", "Fallo al guardar localmente: ${roomEx.message}")
-                        withContext(Dispatchers.Main) {
-                            publicacionExitosa = true
-                            buscandoUbicacion = false
-                        }
+                    } catch (e: Exception) {
+                        Log.e("STORAGE_ERROR", "Fallo al subir la foto: ${e.message}")
+                        throw IllegalStateException(
+                            "No se pudo subir la foto. Verifica tu conexión e inténtalo de nuevo."
+                        )
                     }
                 }
+
+                val nuevaActividad = ActividadEntity(
+                    nombre = nombre,
+                    descripcion = descripcion,
+                    fechaHora = LocalDateTime.of(fecha, hora),
+                    fechaLimite = fechaLimite?.atTime(23, 59),
+                    fechaCreacion = LocalDateTime.now(),
+                    ubicacion = ubicacion,
+                    latitud = latitud,
+                    longitud = longitud,
+                    maxParticipantes = maxParticipantes.toIntOrNull() ?: 1,
+                    publica = !isPrivada,
+                    recurrente = isRecurrente,
+                    idCreador = usuarioActualId,
+                    idInteres = (categoria?.ordinal ?: 0) + 1,
+                    imageUrl = urlFoto
+                )
+
+                actividadRepository.crearActividad(nuevaActividad)
+
+                withContext(Dispatchers.Main) {
+                    publicacionExitosa = true
+                    publicando = false
+                }
+            } catch (ve: ValidationException) {
+                withContext(Dispatchers.Main) {
+                    publicacionError = ve.message
+                    publicando = false
+                }
+            } catch (e: Exception) {
+                Log.e("PUBLICAR_ERROR", "Fallo al publicar actividad: ${e.message}")
+                withContext(Dispatchers.Main) {
+                    publicacionError = e.message ?: "Error al publicar la actividad"
+                    publicando = false
+                }
             }
-            .addOnFailureListener { e ->
-                Log.e("FIRESTORE_ERROR", "Fallo al subir a la nube: ${e.message}")
-                publicacionError = "Error al sincronizar con la nube: ${e.message}"
-                buscandoUbicacion = false
-            }
+        }
     }
 
     fun limpiarDatos() {
@@ -225,5 +234,6 @@ class CrearActividadViewModel(private val dataStore: DataStoreManager, private v
 
         publicacionExitosa = false
         publicacionError = null
+        publicando = false
     }
 }

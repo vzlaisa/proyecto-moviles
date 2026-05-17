@@ -101,9 +101,9 @@ fun CrearActividadLayout(
     rutaImagen: Int,
     onClose: () -> Unit,
     onNext: () -> Unit,
+    isLoading: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
     val pasosColores = listOf(PinkSecondary, BlueAlt, OrangePrimary)
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -126,18 +126,31 @@ fun CrearActividadLayout(
 
             if (pasoActual < 3) {
                 IconButton(onClick = onNext) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Black)
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = Black
+                    )
                 }
             } else {
                 Button(
-                    onClick = {
-                        onNext()
-                    },
+                    onClick = onNext,
+                    enabled = !isLoading,
                     colors = ButtonDefaults.buttonColors(containerColor = OrangePrimary),
                     shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    Text("Publicar", color = White, fontWeight = FontWeight.Bold)
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = White,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text("Publicando...", color = White, fontWeight = FontWeight.Bold)
+                    } else {
+                        Text("Publicar", color = White, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
@@ -187,7 +200,6 @@ fun CrearActividadPaso1(
     onClose: () -> Unit,
     onNext: () -> Unit
 ) {
-    // Estado para controlar la visibilidad de las sugerencias
     var showSuggestions by remember { mutableStateOf(false) }
 
     CrearActividadLayout(
@@ -271,7 +283,10 @@ fun CrearActividadPaso1(
                     placeholder = { Text("Ej. Parque Central o Calle 123") },
                     trailingIcon = {
                         if (viewModel.buscandoUbicacion) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
                         } else {
                             Icon(Icons.Default.LocationOn, contentDescription = null)
                         }
@@ -281,13 +296,12 @@ fun CrearActividadPaso1(
                     singleLine = true
                 )
 
-                // Lista desplegable de sugerencias de Nominatim
                 if (showSuggestions && viewModel.resultadosBusqueda.isNotEmpty()) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 65.dp) // Posicionar debajo del TextField
-                            .zIndex(1f), // Asegurar que esté por encima de otros elementos
+                            .padding(top = 65.dp)
+                            .zIndex(1f),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                         colors = CardDefaults.cardColors(containerColor = White),
                         shape = RoundedCornerShape(8.dp)
@@ -370,7 +384,9 @@ fun CrearActividadPaso2(
                     confirmButton = {
                         TextButton(onClick = {
                             datePickerState.selectedDateMillis?.let { millis ->
-                                val fechaSel = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
+                                val fechaSel = Instant.ofEpochMilli(millis)
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
                                 viewModel.onFechaChange(fechaSel)
                             }
                             mostrarDatePickerFecha = false
@@ -427,7 +443,12 @@ fun CrearActividadPaso2(
                                     Text("Cancelar")
                                 }
                                 TextButton(onClick = {
-                                    viewModel.onHoraChange(LocalTime.of(timePickerState.hour, timePickerState.minute))
+                                    viewModel.onHoraChange(
+                                        LocalTime.of(
+                                            timePickerState.hour,
+                                            timePickerState.minute
+                                        )
+                                    )
                                     mostrarTimePicker = false
                                 }) {
                                     Text("Aceptar")
@@ -463,7 +484,10 @@ fun CrearActividadPaso2(
                         override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                             val fechaActividad = viewModel.fecha
                             return if (fechaActividad != null) {
-                                val limiteMillis = fechaActividad.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                                val limiteMillis = fechaActividad
+                                    .atStartOfDay(ZoneId.systemDefault())
+                                    .toInstant()
+                                    .toEpochMilli()
                                 utcTimeMillis <= limiteMillis
                             } else {
                                 true
@@ -476,7 +500,9 @@ fun CrearActividadPaso2(
                     confirmButton = {
                         TextButton(onClick = {
                             datePickerStateLimite.selectedDateMillis?.let { millis ->
-                                val fechaSel = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
+                                val fechaSel = Instant.ofEpochMilli(millis)
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDate()
                                 viewModel.onFechaLimiteChange(fechaSel)
                             }
                             mostrarDatePickerLimite = false
@@ -546,7 +572,8 @@ fun CrearActividadPaso3(
         onClose = onClose,
         onNext = {
             viewModel.publicarActividad(context)
-        }
+        },
+        isLoading = viewModel.publicando
     ) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
 
@@ -628,7 +655,9 @@ fun CrearActividadPaso3(
                     .clip(RoundedCornerShape(12.dp))
                     .background(GrayAlt)
                     .clickable {
-                        photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -662,7 +691,9 @@ fun CrearActividadPaso3(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = {
-                        photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = GrayAlt, contentColor = Black),
                     shape = RoundedCornerShape(8.dp)
