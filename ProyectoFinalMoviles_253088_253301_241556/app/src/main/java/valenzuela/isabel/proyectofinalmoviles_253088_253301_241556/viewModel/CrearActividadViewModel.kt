@@ -179,11 +179,19 @@ class CrearActividadViewModel(private val dataStore: DataStoreManager, private v
                     }
                 }
 
+                val fechaHoraEvento = LocalDateTime.of(fecha, hora)
+                val fechaLimiteFinal = fechaLimite?.let { limite ->
+                    if (limite == fecha) {
+                        fechaHoraEvento
+                    } else {
+                        limite.atTime(23, 59)
+                    }
+                }
                 val nuevaActividad = ActividadEntity(
                     nombre = nombre,
                     descripcion = descripcion,
-                    fechaHora = LocalDateTime.of(fecha, hora),
-                    fechaLimite = fechaLimite?.atTime(23, 59),
+                    fechaHora = fechaHoraEvento,
+                    fechaLimite = fechaLimiteFinal,
                     fechaCreacion = LocalDateTime.now(),
                     ubicacion = ubicacion,
                     latitud = latitud,

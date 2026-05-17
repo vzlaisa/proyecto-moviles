@@ -482,8 +482,10 @@ fun CrearActividadPaso2(
                 val datePickerStateLimite = rememberDatePickerState(
                     selectableDates = object : SelectableDates {
                         override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                            val noEsAntesDeHoy = utcTimeMillis >= System.currentTimeMillis() - 86400000
+
                             val fechaActividad = viewModel.fecha
-                            return if (fechaActividad != null) {
+                            val noEsDespuesDelEvento = if (fechaActividad != null) {
                                 val limiteMillis = fechaActividad
                                     .atStartOfDay(ZoneId.systemDefault())
                                     .toInstant()
@@ -492,6 +494,8 @@ fun CrearActividadPaso2(
                             } else {
                                 true
                             }
+
+                            return noEsAntesDeHoy && noEsDespuesDelEvento
                         }
                     }
                 )
