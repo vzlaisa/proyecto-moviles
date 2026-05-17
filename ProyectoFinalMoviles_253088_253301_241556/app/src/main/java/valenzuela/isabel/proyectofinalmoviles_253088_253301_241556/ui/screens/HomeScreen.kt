@@ -92,6 +92,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.ui.theme.Whit
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.AuthViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ConfigViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.HomeViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.NotificacionViewModel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -102,6 +103,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     authViewModel: AuthViewModel,
     configViewModel: ConfigViewModel,
+    notificacionViewModel: NotificacionViewModel,
     onNotificacionClick: () -> Unit,
     onClickActividad: (ActividadConDetalle) -> Unit
 ) {
@@ -147,7 +149,8 @@ fun HomeScreen(
             nickname = nickname,
             textoBusqueda = filtros.textoBusqueda,
             onBusquedaChange = { viewModel.setBusqueda(it) },
-            onNotificacionClick = onNotificacionClick
+            onNotificacionClick = onNotificacionClick,
+            notificacionViewModel
         )
 
         CardFondo(alturaPorcentaje = 0.75f) {
@@ -186,8 +189,11 @@ private fun HeaderSection(
     nickname: String,
     textoBusqueda: String,
     onBusquedaChange: (String) -> Unit,
-    onNotificacionClick: () -> Unit
+    onNotificacionClick: () -> Unit,
+    notificacionViewModel: NotificacionViewModel,
 ) {
+    val badgeCount by notificacionViewModel.badgeCount.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -205,17 +211,32 @@ private fun HeaderSection(
             )
 
             Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(color = White, shape = CircleShape),
+                modifier = Modifier.size(40.dp),
                 contentAlignment = Alignment.Center
             ) {
+
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(color = White, shape = CircleShape)
+                )
+
                 IconButton(onClick = { onNotificacionClick() }) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = "Notificaciones",
                         tint = OrangePrimary,
                         modifier = Modifier.size(30.dp)
+                    )
+                }
+
+                // Badge
+                if (badgeCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .size(10.dp)
+                            .background(Color.Red, CircleShape)
                     )
                 }
             }
