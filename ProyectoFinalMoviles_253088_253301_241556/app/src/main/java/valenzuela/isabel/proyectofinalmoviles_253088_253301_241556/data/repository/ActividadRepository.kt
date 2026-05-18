@@ -21,6 +21,9 @@ class ActividadRepository(private val actividadDAO: ActividadDAO) {
         return actividadDAO.getActividades()
     }
 
+    /** Contador en tiempo real de actividades que no se han subido a Firestore. */
+    fun getPendientesSyncCount(): Flow<Int> = actividadDAO.getPendientesSyncCount()
+
     fun getActividadesFiltradas(
         idInteres: Int?,
         busqueda: String,
@@ -68,35 +71,39 @@ class ActividadRepository(private val actividadDAO: ActividadDAO) {
         if (actividad.idCreador <=0) throw ValidationException("El id del creador es inválido")
         if (actividad.idInteres <=0) throw ValidationException("El id del interés es inválido")
 
-        // Registrar en room
-        val id = actividadDAO.insertActividad(actividad)
+        // Registrar en Room marcada como pendiente; se limpia el flag tras subir a Firestore.
+        val id = actividadDAO.insertActividad(actividad.copy(pendienteSync = true))
 
-        // Registrar en firebase
         try {
-            firestore.collection("actividades")
-                .document(id.toString())
-                .set(mapOf(
-                    "id" to id,
-                    "nombre" to actividad.nombre,
-                    "descripcion" to actividad.descripcion,
-                    "fechaHora" to actividad.fechaHora.toString(),
-                    "fechaLimite" to actividad.fechaLimite?.toString(),
-                    "fechaCreacion" to actividad.fechaCreacion.toString(),
-                    "ubicacion" to actividad.ubicacion,
-                    "latitud" to actividad.latitud,
-                    "longitud" to actividad.longitud,
-                    "maxParticipantes" to actividad.maxParticipantes,
-                    "publica" to actividad.publica,
-                    "recurrente" to actividad.recurrente,
-                    "idCreador" to actividad.idCreador,
-                    "idInteres" to actividad.idInteres,
-                    "imageUrl" to actividad.imageUrl
-                )).await()
+            subirActividadAFirestore(actividad.copy(id = id.toInt()))
+            actividadDAO.marcarComoSincronizada(id.toInt())
         } catch (e: Exception) {
             Log.w("SYNC", "Sin red al crear actividad, se sincronizará después: ${e.message}")
         }
 
         return id
+    }
+
+    private suspend fun subirActividadAFirestore(actividad: ActividadEntity) {
+        firestore.collection("actividades")
+            .document(actividad.id.toString())
+            .set(mapOf(
+                "id" to actividad.id,
+                "nombre" to actividad.nombre,
+                "descripcion" to actividad.descripcion,
+                "fechaHora" to actividad.fechaHora.toString(),
+                "fechaLimite" to actividad.fechaLimite?.toString(),
+                "fechaCreacion" to actividad.fechaCreacion.toString(),
+                "ubicacion" to actividad.ubicacion,
+                "latitud" to actividad.latitud,
+                "longitud" to actividad.longitud,
+                "maxParticipantes" to actividad.maxParticipantes,
+                "publica" to actividad.publica,
+                "recurrente" to actividad.recurrente,
+                "idCreador" to actividad.idCreador,
+                "idInteres" to actividad.idInteres,
+                "imageUrl" to actividad.imageUrl
+            )).await()
     }
 
     suspend fun eliminarActividad(actividad: ActividadEntity) {
@@ -127,27 +134,48 @@ class ActividadRepository(private val actividadDAO: ActividadDAO) {
         if (actividad.descripcion.isBlank()) throw ValidationException("La descripción es obligatoria")
         if (actividad.maxParticipantes <= 0) throw ValidationException("Debe haber al menos 1 participante")
 
-        actividadDAO.updateActividad(actividad)
+        actividadDAO.updateActividad(actividad.copy(pendienteSync = true))
 
         try {
-            firestore.collection("actividades")
-                .document(actividad.id.toString())
-                .update(mapOf(
-                    "nombre" to actividad.nombre,
-                    "descripcion" to actividad.descripcion,
-                    "fechaHora" to actividad.fechaHora.toString(),
-                    "fechaLimite" to actividad.fechaLimite?.toString(),
-                    "ubicacion" to actividad.ubicacion,
-                    "latitud" to actividad.latitud,
-                    "longitud" to actividad.longitud,
-                    "maxParticipantes" to actividad.maxParticipantes,
-                    "publica" to actividad.publica,
-                    "recurrente" to actividad.recurrente,
-                    "idInteres" to actividad.idInteres,
-                    "imageUrl" to actividad.imageUrl
-                )).await()
+            actualizarActividadEnFirestore(actividad)
+            actividadDAO.marcarComoSincronizada(actividad.id)
         } catch (e: Exception) {
             Log.w("SYNC", "Sin red al actualizar actividad, se sincronizará después: ${e.message}")
+        }
+    }
+
+    private suspend fun actualizarActividadEnFirestore(actividad: ActividadEntity) {
+        firestore.collection("actividades")
+            .document(actividad.id.toString())
+            .update(mapOf(
+                "nombre" to actividad.nombre,
+                "descripcion" to actividad.descripcion,
+                "fechaHora" to actividad.fechaHora.toString(),
+                "fechaLimite" to actividad.fechaLimite?.toString(),
+                "ubicacion" to actividad.ubicacion,
+                "latitud" to actividad.latitud,
+                "longitud" to actividad.longitud,
+                "maxParticipantes" to actividad.maxParticipantes,
+                "publica" to actividad.publica,
+                "recurrente" to actividad.recurrente,
+                "idInteres" to actividad.idInteres,
+                "imageUrl" to actividad.imageUrl
+            )).await()
+    }
+
+    /**
+     * Reintenta subir/actualizar a Firestore las actividades pendientes.
+     * Si Firestore vuelve a fallar, las actividades quedan marcadas como pendientes.
+     */
+    suspend fun sincronizarPendientes() {
+        val pendientes = actividadDAO.getPendientes()
+        for (actividad in pendientes) {
+            try {
+                subirActividadAFirestore(actividad)
+                actividadDAO.marcarComoSincronizada(actividad.id)
+            } catch (e: Exception) {
+                Log.w("SYNC", "Reintento fallido para actividad ${actividad.id}: ${e.message}")
+            }
         }
     }
 }

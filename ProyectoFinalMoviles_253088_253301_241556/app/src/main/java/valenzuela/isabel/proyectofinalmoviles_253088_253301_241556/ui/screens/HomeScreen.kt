@@ -26,6 +26,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Image
@@ -150,7 +152,8 @@ fun HomeScreen(
             textoBusqueda = filtros.textoBusqueda,
             onBusquedaChange = { viewModel.setBusqueda(it) },
             onNotificacionClick = onNotificacionClick,
-            notificacionViewModel
+            notificacionViewModel = notificacionViewModel,
+            homeViewModel = viewModel
         )
 
         CardFondo(alturaPorcentaje = 0.75f) {
@@ -191,8 +194,10 @@ private fun HeaderSection(
     onBusquedaChange: (String) -> Unit,
     onNotificacionClick: () -> Unit,
     notificacionViewModel: NotificacionViewModel,
+    homeViewModel: HomeViewModel,
 ) {
     val badgeCount by notificacionViewModel.badgeCount.collectAsState()
+    val pendientesSync by homeViewModel.pendientesSync.collectAsState()
 
     Column(
         modifier = Modifier
@@ -209,6 +214,40 @@ private fun HeaderSection(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
+
+            // Ícono nube: indica si hay actividades sin sincronizar a Firestore.
+            Box(
+                modifier = Modifier.size(40.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(color = White, shape = CircleShape)
+                )
+
+                IconButton(onClick = { homeViewModel.sincronizarManual() }) {
+                    Icon(
+                        imageVector = if (pendientesSync > 0) Icons.Default.CloudOff else Icons.Default.CloudDone,
+                        contentDescription = if (pendientesSync > 0)
+                            "Hay $pendientesSync actividad(es) sin sincronizar. Toca para reintentar."
+                        else "Todo sincronizado",
+                        tint = if (pendientesSync > 0) Color.Red else BlueAlt,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+
+                if (pendientesSync > 0) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .size(10.dp)
+                            .background(Color.Red, CircleShape)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
 
             Box(
                 modifier = Modifier.size(40.dp),

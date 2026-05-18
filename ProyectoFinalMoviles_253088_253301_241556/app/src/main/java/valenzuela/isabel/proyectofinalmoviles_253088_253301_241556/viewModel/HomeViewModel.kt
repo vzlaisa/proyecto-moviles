@@ -46,6 +46,27 @@ class HomeViewModel(
 
     private val _ubicacionUsuario = MutableStateFlow<Pair<Double, Double>?>(null)
 
+    /** Cantidad de actividades locales que no se han subido a Firestore. */
+    val pendientesSync = repository.getPendientesSyncCount().stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        0
+    )
+
+    init {
+        // Al abrir la pantalla, intenta resubir lo pendiente.
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.sincronizarPendientes()
+        }
+    }
+
+    /** Reintenta manualmente (cuando el usuario toca el ícono de la nube). */
+    fun sincronizarManual() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.sincronizarPendientes()
+        }
+    }
+
     // Obtiene el nickname del usuario con sesión iniciada
     val nickname = dataStore.nicknameInFlow.stateIn(
         viewModelScope,

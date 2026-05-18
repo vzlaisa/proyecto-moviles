@@ -35,7 +35,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.enums.In
         InscripcionEntity::class,
         NotificacionEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 @TypeConverters(value = [

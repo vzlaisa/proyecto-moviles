@@ -73,6 +73,9 @@ data class ActividadEntity(
     val idCreador: Int,
 
     @ColumnInfo(name = "id_interes")
-    val idInteres: Int
+    val idInteres: Int,
+
+    @ColumnInfo(name = "pendiente_sync", defaultValue = "0")
+    val pendienteSync: Boolean = false
 
 )

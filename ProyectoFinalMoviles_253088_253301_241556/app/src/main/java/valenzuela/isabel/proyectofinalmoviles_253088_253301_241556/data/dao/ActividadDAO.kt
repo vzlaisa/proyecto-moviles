@@ -50,6 +50,18 @@ interface ActividadDAO {
     @Query("DELETE FROM actividades")
     suspend fun limpiarActividadesLocales()
 
+    @Query("SELECT COUNT(*) FROM actividades WHERE pendiente_sync = 1")
+    fun getPendientesSyncCount(): Flow<Int>
+
+    @Query("SELECT * FROM actividades WHERE pendiente_sync = 1")
+    suspend fun getPendientes(): List<ActividadEntity>
+
+    @Query("UPDATE actividades SET pendiente_sync = 0 WHERE id = :id")
+    suspend fun marcarComoSincronizada(id: Int)
+
+    @Query("UPDATE actividades SET pendiente_sync = 1 WHERE id = :id")
+    suspend fun marcarComoPendiente(id: Int)
+
     @Query("""
         SELECT 
             i.nombre, 
