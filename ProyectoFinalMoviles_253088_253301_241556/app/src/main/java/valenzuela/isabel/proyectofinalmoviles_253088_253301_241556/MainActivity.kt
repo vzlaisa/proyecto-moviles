@@ -67,7 +67,7 @@ class MainActivity : FragmentActivity() {
         val actividadRepo by lazy { ActividadRepository(database.actividadDao()) }
         val inscripcionRepo by lazy { InscripcionRepository(database.inscripcionDao(), database.actividadDao()) }
         val notificacionRepo by lazy { NotificacionRepository(database.notificacionDao()) }
-        val dataStore by lazy { DataStoreManager(this) }
+        val dataStore by lazy { DataStoreManager(applicationContext) }
 
         syncManager = SyncManager(
             actividadDAO = database.actividadDao(),
