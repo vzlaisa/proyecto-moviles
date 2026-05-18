@@ -409,9 +409,9 @@ private fun FiltrosSection(viewModel: HomeViewModel) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Slider(
-                    value = filtros.distanciaMax ?: 50f,
+                    value = filtros.distanciaMax ?: 500f,
                     onValueChange = { viewModel.setDistancia(it) },
-                    valueRange = 1f..100f,
+                    valueRange = 1f..1000f,
                     colors = SliderDefaults.colors(
                         thumbColor = OrangePrimary,
                         activeTrackColor = Color(0xFFD6C49A),
@@ -421,7 +421,7 @@ private fun FiltrosSection(viewModel: HomeViewModel) {
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Text(text = "1 km", style = MaterialTheme.typography.bodySmall)
-                    Text(text = "100 km", style = MaterialTheme.typography.bodySmall)
+                    Text(text = "1000 km", style = MaterialTheme.typography.bodySmall)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
