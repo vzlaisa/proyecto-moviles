@@ -45,6 +45,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Cre
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.DetalleActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.EditarActividadViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.NotificacionViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ResumenViewModel
 
 
 @Composable
@@ -58,7 +59,8 @@ fun AppNavigation(
     crearActividadViewModel: CrearActividadViewModel,
     editarActividadViewModel: EditarActividadViewModel,
     detalleActividadViewModel: DetalleActividadViewModel,
-    notificacionViewModel: NotificacionViewModel
+    notificacionViewModel: NotificacionViewModel,
+    resumenViewModel: ResumenViewModel
 ) {
     val navController = rememberNavController()
 
@@ -380,6 +382,7 @@ fun AppNavigation(
                 // Resumen de actividades
                 composable(Screen.ResumenActividades.route) {
                     ResumenActividadesScreen(
+                        viewModel = resumenViewModel
                     )
                 }
             }

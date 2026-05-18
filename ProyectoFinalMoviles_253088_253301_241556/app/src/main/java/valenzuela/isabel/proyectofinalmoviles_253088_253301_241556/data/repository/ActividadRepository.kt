@@ -7,6 +7,8 @@ import kotlinx.coroutines.tasks.await
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.dao.ActividadDAO
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadConDetalle
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.ActividadEntity
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.InteresConteo
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.entity.NuevaPersona
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.data.exception.ValidationException
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -27,6 +29,14 @@ class ActividadRepository(private val actividadDAO: ActividadDAO) {
         return actividadDAO.getActividadesFiltradas(
             idInteres = idInteres, texto= busqueda, fecha = fecha
         )
+    }
+
+    fun getTop3InteresesDelMes(idUsuario: Int): Flow<List<InteresConteo>> {
+        return actividadDAO.getTop3InteresesDelMes(idUsuario)
+    }
+
+    fun getNuevasPersonasDelMes(idUsuario: Int): Flow<List<NuevaPersona>> {
+        return actividadDAO.getNuevasPersonasDelMes(idUsuario)
     }
 
     suspend fun crearActividad(actividad: ActividadEntity): Long {

@@ -34,6 +34,7 @@ import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.Hom
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.NotificacionViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.PerfilViewModel
 import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.RegistroViewModel
+import valenzuela.isabel.proyectofinalmoviles_253088_253301_241556.viewModel.ResumenViewModel
 
 class MainActivity : FragmentActivity() {
     private lateinit var syncManager: SyncManager
@@ -98,6 +99,7 @@ class MainActivity : FragmentActivity() {
         val detalleActividadViewModel: DetalleActividadViewModel by viewModels { factory }
         val editarActividadViewModel: EditarActividadViewModel by viewModels { factory }
         val notificacionViewModel: NotificacionViewModel by viewModels { factory }
+        val resumenViewModel: ResumenViewModel by viewModels { factory }
 
         setContent {
             ProyectoFinalMoviles_253088_253301_241556Theme {
@@ -111,7 +113,8 @@ class MainActivity : FragmentActivity() {
                     crearActividadViewModel = crearActividadViewModel,
                     detalleActividadViewModel = detalleActividadViewModel,
                     editarActividadViewModel = editarActividadViewModel,
-                    notificacionViewModel = notificacionViewModel
+                    notificacionViewModel = notificacionViewModel,
+                    resumenViewModel = resumenViewModel
                 )
             }
         }
@@ -154,6 +157,8 @@ private class JoinlyViewModelFactory(
                 DetalleActividadViewModel(actividadRepo, inscripcionRepo, dataStore) as T
             modelClass.isAssignableFrom(NotificacionViewModel::class.java) ->
                 NotificacionViewModel(dataStore, notificacionRepo) as T
+            modelClass.isAssignableFrom(ResumenViewModel::class.java) ->
+                ResumenViewModel(dataStore, actividadRepo) as T
             else -> throw IllegalArgumentException("ViewModel desconocido: ${modelClass.name}")
         }
     }
